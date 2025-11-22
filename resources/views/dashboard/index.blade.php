@@ -1,0 +1,269 @@
+@extends('layouts.vertical', ['title' => 'لوحة التحكم'])
+
+@section('content')
+
+<!-- Start Content-->
+<div class="container-fluid">
+    <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
+        <div class="flex-grow-1">
+            <h4 class="fs-18 fw-semibold m-0">لوحة التحكم</h4>
+        </div>
+    </div>
+
+    <!-- Start Main Widgets -->
+    <div class="row">
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">إجمالي المبيعات</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
+                            <div id="total_sales" class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success-subtle text-success fs-13">{{ number_format($metrics['sales_count'], 0, ',', '.') }} فاتورة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">صافي المبيعات</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_net_sales'], 0, ',', '.') }}</h3>
+                            <div id="total_orders" class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-info-subtle text-info fs-13">بعد الضريبة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">المصروفات</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_expenses'], 0, ',', '.') }}</h3>
+                            <div id="new_customers" class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger-subtle text-danger fs-13">{{ number_format($metrics['expenses_count'], 0, ',', '.') }} مصروف</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-6 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">صافي الربح</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['net_profit'], 0, ',', '.') }}</h3>
+                            <div id="total_income" class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-{{ $metrics['net_profit'] >= 0 ? 'success' : 'danger' }}-subtle text-{{ $metrics['net_profit'] >= 0 ? 'success' : 'danger' }} fs-13">{{ $metrics['net_profit'] >= 0 ? 'ربح' : 'خسارة' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 col-lg-6 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">الوزن الإجمالي</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_weight'], 1, ',', '.') }} جرام</h3>
+                            <div id="total_returns" class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning-subtle text-warning fs-13">وزن الذهب المباع</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Main Widgets -->
+
+    <!-- Start Row -->
+    <div class="row">
+        <!-- Start Sales By Category -->
+        <div class="col-md-12 col-xl-4">
+            <div class="card overflow-hidden">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title text-dark mb-0">المبيعات حسب الفئة</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="categories_chart" class="apex-charts"></div>
+                    <div class="device-view text-center mt-3">
+                        <p class="text-uppercase mb-1 fw-medium text-muted">إجمالي المبيعات</p>
+                        <h3 class="mb-0 text-dark fw-semibold" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Sales By Category -->
+
+        <!-- Start Sales Overtime -->
+        <div class="col-md-12 col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title text-dark mb-0">المبيعات اليومية</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="sales-overtime" class="apex-charts"></div>
+                </div>
+            </div> 
+        </div>
+        <!-- End Sales Overtime -->
+    </div>
+    <!-- End Row -->
+
+    <!-- Start Row -->
+    <div class="row">
+        <!-- Start Top Branches -->
+        <div class="col-md-6 col-xxl-4 col-xl-6">
+            <div class="card overflow-hidden">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title text-dark mb-0">أفضل الفروع</h5>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @foreach($topPerformers['branches'] as $branch)
+                        <li class="list-group-item">
+                            <div class="d-flex">
+                                <div class="flex-grow-1 align-content-center">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <h6 class="mb-1 text-dark fs-15">{{ $branch->branch->name }}</h6>
+                                            <span class="fs-14 text-muted">{{ $branch->count }} فاتورة</span>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($branch->amount, 0, ',', '.') }}</h6>
+                                            <span class="fs-13 text-muted" dir="ltr">{{ number_format($branch->weight, 1, ',', '.') }} جم</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- End Top Branches -->
+
+        <!-- Start Top Employees -->
+        <div class="col-md-6 col-xxl-4 col-xl-6">
+            <div class="card overflow-hidden">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title text-dark mb-0">أفضل الموظفين</h5>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @foreach($topPerformers['employees'] as $sale)
+                        <li class="list-group-item">
+                            <div class="d-flex">
+                                <div class="flex-grow-1 align-content-center">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <h6 class="mb-1 text-dark fs-15">{{ $sale->employee->name }}</h6>
+                                            <span class="fs-14 text-muted">{{ $sale->employee->branch->name }}</span>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($sale->amount, 0, ',', '.') }}</h6>
+                                            <span class="fs-13 text-muted">{{ number_format($sale->count, 0, ',', '.') }} فاتورة</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- End Top Employees -->
+
+        <!-- Start Revenue Statistics -->
+        <div class="col-md-12 col-xxl-4 col-xl-12">
+            <div class="card overflow-hidden">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title text-dark mb-0">إحصائيات الإيرادات</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="revenueCharts" class="apex-charts"></div>
+                    <div class="row border border-dashed border-1 rounded-2 mt-3">
+                        <div class="col col-xl-6">
+                            <div class="p-2 border-end border-inline-end-dashed text-center">
+                                <h3 class="mb-0 fs-18 text-dark me-1" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
+                                <div class="d-flex align-items-center justify-content-center mt-2">
+                                    <p class="mb-0 fs-14 text-muted me-1">المبيعات</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col col-xl-6">
+                            <div class="p-2 text-center">
+                                <h3 class="mb-0 fs-18 text-dark me-1" dir="ltr">{{ number_format($metrics['total_expenses'], 0, ',', '.') }}</h3>
+                                <div class="d-flex align-items-center justify-content-center mt-2">
+                                    <p class="mb-0 fs-14 text-muted me-1">المصروفات</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Revenue Statistics -->
+    </div>
+    <!-- End Row -->
+</div> 
+<!-- container-fluid -->
+@endsection
+
+@section('script-bottom')
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
+<script>
+// Pass data from Laravel to JavaScript
+const categoriesData = @json($chartsData['sales_by_category']);
+const dailySalesData = @json($chartsData['daily_sales']);
+const monthlyRevenueData = @json($chartsData['monthly_revenue']);
+const salesAmount = {{ $metrics['total_sales'] }};
+const expensesAmount = {{ $metrics['total_expenses'] }};
+</script>
+<script src="{{ asset('js/crm-dashboard-custom.js') }}"></script>
+@endsection
