@@ -138,11 +138,11 @@
                     <h6>المبالغ المحسوبة</h6>
                     <div class="mb-3">
                         <label class="form-label">الضريبة</label>
-                        <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->tax_amount,2) }}</div>
+                        <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->tax_amount,2) }} ريال</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">الصافي</label>
-                        <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->net_amount,2) }}</div>
+                        <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->net_amount,2) }} ريال</div>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="submit" class="btn btn-warning"><i class="mdi mdi-content-save-outline me-1"></i> حفظ التعديلات</button>

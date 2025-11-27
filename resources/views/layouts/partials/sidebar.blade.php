@@ -1,4 +1,4 @@
-<!-- Left Sidebar Start -->
+<!-- Right Sidebar Start -->
 <div class="app-sidebar-menu">
     <div class="h-100" data-simplebar>
 
@@ -38,29 +38,57 @@
                 @endif
 
                 <li class="menu-title mt-2">إدارة المبيعات</li>
-
-                @if(!auth()->user()->isBranch())
+                @if(auth()->user()->isBranch())
                     <li>
-                        <a href="{{ route('sales.index') }}" class="tp-link">
+                        <a href="{{ route('sales.create') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
+                            <span> تسجيل مبيعة جديدة </span>
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="#sidebarSales" data-bs-toggle="collapse" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
                             <span> المبيعات </span>
                         </a>
+                        <div class="collapse" id="sidebarSales">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="{{ route('sales.index') }}" class="tp-link">قائمة المبيعات</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('sales.create') }}" class="tp-link">تسجيل مبيعة جديدة</a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
                 @endif
 
-                <li>
-                    <a href="{{ route('sales.create') }}" class="tp-link">
-                        <span class="nav-icon"><i class="mdi mdi-plus-circle-outline"></i></span>
-                        <span> تسجيل مبيعة جديدة </span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="{{ route('expenses.create') }}" class="tp-link">
-                        <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
-                        <span> تسجيل مصروف جديد </span>
-                    </a>
-                </li>
+                @if(auth()->user()->isBranch())
+                    <li>
+                        <a href="{{ route('expenses.create') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
+                            <span> تسجيل مصروف جديد </span>
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="#sidebarExpenses" data-bs-toggle="collapse" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
+                            <span> المصروفات </span>
+                        </a>
+                        <div class="collapse" id="sidebarExpenses">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="{{ route('expenses.index') }}" class="tp-link">قائمة المصروفات</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('expenses.create') }}" class="tp-link">تسجيل مصروف جديد</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
 
                 @if(!auth()->user()->isBranch())
                     <li class="menu-title mt-2">التقارير</li>
@@ -112,6 +140,9 @@
                                 <li>
                                     <a href="{{ route('calibers.index') }}" class="tp-link">العيارات والضرائب</a>
                                 </li>
+                                <li>
+                                    <a href="{{ route('settings.index') }}" class="tp-link">إعدادات النظام</a>
+                                </li>
                             </ul>
                         </div>
                     </li>
@@ -127,4 +158,4 @@
 
     </div>
 </div>
-<!-- Left Sidebar End -->
+<!-- Right Sidebar End -->

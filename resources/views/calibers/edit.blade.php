@@ -1,5 +1,5 @@
-@extends('layouts.master')
-
+@extends('layouts.vertical', ['title' => 'لوحة التحكم'])
+    
 @section('title')
     @lang('translation.edit-caliber')
 @endsection
@@ -194,15 +194,15 @@
                             <small class="text-muted d-block mb-2">مثال على الحساب:</small>
                             <div class="d-flex justify-content-between mb-1">
                                 <span>المبلغ:</span>
-                                <strong>10,000 جنيه</strong>
+                                <strong>10,000 ريال</strong>
                             </div>
                             <div class="d-flex justify-content-between mb-1">
                                 <span>الضريبة:</span>
-                                <strong class="text-danger" id="tax_example">{{ number_format(($caliber->tax_rate * 10000) / 100, 2) }} جنيه</strong>
+                                <strong class="text-danger" id="tax_example">{{ number_format(($caliber->tax_rate * 10000) / 100, 2) }} ريال</strong>
                             </div>
                             <div class="d-flex justify-content-between border-top pt-1">
                                 <span>الصافي:</span>
-                                <strong class="text-success" id="net_example">{{ number_format(10000 - (($caliber->tax_rate * 10000) / 100), 2) }} جنيه</strong>
+                                <strong class="text-success" id="net_example">{{ number_format(10000 - (($caliber->tax_rate * 10000) / 100), 2) }} ريال</strong>
                             </div>
                         </div>
                     </div>
@@ -240,8 +240,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const net = amount - tax;
 
         taxDisplay.textContent = taxRate.toFixed(2);
-        taxExample.textContent = tax.toFixed(2) + ' جنيه';
-        netExample.textContent = net.toFixed(2) + ' جنيه';
+        taxExample.textContent = tax.toFixed(2) + ' ريال';
+        netExample.textContent = net.toFixed(2) + ' ريال';
     }
 
     taxRateInput.addEventListener('input', updateTaxPreview);

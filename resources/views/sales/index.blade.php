@@ -96,7 +96,7 @@
                                     </td>
                                     <td class="text-muted">{{ number_format($sale->weight, 2) }}</td>
                                     <td dir="ltr">
-                                        <span class="fw-semibold text-dark">{{ number_format($sale->total_amount, 0, ',', '.') }}</span>
+                                        <span class="fw-semibold text-dark">{{ number_format($sale->total_amount, 0, ',', '.') }} <small class="text-muted">ريال</small></span>
                                     </td>
                                     <td class="text-muted">{{ $sale->created_at->format('Y-m-d') }}</td>
                                     <td class="text-center sales-table-actions">
@@ -106,6 +106,12 @@
                                         <a href="{{ route('sales.edit', $sale) }}" class="btn btn-icon btn-sm bg-warning-subtle" data-bs-toggle="tooltip" data-bs-original-title="تعديل">
                                             <i class="mdi mdi-pencil-outline text-warning fs-16"></i>
                                         </a>
+                                        <button type="button" class="btn btn-icon btn-sm bg-danger-subtle btn-delete-sale" 
+                                                data-url="{{ route('sales.destroy', $sale) }}" 
+                                                data-invoice="{{ $sale->invoice_number }}"
+                                                data-bs-toggle="tooltip" data-bs-original-title="حذف">
+                                            <i class="mdi mdi-delete-outline text-danger fs-16"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -128,6 +134,53 @@
                     </div>
                     @endif
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('script')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+        const modalEl = document.getElementById('deleteSaleModal');
+        const form = document.getElementById('deleteSaleForm');
+        const invoiceEl = document.getElementById('deleteSaleInvoice');
+        document.querySelectorAll('.btn-delete-sale').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                        const url = this.getAttribute('data-url');
+                        const invoice = this.getAttribute('data-invoice');
+                        form.setAttribute('action', url);
+                        if (invoiceEl) invoiceEl.textContent = invoice || '—';
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                });
+        });
+});
+</script>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteSaleModal" tabindex="-1" aria-labelledby="deleteSaleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="deleteSaleModalLabel">
+                        <iconify-icon icon="solar:warning-triangle-bold" class="text-danger fs-4 me-2"></iconify-icon>
+                        تأكيد الحذف
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                هل أنت متأكد من حذف هذه المبيعة؟<br>
+                رقم الفاتورة: <strong id="deleteSaleInvoice">—</strong>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                <form id="deleteSaleForm" method="POST" action="#">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">حذف</button>
+                </form>
             </div>
         </div>
     </div>

@@ -14,8 +14,14 @@ class ExpenseController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        // Block listing for branch accounts entirely
+        if ($user && method_exists($user, 'isBranch') && $user->isBranch()) {
+            abort(403, 'غير مسموح لحساب الفرع بعرض قائمة المصروفات');
+        }
+
         $query = Expense::with(['branch', 'expenseType'])
-                       ->orderBy('expense_date', 'desc');
+            ->orderBy('expense_date', 'desc');
 
         // Apply filters
         if ($request->filled('branch_id')) {
@@ -79,6 +85,28 @@ class ExpenseController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'expense_date' => 'required|date',
             'notes' => 'nullable|string|max:1000',
+        ], [
+            'branch_id.required' => 'الفرع مطلوب.',
+            'branch_id.exists' => 'الفرع المحدد غير موجود.',
+            'expense_type_id.required' => 'نوع المصروف مطلوب.',
+            'expense_type_id.exists' => 'نوع المصروف المحدد غير موجود.',
+            'description.required' => 'الوصف مطلوب.',
+            'description.string' => 'الوصف يجب أن يكون نصاً.',
+            'description.max' => 'الوصف يجب ألا يتجاوز :max حرفاً.',
+            'amount.required' => 'المبلغ مطلوب.',
+            'amount.numeric' => 'المبلغ يجب أن يكون رقماً.',
+            'amount.min' => 'المبلغ يجب أن يكون على الأقل :min.',
+            'expense_date.required' => 'تاريخ المصروف مطلوب.',
+            'expense_date.date' => 'تاريخ المصروف غير صالح.',
+            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
+            'notes.max' => 'الملاحظات يجب ألا تتجاوز :max حرفاً.',
+        ], [
+            'branch_id' => 'الفرع',
+            'expense_type_id' => 'نوع المصروف',
+            'description' => 'الوصف',
+            'amount' => 'المبلغ',
+            'expense_date' => 'تاريخ المصروف',
+            'notes' => 'الملاحظات',
         ]);
 
         // Check if branch user is trying to access another branch
@@ -88,12 +116,35 @@ class ExpenseController extends Controller
         }
 
         try {
-            Expense::create($validated);
+            $expense = Expense::create($validated);
+
+            // If the request is AJAX/JSON, return a JSON response instead of redirecting
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم تسجيل المصروف بنجاح',
+                    'data' => [
+                        'id' => $expense->id,
+                        'branch_id' => $expense->branch_id,
+                        'expense_type_id' => $expense->expense_type_id,
+                        'description' => $expense->description,
+                        'amount' => $expense->amount,
+                        'expense_date' => $expense->expense_date,
+                        'notes' => $expense->notes,
+                    ],
+                ]);
+            }
 
             return redirect()->route('expenses.index')
                            ->with('success', 'تم تسجيل المصروف بنجاح');
 
         } catch (\Exception $e) {
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ في تسجيل المصروف: ' . $e->getMessage(),
+                ], 500);
+            }
             return back()->withInput()
                         ->with('error', 'حدث خطأ في تسجيل المصروف: ' . $e->getMessage());
         }
@@ -149,6 +200,28 @@ class ExpenseController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'expense_date' => 'required|date',
             'notes' => 'nullable|string|max:1000',
+        ], [
+            'branch_id.required' => 'الفرع مطلوب.',
+            'branch_id.exists' => 'الفرع المحدد غير موجود.',
+            'expense_type_id.required' => 'نوع المصروف مطلوب.',
+            'expense_type_id.exists' => 'نوع المصروف المحدد غير موجود.',
+            'description.required' => 'الوصف مطلوب.',
+            'description.string' => 'الوصف يجب أن يكون نصاً.',
+            'description.max' => 'الوصف يجب ألا يتجاوز :max حرفاً.',
+            'amount.required' => 'المبلغ مطلوب.',
+            'amount.numeric' => 'المبلغ يجب أن يكون رقماً.',
+            'amount.min' => 'المبلغ يجب أن يكون على الأقل :min.',
+            'expense_date.required' => 'تاريخ المصروف مطلوب.',
+            'expense_date.date' => 'تاريخ المصروف غير صالح.',
+            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
+            'notes.max' => 'الملاحظات يجب ألا تتجاوز :max حرفاً.',
+        ], [
+            'branch_id' => 'الفرع',
+            'expense_type_id' => 'نوع المصروف',
+            'description' => 'الوصف',
+            'amount' => 'المبلغ',
+            'expense_date' => 'تاريخ المصروف',
+            'notes' => 'الملاحظات',
         ]);
 
         try {

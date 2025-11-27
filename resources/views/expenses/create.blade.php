@@ -4,71 +4,7 @@
 @endsection
 
 @section('css')
-<style>
-    .form-section {
-        background: var(--ct-card-bg);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 24px;
-        border: 1px solid var(--ct-border-color);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .form-section::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: linear-gradient(135deg, var(--ct-primary), var(--ct-info));
-    }
-    
-    [data-bs-theme="dark"] .form-section {
-        background: rgba(255, 255, 255, 0.02);
-        border-color: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    
-    .section-header {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: var(--ct-heading-color);
-    }
-    
-    .form-control, .form-select {
-        border-radius: 10px;
-        padding: 12px 16px;
-        border: 1.5px solid var(--ct-border-color);
-        transition: all 0.3s ease;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: var(--ct-primary);
-        box-shadow: 0 0 0 0.2rem rgba(var(--ct-primary-rgb), 0.15);
-    }
-    
-    [data-bs-theme="dark"] .form-control,
-    [data-bs-theme="dark"] .form-select {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: var(--ct-body-color);
-    }
-    
-    .form-label {
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--ct-body-color);
-        font-size: 0.9rem;
-    }
-</style>
+    @include('components.form-styles')
 @endsection
 
 @section('content')
@@ -82,7 +18,10 @@
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">المصروفات</a></li>
+                        {{-- رابط قائمة المصروفات مخفي لحساب الفرع بعد تقييد الوصول --}}
+                        @if(!auth()->user() || !auth()->user()->isBranch())
+                            <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">المصروفات</a></li>
+                        @endif
                         <li class="breadcrumb-item active">تسجيل جديد</li>
                     </ol>
                 </div>
@@ -98,7 +37,7 @@
         </div>
     @endif
 
-    <form action="{{ route('expenses.store') }}" method="POST">
+    <form id="expense-create-form" action="{{ route('expenses.store') }}" method="POST">
         @csrf
         
         <div class="row">
@@ -158,7 +97,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="amount" class="form-label">
-                                المبلغ (جنيه) <span class="text-danger">*</span>
+                                المبلغ (ريال) <span class="text-danger">*</span>
                             </label>
                             <input type="number" 
                                    name="amount" 
@@ -234,10 +173,12 @@
                             حفظ المصروف
                         </button>
 
-                        <a href="{{ route('expenses.index') }}" class="btn btn-light btn-lg">
-                            <iconify-icon icon="solar:close-circle-bold" class="fs-5 me-2"></iconify-icon>
-                            إلغاء
-                        </a>
+                        @if(!auth()->user() || !auth()->user()->isBranch())
+                            <a href="{{ route('expenses.index') }}" class="btn btn-light btn-lg">
+                                <iconify-icon icon="solar:close-circle-bold" class="fs-5 me-2"></iconify-icon>
+                                إلغاء
+                            </a>
+                        @endif
                     </div>
                 </div>
 
@@ -250,5 +191,132 @@
         </div>
     </form>
 
+    <!-- Success Modal -->
+    <div class="modal fade" id="expenseSuccessModal" tabindex="-1" aria-labelledby="expenseSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="expenseSuccessModalLabel">
+                        <iconify-icon icon="solar:check-circle-bold" class="text-success fs-4 me-2"></iconify-icon>
+                        تم الحفظ بنجاح
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    تم تسجيل المصروف بنجاح.<br>
+                    رقم المصروف: <strong id="expenseSuccessId">—</strong><br>
+                    يمكنك إضافة مصروف آخر أو إغلاق النافذة.
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-primary" id="addAnotherExpenseBtn">إضافة مصروف آخر</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert (dynamic) -->
+    <div class="alert alert-danger d-none mt-3" id="expenseErrorAlert" role="alert"></div>
+
 </div>
+@endsection
+
+@section('script')
+<script>
+    (function() {
+        const form = document.getElementById('expense-create-form');
+        const errorAlert = document.getElementById('expenseErrorAlert');
+        const addAnotherBtn = document.getElementById('addAnotherExpenseBtn');
+
+        function clearErrors() {
+            errorAlert.classList.add('d-none');
+            errorAlert.textContent = '';
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+        }
+
+        function showFieldErrors(errors) {
+            clearErrors();
+            let hasFieldErrors = false;
+            Object.keys(errors || {}).forEach(name => {
+                const field = form.querySelector(`[name="${name}"]`);
+                if (field) {
+                    field.classList.add('is-invalid');
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = Array.isArray(errors[name]) ? errors[name][0] : errors[name];
+                    field.parentElement.appendChild(feedback);
+                    hasFieldErrors = true;
+                }
+            });
+            if (!hasFieldErrors && errors) {
+                errorAlert.textContent = 'حدثت أخطاء أثناء الإرسال.';
+                errorAlert.classList.remove('d-none');
+            }
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearErrors();
+
+            const url = form.getAttribute('action');
+            const csrfToken = form.querySelector('input[name="_token"]').value;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                if (response.status === 422) {
+                    const data = await response.json();
+                    showFieldErrors(data.errors || {});
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data && data.success) {
+                    // Show success modal without redirect
+                    const modalEl = document.getElementById('expenseSuccessModal');
+                    const idEl = document.getElementById('expenseSuccessId');
+                    if (idEl && data.data?.id) {
+                        idEl.textContent = data.data.id;
+                    }
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                } else {
+                    errorAlert.textContent = (data && data.message) ? data.message : 'حدث خطأ غير متوقع.';
+                    errorAlert.classList.remove('d-none');
+                }
+            } catch (err) {
+                errorAlert.textContent = 'تعذر الاتصال بالخادم. حاول مرة أخرى.';
+                errorAlert.classList.remove('d-none');
+            }
+        });
+
+        addAnotherBtn?.addEventListener('click', function() {
+            // Reset form for another entry
+            form.reset();
+            clearErrors();
+            const modalEl = document.getElementById('expenseSuccessModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal?.hide();
+            // set default date to today again
+            const dateInput = document.getElementById('expense_date');
+            if (dateInput) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+        });
+    })();
+</script>
 @endsection

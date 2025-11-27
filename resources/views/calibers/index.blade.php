@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.vertical', ['title' => 'إدارة العيارات'])
 
 @section('title')
     @lang('translation.calibers-management')

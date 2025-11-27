@@ -1,13 +1,61 @@
 @extends('layouts.vertical', ['title' => 'لوحة التحكم'])
 
 @section('content')
+@section('css')
+<style>
+@media print { 
+    @page { size: A4 portrait; margin: 12mm; } 
+    .topbar-custom,.app-sidebar-menu,.footer, .btn, form[action*="dashboard"], .apex-charts { display:none !important; } 
+    .card{box-shadow:none !important;border:0 !important; } 
+}
+/* Filter bar polish */
+.dash-filter{border:1px solid var(--bs-border-color);border-radius:12px;padding:.75rem 1rem;background:var(--bs-body-bg)}
+.dash-filter .form-label{margin-bottom:.25rem;font-size:.8rem;color:var(--bs-secondary-color)}
+.dash-filter .form-select,.dash-filter .form-control{border-radius:10px}
+.dash-filter .btn{border-radius:10px}
+</style>
+@endsection
 
 <!-- Start Content-->
 <div class="container-fluid">
-    <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
+    <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column gap-3">
         <div class="flex-grow-1">
             <h4 class="fs-18 fw-semibold m-0">لوحة التحكم</h4>
         </div>
+        <form method="GET" action="{{ route('dashboard') }}" class="dash-filter d-flex flex-wrap gap-3 align-items-end">
+            <div>
+                <label class="form-label mb-1">الفترة</label>
+                <select name="period" class="form-select form-select-sm" onchange="toggleCustomDates(this.value)">
+                    <option value="daily" {{ ($period ?? 'monthly')==='daily' ? 'selected' : '' }}>اليوم</option>
+                    <option value="weekly" {{ ($period ?? 'monthly')==='weekly' ? 'selected' : '' }}>الأسبوع</option>
+                    <option value="monthly" {{ ($period ?? 'monthly')==='monthly' ? 'selected' : '' }}>الشهر</option>
+                    <option value="custom" {{ ($period ?? 'monthly')==='custom' ? 'selected' : '' }}>مخصص</option>
+                </select>
+            </div>
+            <div id="customDates" class="d-flex gap-2" style="{{ ($period ?? 'monthly')==='custom' ? '' : 'display:none;' }}">
+                <div>
+                    <label class="form-label mb-1">من</label>
+                    <input type="date" name="start_date" value="{{ $startDate }}" class="form-control form-control-sm">
+                </div>
+                <div>
+                    <label class="form-label mb-1">إلى</label>
+                    <input type="date" name="end_date" value="{{ $endDate }}" class="form-control form-control-sm">
+                </div>
+            </div>
+            <div>
+                <label class="form-label mb-1">الفرع</label>
+                <select name="branch_id" class="form-select form-select-sm">
+                    <option value="">كل الفروع</option>
+                    @foreach(($branches ?? []) as $b)
+                        <option value="{{ $b->id }}" {{ (string)($branchId ?? '') === (string)$b->id ? 'selected' : '' }}>{{ $b->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="d-flex gap-2 align-items-end ms-auto">
+                <button type="submit" class="btn btn-primary btn-sm"><iconify-icon icon="solar:filter-bold" class="me-1"></iconify-icon>تطبيق</button>
+                <a href="{{ route('dashboard.print', request()->query()) }}" class="btn btn-outline-primary btn-sm" target="_blank"><iconify-icon icon="solar:printer-bold" class="me-1"></iconify-icon>تقرير للطباعة</a>
+            </div>
+        </form>
     </div>
 
     <!-- Start Main Widgets -->
@@ -135,7 +183,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
-                        <h5 class="card-title text-dark mb-0">المبيعات اليومية</h5>
+                        <h5 class="card-title text-dark mb-0">المبيعات حسب المدة</h5>
                     </div>
                 </div>
                 <div class="card-body">
@@ -258,6 +306,10 @@
 @section('script-bottom')
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
 <script>
+function toggleCustomDates(value){
+    const el=document.getElementById('customDates');
+    if(!el) return; el.style.display = (value==='custom')? 'flex':'none';
+}
 // Pass data from Laravel to JavaScript
 const categoriesData = @json($chartsData['sales_by_category']);
 const dailySalesData = @json($chartsData['daily_sales']);

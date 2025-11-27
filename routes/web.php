@@ -8,6 +8,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,20 +26,21 @@ require __DIR__.'/auth.php';
 
 Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
-    // Dashboard
+    // Original Dashboard route at root
     Route::get('', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
+    Route::get('dashboard/print', [DashboardController::class, 'print'])->name('dashboard.print');
 
-    // Sales Management
+    // Sales Management (original single resource)
     Route::resource('sales', SaleController::class);
     Route::post('sales/{sale}/return', [SaleController::class, 'returnSale'])->name('sales.return');
     Route::get('api/employees-by-branch', [SaleController::class, 'getEmployeesByBranch'])->name('api.employees-by-branch');
     Route::get('api/sales/search', [SaleController::class, 'searchByInvoice'])->name('api.sales.search');
 
-    // Expenses Management
+    // Expenses Management (original single resource)
     Route::resource('expenses', ExpenseController::class);
 
-    // Reports
+    // Reports (unrestricted as original)
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('comprehensive', [ReportController::class, 'comprehensive'])->name('comprehensive');
@@ -60,6 +62,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Calibers Management
     Route::resource('calibers', CaliberController::class)->except(['show']);
     Route::post('calibers/{caliber}/toggle-status', [CaliberController::class, 'toggleStatus'])->name('calibers.toggle-status');
+
+    // System Settings
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
 
     // Legacy routes for existing template compatibility
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');

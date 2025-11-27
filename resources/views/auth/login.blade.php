@@ -13,12 +13,12 @@
                                 <div class="auth-brand">
                                     <a href="{{ route('second', [ 'dashboard' , 'index']) }}" class="logo logo-light">
                                         <span class="logo-lg">
-                                            <img src="/images/logo-light.png" alt="" height="24">
+                                            <img src="{{ asset('images/logo-login.png') }}" alt="شعار الدخول" height="36">
                                         </span>
                                     </a>
                                     <a href="{{ route('second', [ 'dashboard' , 'index']) }}" class="logo logo-dark">
                                         <span class="logo-lg">
-                                            <img src="/images/logo-dark.png" alt="" height="24">
+                                            <img src="{{ asset('images/logo-login.png') }}" alt="شعار الدخول" height="36">
                                         </span>
                                     </a>
                                 </div>
@@ -73,7 +73,7 @@
     <div class="account-page-bg rounded-4">
         <div class="text-center">
             <div class="auth-image">
-                <img src="/images/auth-images.svg" class="mx-auto img-fluid" alt="images">
+                <img src="{{ asset('images/logo-login.png') }}" class="mx-auto img-fluid" alt="شعار النظام">
             </div>
         </div>
     </div>

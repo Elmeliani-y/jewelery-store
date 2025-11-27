@@ -24,35 +24,88 @@ class DashboardController extends Controller
         if (auth()->check() && auth()->user()->isBranch()) {
             return redirect()->route('sales.create');
         }
-        // Get date range (default to current month)
-        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        // Determine period
+        $period = $request->get('period', 'monthly'); // daily|weekly|monthly|custom
+        $branchId = $request->get('branch_id');
+
+        // Get date range (default by period)
+        if ($period === 'daily') {
+            $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
+        } elseif ($period === 'weekly') {
+            $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
+        } elseif ($period === 'monthly') {
+            $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+        } else { // custom
+            $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+            $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        }
 
         // Key metrics
-        $metrics = $this->getKeyMetrics($startDate, $endDate);
+        $metrics = $this->getKeyMetrics($startDate, $endDate, $branchId);
         
         // Charts data
-        $chartsData = $this->getChartsData($startDate, $endDate);
+        $chartsData = $this->getChartsData($startDate, $endDate, $branchId);
         
         // Top performers
-        $topPerformers = $this->getTopPerformers($startDate, $endDate);
+        $topPerformers = $this->getTopPerformers($startDate, $endDate, $branchId);
+
+        $branches = \App\Models\Branch::active()->get();
+
+        // CSV export of key metrics
+        if ($request->get('format') === 'csv') {
+            $filename = 'dashboard_metrics_' . date('Y-m-d') . '.csv';
+            return response()->streamDownload(function () use ($metrics, $period, $startDate, $endDate, $branchId) {
+                $out = fopen('php://output', 'w');
+                // UTF-8 BOM for Excel
+                fwrite($out, "\xEF\xBB\xBF");
+                fputcsv($out, ['الفترة', $period === 'custom' ? ($startDate.' - '.$endDate) : $period]);
+                fputcsv($out, ['الفرع', $branchId ?: 'كل الفروع']);
+                fputcsv($out, []);
+                fputcsv($out, ['المؤشر', 'القيمة']);
+                foreach ($metrics as $key => $val) {
+                    $label = match($key){
+                        'total_sales' => 'إجمالي المبيعات',
+                        'total_net_sales' => 'صافي المبيعات',
+                        'total_tax' => 'إجمالي الضريبة',
+                        'total_weight' => 'إجمالي الوزن',
+                        'total_expenses' => 'إجمالي المصروفات',
+                        'sales_count' => 'عدد الفواتير',
+                        'expenses_count' => 'عدد المصروفات',
+                        'net_profit' => 'صافي الربح',
+                        default => $key,
+                    };
+                    fputcsv($out, [$label, $val]);
+                }
+                fclose($out);
+            }, $filename, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+            ]);
+        }
 
         return view('dashboard.index', compact(
             'metrics',
             'chartsData', 
             'topPerformers',
             'startDate',
-            'endDate'
+            'endDate',
+            'period',
+            'branchId',
+            'branches'
         ));
     }
 
     /**
      * Get key metrics for the dashboard.
      */
-    private function getKeyMetrics($startDate, $endDate)
+    private function getKeyMetrics($startDate, $endDate, $branchId = null)
     {
-        $salesQuery = Sale::notReturned()->inDateRange($startDate, $endDate);
-        $expensesQuery = Expense::inDateRange($startDate, $endDate);
+        $salesQuery = Sale::notReturned()->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId));
+        $expensesQuery = Expense::inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId));
 
         return [
             'total_sales' => $salesQuery->sum('total_amount'),
@@ -69,11 +122,12 @@ class DashboardController extends Controller
     /**
      * Get charts data for visualization.
      */
-    private function getChartsData($startDate, $endDate)
+    private function getChartsData($startDate, $endDate, $branchId = null)
     {
         // Daily sales chart
         $dailySales = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as amount, SUM(weight) as weight')
             ->groupBy('date')
             ->orderBy('date')
@@ -87,9 +141,11 @@ class DashboardController extends Controller
             
             $sales = Sale::notReturned()
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
                 ->sum('total_amount');
             
             $expenses = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])
+                ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
                 ->sum('amount');
             
             $monthlyRevenue[] = [
@@ -102,6 +158,7 @@ class DashboardController extends Controller
         // Sales by caliber
         $salesByCaliber = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('caliber')
             ->selectRaw('caliber_id, SUM(total_amount) as amount, SUM(weight) as weight')
             ->groupBy('caliber_id')
@@ -117,6 +174,7 @@ class DashboardController extends Controller
         // Sales by category
         $salesByCategory = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('category')
             ->selectRaw('category_id, SUM(total_amount) as amount, COUNT(*) as count')
             ->groupBy('category_id')
@@ -146,6 +204,7 @@ class DashboardController extends Controller
 
         // Expenses by type
         $expensesByType = Expense::inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('expenseType')
             ->selectRaw('expense_type_id, SUM(amount) as amount, COUNT(*) as count')
             ->groupBy('expense_type_id')
@@ -171,7 +230,7 @@ class DashboardController extends Controller
     /**
      * Get top performers data.
      */
-    private function getTopPerformers($startDate, $endDate)
+    private function getTopPerformers($startDate, $endDate, $branchId = null)
     {
         // Top branches by sales
         $topBranches = Sale::notReturned()
@@ -186,6 +245,7 @@ class DashboardController extends Controller
         // Top employees by sales
         $topEmployees = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with(['employee', 'employee.branch'])
             ->selectRaw('employee_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
             ->groupBy('employee_id')
@@ -196,6 +256,7 @@ class DashboardController extends Controller
         // Top categories by sales
         $topCategories = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('category')
             ->selectRaw('category_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
             ->groupBy('category_id')
@@ -206,6 +267,7 @@ class DashboardController extends Controller
         // Top calibers by sales
         $topCalibers = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('caliber')
             ->selectRaw('caliber_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
             ->groupBy('caliber_id')
@@ -237,5 +299,41 @@ class DashboardController extends Controller
         $chartsData = $this->getChartsData($startDate, $endDate);
 
         return response()->json($chartsData[$chartType] ?? []);
+    }
+
+    /**
+     * Print-friendly dashboard report without charts.
+     */
+    public function print(Request $request)
+    {
+        if (auth()->check() && auth()->user()->isBranch()) {
+            return redirect()->route('sales.create');
+        }
+
+        $period = $request->get('period', 'monthly');
+        $branchId = $request->get('branch_id');
+
+        if ($period === 'daily') {
+            $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
+        } elseif ($period === 'weekly') {
+            $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
+        } elseif ($period === 'monthly') {
+            $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+        } else {
+            $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+            $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        }
+
+        $metrics = $this->getKeyMetrics($startDate, $endDate, $branchId);
+        $chartsData = $this->getChartsData($startDate, $endDate, $branchId);
+        $topPerformers = $this->getTopPerformers($startDate, $endDate, $branchId);
+        $branch = $branchId ? Branch::find($branchId) : null;
+
+        return view('dashboard.print', compact(
+            'metrics', 'chartsData', 'topPerformers', 'startDate', 'endDate', 'period', 'branch'
+        ));
     }
 }

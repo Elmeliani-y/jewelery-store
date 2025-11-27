@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelFormat;
 use App\Exports\ReportsExport;
 
 class ReportController extends Controller
@@ -44,28 +45,36 @@ class ReportController extends Controller
     public function comprehensive(Request $request)
     {
         $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
+        $format = $request->get('format');
+        $perPage = (int) $request->get('per_page', 25);
         
-        // Get sales data
-        $salesQuery = $this->buildSalesQuery($filters);
-        $sales = $salesQuery->with(['branch', 'employee', 'category', 'caliber'])->get();
-        
-        // Get expenses data  
-        $expensesQuery = $this->buildExpensesQuery($filters);
-        $expenses = $expensesQuery->with(['branch', 'expenseType'])->get();
+        // Base queries
+        $salesQuery = $this->buildSalesQuery($filters)->with(['branch', 'employee', 'category', 'caliber']);
+        $expensesQuery = $this->buildExpensesQuery($filters)->with(['branch', 'expenseType']);
+
+        // For HTML view: paginate; For exports/print: fetch all
+        if ($format) {
+            $sales = (clone $salesQuery)->get();
+            $expenses = (clone $expensesQuery)->get();
+        } else {
+            $sales = (clone $salesQuery)->paginate($perPage)->appends($request->query());
+            $expenses = (clone $expensesQuery)->paginate($perPage)->appends($request->query());
+        }
 
         // Calculate summaries
         $summary = [
-            'total_sales' => $sales->sum('total_amount'),
-            'total_net_sales' => $sales->sum('net_amount'),
-            'total_tax' => $sales->sum('tax_amount'),
-            'total_weight' => $sales->sum('weight'),
-            'total_expenses' => $expenses->sum('amount'),
-            'net_profit' => $sales->sum('net_amount') - $expenses->sum('amount'),
-            'sales_count' => $sales->count(),
-            'expenses_count' => $expenses->count(),
+            'total_sales' => (clone $salesQuery)->sum('total_amount'),
+            'total_net_sales' => (clone $salesQuery)->sum('net_amount'),
+            'total_tax' => (clone $salesQuery)->sum('tax_amount'),
+            'total_weight' => (clone $salesQuery)->sum('weight'),
+            'total_expenses' => (clone $expensesQuery)->sum('amount'),
+            'net_profit' => (clone $salesQuery)->sum('net_amount') - (clone $expensesQuery)->sum('amount'),
+            'sales_count' => (clone $salesQuery)->count(),
+            'expenses_count' => (clone $expensesQuery)->count(),
         ];
 
-        $data = compact('sales', 'expenses', 'summary', 'filters');
+        $data = compact('sales', 'expenses', 'summary', 'filters') + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.comprehensive', $data, 'تقرير شامل');
@@ -73,6 +82,9 @@ class ReportController extends Controller
 
         if ($request->get('format') === 'excel') {
             return Excel::download(new ReportsExport($data), 'comprehensive_report.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'comprehensive_report.csv', ExcelFormat::CSV);
         }
 
         return view('reports.comprehensive', $data);
@@ -84,6 +96,7 @@ class ReportController extends Controller
     public function detailed(Request $request)
     {
         $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
         
         $salesQuery = $this->buildSalesQuery($filters);
         $sales = $salesQuery->with(['branch', 'employee', 'category', 'caliber'])->get();
@@ -106,7 +119,7 @@ class ReportController extends Controller
             'sales_count' => $sales->count(),
         ];
 
-        $data = compact('sales', 'groupedData', 'summary', 'filters');
+        $data = compact('sales', 'groupedData', 'summary', 'filters') + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.detailed', $data, 'تقرير مفصل');
@@ -114,6 +127,9 @@ class ReportController extends Controller
 
         if ($request->get('format') === 'excel') {
             return Excel::download(new ReportsExport($data), 'detailed_report.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'detailed_report.csv', ExcelFormat::CSV);
         }
 
         return view('reports.detailed', $data);
@@ -125,8 +141,11 @@ class ReportController extends Controller
     public function calibers(Request $request)
     {
         $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
+        $format = $request->get('format');
+        $perPage = (int) $request->get('per_page', 25);
         
-        $calibersData = Caliber::active()
+        $calibersQuery = Caliber::active()
             ->withCount(['sales' => function ($query) use ($filters) {
                 $this->applySalesFilters($query, $filters);
                 $query->where('is_returned', false);
@@ -134,9 +153,10 @@ class ReportController extends Controller
             ->with(['sales' => function ($query) use ($filters) {
                 $this->applySalesFilters($query, $filters);
                 $query->where('is_returned', false);
-            }])
-            ->get()
-            ->map(function ($caliber) {
+            }]);
+
+        if ($format) {
+            $calibersData = $calibersQuery->get()->map(function ($caliber) {
                 return [
                     'caliber' => $caliber,
                     'total_amount' => $caliber->sales->sum('total_amount'),
@@ -146,8 +166,23 @@ class ReportController extends Controller
                     'sales_count' => $caliber->sales_count,
                 ];
             });
+        } else {
+            $calibersData = $calibersQuery
+                ->paginate($perPage)
+                ->through(function ($caliber) {
+                    return [
+                        'caliber' => $caliber,
+                        'total_amount' => $caliber->sales->sum('total_amount'),
+                        'total_weight' => $caliber->sales->sum('weight'),
+                        'total_tax' => $caliber->sales->sum('tax_amount'),
+                        'net_amount' => $caliber->sales->sum('net_amount'),
+                        'sales_count' => $caliber->sales_count,
+                    ];
+                })
+                ->appends($request->query());
+        }
 
-        $data = compact('calibersData', 'filters');
+        $data = compact('calibersData', 'filters') + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.calibers', $data, 'تقرير العيارات');
@@ -155,6 +190,9 @@ class ReportController extends Controller
 
         if ($request->get('format') === 'excel') {
             return Excel::download(new ReportsExport($data), 'calibers_report.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'calibers_report.csv', ExcelFormat::CSV);
         }
 
         return view('reports.calibers', $data);
@@ -166,8 +204,11 @@ class ReportController extends Controller
     public function categories(Request $request)
     {
         $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
+        $format = $request->get('format');
+        $perPage = (int) $request->get('per_page', 25);
         
-        $categoriesData = Category::active()
+        $categoriesQuery = Category::active()
             ->withCount(['sales' => function ($query) use ($filters) {
                 $this->applySalesFilters($query, $filters);
                 $query->where('is_returned', false);
@@ -175,9 +216,10 @@ class ReportController extends Controller
             ->with(['sales' => function ($query) use ($filters) {
                 $this->applySalesFilters($query, $filters);
                 $query->where('is_returned', false);
-            }])
-            ->get()
-            ->map(function ($category) {
+            }]);
+
+        if ($format) {
+            $categoriesData = $categoriesQuery->get()->map(function ($category) {
                 return [
                     'category' => $category,
                     'total_amount' => $category->sales->sum('total_amount'),
@@ -185,8 +227,21 @@ class ReportController extends Controller
                     'sales_count' => $category->sales_count,
                 ];
             });
+        } else {
+            $categoriesData = $categoriesQuery
+                ->paginate($perPage)
+                ->through(function ($category) {
+                    return [
+                        'category' => $category,
+                        'total_amount' => $category->sales->sum('total_amount'),
+                        'total_weight' => $category->sales->sum('weight'),
+                        'sales_count' => $category->sales_count,
+                    ];
+                })
+                ->appends($request->query());
+        }
 
-        $data = compact('categoriesData', 'filters');
+        $data = compact('categoriesData', 'filters') + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.categories', $data, 'تقرير الأصناف');
@@ -194,6 +249,9 @@ class ReportController extends Controller
 
         if ($request->get('format') === 'excel') {
             return Excel::download(new ReportsExport($data), 'categories_report.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'categories_report.csv', ExcelFormat::CSV);
         }
 
         return view('reports.categories', $data);
@@ -205,14 +263,18 @@ class ReportController extends Controller
     public function employees(Request $request)
     {
         $filters = $this->validateFilters($request);
-        
-        $employeesData = Employee::active()
+        $lists = $this->getFilterLists();
+        $format = $request->get('format');
+        $perPage = (int) $request->get('per_page', 25);
+
+        $employeesQuery = Employee::active()
             ->with(['branch', 'sales' => function ($query) use ($filters) {
                 $this->applySalesFilters($query, $filters);
                 $query->where('is_returned', false);
-            }])
-            ->get()
-            ->map(function ($employee) {
+            }]);
+
+        if ($format) {
+            $employeesData = $employeesQuery->get()->map(function ($employee) {
                 return [
                     'employee' => $employee,
                     'total_sales' => $employee->sales->sum('total_amount'),
@@ -221,8 +283,22 @@ class ReportController extends Controller
                     'net_profit' => $employee->sales->sum('net_amount') - $employee->salary,
                 ];
             });
+        } else {
+            $employeesData = $employeesQuery
+                ->paginate($perPage)
+                ->through(function ($employee) {
+                    return [
+                        'employee' => $employee,
+                        'total_sales' => $employee->sales->sum('total_amount'),
+                        'total_weight' => $employee->sales->sum('weight'),
+                        'sales_count' => $employee->sales->count(),
+                        'net_profit' => $employee->sales->sum('net_amount') - $employee->salary,
+                    ];
+                })
+                ->appends($request->query());
+        }
 
-        $data = compact('employeesData', 'filters');
+        $data = compact('employeesData', 'filters') + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.employees', $data, 'تقرير الموظفين');
@@ -230,6 +306,9 @@ class ReportController extends Controller
 
         if ($request->get('format') === 'excel') {
             return Excel::download(new ReportsExport($data), 'employees_report.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'employees_report.csv', ExcelFormat::CSV);
         }
 
         return view('reports.employees', $data);
@@ -241,6 +320,7 @@ class ReportController extends Controller
     public function netProfit(Request $request)
     {
         $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
         
         // Get sales data
         $salesQuery = $this->buildSalesQuery($filters);
@@ -268,7 +348,7 @@ class ReportController extends Controller
             'total_salaries' => $totalSalaries,
             'net_profit' => $netProfit,
             'filters' => $filters,
-        ];
+        ] + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.net_profit', $data, 'تقرير صافي الربح');
@@ -276,6 +356,9 @@ class ReportController extends Controller
 
         if ($request->get('format') === 'excel') {
             return Excel::download(new ReportsExport($data), 'net_profit_report.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'net_profit_report.csv', ExcelFormat::CSV);
         }
 
         return view('reports.net_profit', $data);
@@ -380,6 +463,20 @@ class ReportController extends Controller
         $filters['date_to'] = $request->get('date_to', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
         return $filters;
+    }
+
+    /**
+     * Get dropdown lists for report filters.
+     */
+    private function getFilterLists()
+    {
+        return [
+            'branches' => Branch::active()->get(),
+            'employees' => Employee::active()->get(),
+            'categories' => Category::active()->get(),
+            'calibers' => Caliber::active()->get(),
+            'expenseTypes' => ExpenseType::active()->get(),
+        ];
     }
 
     /**

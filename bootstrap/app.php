@@ -11,7 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // (Reverted) No custom route middleware aliases
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

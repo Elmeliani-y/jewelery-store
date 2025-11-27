@@ -1,316 +1,7 @@
 @extends('layouts.vertical', ['title' => 'تسجيل مبيعة جديدة'])
 
 @section('css')
-<style>
-    .arabic-text {
-        font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        direction: rtl;
-        text-align: right;
-    }
-    
-    /* Modern Form Section */
-    .form-section {
-        background: var(--ct-card-bg);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 24px;
-        border: 1px solid var(--ct-border-color);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .form-section::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: linear-gradient(135deg, var(--ct-primary), var(--ct-info));
-    }
-    
-    .form-section:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
-    }
-    
-    /* Dark Mode Enhancements */
-    [data-bs-theme="dark"] .form-section {
-        background: rgba(255, 255, 255, 0.02);
-        border-color: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    
-    [data-bs-theme="dark"] .form-section:hover {
-        background: rgba(255, 255, 255, 0.04);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    }
-    
-    /* Section Headers */
-    .section-header {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: var(--ct-heading-color);
-    }
-    
-    .section-header iconify-icon {
-        font-size: 1.5rem;
-        opacity: 0.9;
-    }
-    
-    /* Form Controls Enhancement */
-    .form-control, .form-select {
-        border-radius: 10px;
-        padding: 12px 16px;
-        border: 1.5px solid var(--ct-border-color);
-        transition: all 0.3s ease;
-        font-size: 0.95rem;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: var(--ct-primary);
-        box-shadow: 0 0 0 0.2rem rgba(var(--ct-primary-rgb), 0.15);
-        transform: translateY(-1px);
-    }
-    
-    [data-bs-theme="dark"] .form-control,
-    [data-bs-theme="dark"] .form-select {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.1);
-        color: var(--ct-body-color);
-    }
-    
-    [data-bs-theme="dark"] .form-control:focus,
-    [data-bs-theme="dark"] .form-select:focus {
-        background-color: rgba(255, 255, 255, 0.08);
-        border-color: var(--ct-primary);
-    }
-    
-    /* Form Labels */
-    .form-label {
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--ct-body-color);
-        font-size: 0.9rem;
-    }
-    
-    /* Payment Method Cards */
-    .payment-card {
-        background: var(--ct-card-bg);
-        border: 2px solid var(--ct-border-color);
-        border-radius: 12px;
-        padding: 16px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        height: 100%;
-    }
-    
-    .payment-card:hover {
-        border-color: var(--ct-primary);
-        background: rgba(var(--ct-primary-rgb), 0.05);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .payment-card input[type="radio"]:checked ~ .payment-content {
-        color: var(--ct-primary);
-    }
-    
-    .payment-card input[type="radio"]:checked ~ * .payment-icon {
-        color: var(--ct-primary);
-        transform: scale(1.1);
-    }
-    
-    .payment-card.active {
-        border-color: var(--ct-primary);
-        background: rgba(var(--ct-primary-rgb), 0.1);
-        box-shadow: 0 4px 12px rgba(var(--ct-primary-rgb), 0.2);
-    }
-    
-    .payment-icon {
-        font-size: 2rem;
-        transition: all 0.3s ease;
-    }
-    
-    .payment-content {
-        flex: 1;
-    }
-    
-    .payment-title {
-        font-weight: 600;
-        font-size: 1rem;
-        margin-bottom: 2px;
-    }
-    
-    .payment-desc {
-        font-size: 0.75rem;
-        opacity: 0.7;
-    }
-    
-    [data-bs-theme="dark"] .payment-card {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    [data-bs-theme="dark"] .payment-card:hover {
-        background: rgba(255, 255, 255, 0.06);
-    }
-    
-    [data-bs-theme="dark"] .payment-card.active {
-        background: rgba(var(--ct-primary-rgb), 0.15);
-    }
-    
-    /* Calculation Cards */
-    .calc-card {
-        background: var(--ct-card-bg);
-        border: 2px solid var(--ct-border-color);
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-    
-    .calc-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    
-    .calc-card.info {
-        border-color: var(--ct-info);
-        background: rgba(var(--ct-info-rgb), 0.05);
-    }
-    
-    .calc-card.success {
-        border-color: var(--ct-success);
-        background: rgba(var(--ct-success-rgb), 0.05);
-    }
-    
-    .calc-card.warning {
-        border-color: var(--ct-warning);
-        background: rgba(var(--ct-warning-rgb), 0.05);
-    }
-    
-    .calc-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        opacity: 0.8;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .calc-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0;
-    }
-    
-    .calc-icon {
-        font-size: 2.5rem;
-        opacity: 0.3;
-        margin-bottom: 8px;
-    }
-    
-    [data-bs-theme="dark"] .calc-card {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-    
-    [data-bs-theme="dark"] .calc-card.info {
-        background: rgba(var(--ct-info-rgb), 0.1);
-    }
-    
-    [data-bs-theme="dark"] .calc-card.success {
-        background: rgba(var(--ct-success-rgb), 0.1);
-    }
-    
-    [data-bs-theme="dark"] .calc-card.warning {
-        background: rgba(var(--ct-warning-rgb), 0.1);
-    }
-    
-    /* Action Buttons */
-    .btn {
-        padding: 12px 28px;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    
-    .btn iconify-icon {
-        font-size: 1.2rem;
-    }
-    
-    /* Responsive Improvements */
-    @media (max-width: 768px) {
-        .form-section {
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        
-        .section-header {
-            font-size: 1rem;
-        }
-        
-        .payment-card {
-            padding: 12px;
-            margin-bottom: 12px;
-        }
-        
-        .calc-value {
-            font-size: 1.2rem;
-        }
-        
-        .calc-icon {
-            font-size: 2rem;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            width: 100%;
-            justify-content: center;
-        }
-    }
-    
-    /* Loading State */
-    .form-control.loading {
-        background-image: linear-gradient(90deg, transparent, rgba(var(--ct-primary-rgb), 0.1), transparent);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-    }
-    
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-    
-    /* Smooth transitions for show/hide */
-    .fade-in {
-        animation: fadeIn 0.3s ease-in;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
+    @include('components.form-styles')
 @endsection
 
 @section('content')
@@ -326,7 +17,9 @@
                 <div class="text-end">
                     <ol class="breadcrumb m-0 py-0 arabic-text">
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-primary">الرئيسية</a></li>
+                        @unless(auth()->user()->isBranch())
                         <li class="breadcrumb-item"><a href="{{ route('sales.index') }}" class="text-primary">المبيعات</a></li>
+                        @endunless
                         <li class="breadcrumb-item active">تسجيل مبيعة جديدة</li>
                     </ol>
                 </div>
@@ -345,7 +38,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('sales.store') }}" method="POST" class="arabic-text">
+                    <form id="sale-create-form" action="{{ route('sales.store') }}" method="POST" class="arabic-text">
                         @csrf
                         
                         <!-- Branch and Employee Section -->
@@ -456,7 +149,7 @@
                                     </div>
                                     
                                     <div class="col-md-3 mb-3">
-                                        <label class="form-label">المبلغ (جنيه) <span class="text-danger">*</span></label>
+                                        <label class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" class="form-control product-amount" 
                                                name="products[INDEX][amount]" placeholder="0.00" required>
                                     </div>
@@ -467,11 +160,11 @@
                                         <div class="d-flex gap-3 flex-wrap">
                                             <small class="text-muted">
                                                 <strong>الضريبة:</strong> 
-                                                <span class="product-tax">0.00</span> جنيه
+                                                <span class="product-tax">0.00</span> ريال
                                             </small>
                                             <small class="text-success">
                                                 <strong>الصافي:</strong> 
-                                                <span class="product-net">0.00</span> جنيه
+                                                <span class="product-net">0.00</span> ريال
                                             </small>
                                         </div>
                                     </div>
@@ -582,21 +275,21 @@
                                     <div class="calc-card warning">
                                         <iconify-icon icon="solar:wallet-bold-duotone" class="calc-icon text-warning"></iconify-icon>
                                         <div class="calc-label text-warning">الإجمالي</div>
-                                        <h3 class="calc-value text-warning" id="total_amount_display">0.00 جنيه</h3>
+                                        <h3 class="calc-value text-warning" id="total_amount_display">0.00 ريال</h3>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6">
                                     <div class="calc-card info">
                                         <iconify-icon icon="solar:bill-list-bold-duotone" class="calc-icon text-info"></iconify-icon>
                                         <div class="calc-label text-info">الضريبة</div>
-                                        <h3 class="calc-value text-info" id="tax_amount_display">0.00 جنيه</h3>
+                                        <h3 class="calc-value text-info" id="tax_amount_display">0.00 ريال</h3>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-md-6">
                                     <div class="calc-card success">
                                         <iconify-icon icon="solar:wallet-money-bold-duotone" class="calc-icon text-success"></iconify-icon>
                                         <div class="calc-label text-success">الصافي</div>
-                                        <h3 class="calc-value text-success" id="net_amount_display">0.00 جنيه</h3>
+                                        <h3 class="calc-value text-success" id="net_amount_display">0.00 ريال</h3>
                                     </div>
                                 </div>
                             </div>
@@ -639,6 +332,8 @@
                             </div>
                         </div>
                     </form>
+                    <!-- Error Alert (dynamic for AJAX) -->
+                    <div class="alert alert-danger d-none mt-3" id="saleErrorAlert" role="alert"></div>
                 </div>
             </div>
         </div>
@@ -650,6 +345,82 @@
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // AJAX submit for sales create to show modal instead of redirect
+    const form = document.getElementById('sale-create-form');
+    const errorAlert = document.getElementById('saleErrorAlert');
+
+    function clearErrors() {
+        errorAlert.classList.add('d-none');
+        errorAlert.textContent = '';
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+    }
+
+    function showFieldErrors(errors) {
+        clearErrors();
+        let hasFieldErrors = false;
+        Object.keys(errors || {}).forEach(name => {
+            const field = form.querySelector(`[name="${name}"]`);
+            if (field) {
+                field.classList.add('is-invalid');
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = Array.isArray(errors[name]) ? errors[name][0] : errors[name];
+                field.parentElement.appendChild(feedback);
+                hasFieldErrors = true;
+            }
+        });
+        if (!hasFieldErrors && errors) {
+            errorAlert.textContent = 'حدثت أخطاء أثناء الإرسال.';
+            errorAlert.classList.remove('d-none');
+        }
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        clearErrors();
+
+        const url = form.getAttribute('action');
+        const csrfToken = form.querySelector('input[name="_token"]').value;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            if (response.status === 422) {
+                const data = await response.json();
+                showFieldErrors(data.errors || {});
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data && data.success) {
+                // Populate modal details and show
+                const modalEl = document.getElementById('saleSuccessModal');
+                const invoiceEl = document.getElementById('saleSuccessInvoice');
+                if (invoiceEl && data.data?.invoice_number) {
+                    invoiceEl.textContent = data.data.invoice_number;
+                }
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            } else {
+                errorAlert.textContent = (data && data.message) ? data.message : 'حدث خطأ غير متوقع.';
+                errorAlert.classList.remove('d-none');
+            }
+        } catch (err) {
+            errorAlert.textContent = 'تعذر الاتصال بالخادم. حاول مرة أخرى.';
+            errorAlert.classList.remove('d-none');
+        }
+    });
+
     let productIndex = 0;
     
     // Add first product on page load
@@ -778,9 +549,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         $('#total_weight_display').text(totalWeight.toFixed(3) + ' جم');
-        $('#total_amount_display').text(totalAmount.toFixed(2) + ' جنيه');
-        $('#tax_amount_display').text(totalTax.toFixed(2) + ' جنيه');
-        $('#net_amount_display').text(totalNet.toFixed(2) + ' جنيه');
+        $('#total_amount_display').text(totalAmount.toFixed(2) + ' ريال');
+        $('#tax_amount_display').text(totalTax.toFixed(2) + ' ريال');
+        $('#net_amount_display').text(totalNet.toFixed(2) + ' ريال');
         
         // Store in hidden inputs
         $('#final_total_amount').val(totalAmount.toFixed(2));
@@ -875,4 +646,39 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 </script>
+<!-- Success Modal -->
+<div class="modal fade" id="saleSuccessModal" tabindex="-1" aria-labelledby="saleSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="saleSuccessModalLabel">
+                    <iconify-icon icon="solar:check-circle-bold" class="text-success fs-4 me-2"></iconify-icon>
+                    تم حفظ المبيعة بنجاح
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                رقم الفاتورة: <strong id="saleSuccessInvoice">—</strong><br>
+                يمكنك إضافة مبيعة أخرى أو إغلاق النافذة.
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="addAnotherSaleBtn">إضافة مبيعة أخرى</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('addAnotherSaleBtn')?.addEventListener('click', function() {
+            const form = document.getElementById('sale-create-form');
+            if (form) {
+                form.reset();
+                // Clear dynamic products and add a fresh one
+                const productsContainer = document.getElementById('products-container');
+                productsContainer.innerHTML = '';
+                // Reset counters in current scope
+                window.location.reload(); // simplest way to reset dynamic state
+            }
+        });
+    </script>
+</div>
 @endsection
