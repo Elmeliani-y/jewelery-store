@@ -118,6 +118,9 @@
                                 <li>
                                     <a href="{{ route('reports.net-profit') }}" class="tp-link">صافي الربح</a>
                                 </li>
+                                <li>
+                                    <a href="{{ route('reports.by-branch') }}" class="tp-link">تقرير حسب الفروع</a>
+                                </li>
                             </ul>
                         </div>
                     </li>

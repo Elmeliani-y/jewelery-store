@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Sale;
 use App\Models\Expense;
 use App\Models\Branch;
@@ -19,6 +18,82 @@ use App\Exports\ReportsExport;
 
 class ReportController extends Controller
 {
+    /**
+     * Generate report by branch (sales and expenses grouped by branch).
+     */
+    public function byBranch(Request $request)
+    {
+        $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
+        $format = $request->get('format');
+        $perPage = (int) $request->get('per_page', 25);
+
+        // Get all branches (active)
+        $branches = Branch::active()->get();
+
+        // For each branch, get sales and expenses summary in the filter range
+        $branchData = $branches->map(function($branch) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('branch_id', $branch->id);
+            $expensesQuery = Expense::where('branch_id', $branch->id);
+
+            // Apply date filters
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                $expensesQuery->whereDate('expense_date', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                $expensesQuery->whereDate('expense_date', '<=', $filters['date_to']);
+            }
+
+            $totalSales = $salesQuery->sum('total_amount');
+            $totalNetSales = $salesQuery->sum('net_amount');
+            $totalWeight = $salesQuery->sum('weight');
+            $salesCount = $salesQuery->count();
+
+            $totalExpenses = $expensesQuery->sum('amount');
+            $expensesCount = $expensesQuery->count();
+
+            $netProfit = $totalNetSales - $totalExpenses;
+
+            return [
+                'branch' => $branch,
+                'total_sales' => $totalSales,
+                'total_net_sales' => $totalNetSales,
+                'total_weight' => $totalWeight,
+                'sales_count' => $salesCount,
+                'total_expenses' => $totalExpenses,
+                'expenses_count' => $expensesCount,
+                'net_profit' => $netProfit,
+            ];
+        });
+
+        // Optionally paginate for HTML view
+        if (!$format && $branchData->count() > $perPage) {
+            $page = $request->get('page', 1);
+            $branchData = new \Illuminate\Pagination\LengthAwarePaginator(
+                $branchData->forPage($page, $perPage)->values(),
+                $branchData->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
+        $data = compact('branchData', 'filters') + $lists;
+
+        if ($format === 'pdf') {
+            return $this->generatePDF('reports.by_branch', $data, 'تقرير حسب الفروع');
+        }
+        if ($format === 'excel') {
+            return Excel::download(new ReportsExport($data), 'branch_report.xlsx');
+        }
+        if ($format === 'csv') {
+            return Excel::download(new ReportsExport($data), 'branch_report.csv', ExcelFormat::CSV);
+        }
+
+        return view('reports.by_branch', $data);
+    }
     /**
      * Display reports index with filtering options.
      */
