@@ -43,7 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('sales/search/invoice', [ApiSaleController::class, 'searchByInvoice'])->name('api.sales.search-invoice');
     
     // Expenses API
-    Route::apiResource('expenses', ApiExpenseController::class);
+    Route::apiResource('expenses', ApiExpenseController::class)->names([
+        'index' => 'api.expenses.index',
+        'store' => 'api.expenses.store',
+        'show' => 'api.expenses.show',
+        'update' => 'api.expenses.update',
+        'destroy' => 'api.expenses.destroy',
+    ]);
     
     // Reports API
     Route::prefix('reports')->group(function () {
@@ -57,13 +63,25 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Branches API
-    Route::apiResource('branches', ApiBranchController::class);
-    Route::post('branches/{branch}/toggle-status', [ApiBranchController::class, 'toggleStatus']);
+    Route::apiResource('branches', ApiBranchController::class)->names([
+        'index' => 'api.branches.index',
+        'store' => 'api.branches.store',
+        'show' => 'api.branches.show',
+        'update' => 'api.branches.update',
+        'destroy' => 'api.branches.destroy',
+    ]);
+    Route::post('branches/{branch}/toggle-status', [ApiBranchController::class, 'toggleStatus'])->name('api.branches.toggle-status');
     
     // Employees API
-    Route::apiResource('employees', ApiEmployeeController::class);
-    Route::post('employees/{employee}/toggle-status', [ApiEmployeeController::class, 'toggleStatus']);
-    Route::get('branches/{branch}/employees', [ApiEmployeeController::class, 'getByBranch']);
+    Route::apiResource('employees', ApiEmployeeController::class)->names([
+        'index' => 'api.employees.index',
+        'store' => 'api.employees.store',
+        'show' => 'api.employees.show',
+        'update' => 'api.employees.update',
+        'destroy' => 'api.employees.destroy',
+    ]);
+    Route::post('employees/{employee}/toggle-status', [ApiEmployeeController::class, 'toggleStatus'])->name('api.employees.toggle-status');
+    Route::get('branches/{branch}/employees', [ApiEmployeeController::class, 'getByBranch'])->name('api.branches.employees');
     
     // Master data API
     Route::get('master-data', function () {
