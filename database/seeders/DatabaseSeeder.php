@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         // Seed jewelry system data first to create branches
         $this->call([
             JewelrySystemSeeder::class,
-            FakeSalesExpensesSeeder::class,
+            // FakeSalesExpensesSeeder::class,
         ]);
 
         // Get branches for creating branch users
@@ -52,12 +52,12 @@ class DatabaseSeeder extends Seeder
         if ($branches->count() > 0) {
             foreach ($branches as $branch) {
                 $branchSlug = preg_replace('/[^a-z0-9]+/i', '', $branch->name);
-                $username = 'branch_' . $branch->id;
-                
+                $username = 'branch_'.$branch->id;
+
                 User::factory()->create([
-                    'name' => 'حساب ' . $branch->name,
+                    'name' => 'حساب '.$branch->name,
                     'username' => $username,
-                    'email' => $username . '@dusty.com',
+                    'email' => $username.'@dusty.com',
                     'email_verified_at' => now(),
                     'password' => Hash::make('branch123'),
                     'role' => 'branch',
