@@ -32,9 +32,15 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     
     // Sales API
-    Route::apiResource('sales', ApiSaleController::class);
-    Route::post('sales/{sale}/return', [ApiSaleController::class, 'returnSale']);
-    Route::get('sales/search/invoice', [ApiSaleController::class, 'searchByInvoice']);
+    Route::apiResource('sales', ApiSaleController::class)->names([
+        'index' => 'api.sales.index',
+        'store' => 'api.sales.store',
+        'show' => 'api.sales.show',
+        'update' => 'api.sales.update',
+        'destroy' => 'api.sales.destroy',
+    ]);
+    Route::post('sales/{sale}/return', [ApiSaleController::class, 'returnSale'])->name('api.sales.return');
+    Route::get('sales/search/invoice', [ApiSaleController::class, 'searchByInvoice'])->name('api.sales.search-invoice');
     
     // Expenses API
     Route::apiResource('expenses', ApiExpenseController::class);
