@@ -79,6 +79,14 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label for="sale_id" class="form-label">رقم المبيعة</label>
+                    <input type="number" name="sale_id" id="sale_id" value="{{ request('sale_id') }}" class="form-control" placeholder="بحث برقم المبيعة">
+                </div>
+                <div class="col-md-3">
+                    <label for="expense_id" class="form-label">رقم المصروف</label>
+                    <input type="number" name="expense_id" id="expense_id" value="{{ request('expense_id') }}" class="form-control" placeholder="بحث برقم المصروف">
+                </div>
+                <div class="col-md-3">
                     <label for="from" class="form-label">من تاريخ</label>
                     <input type="date" name="from" id="from" value="{{ request('from') }}" class="form-control">
                 </div>
@@ -97,6 +105,8 @@
 
 	@php
 		// Determine which tables to show based on filters
+		$hasSaleIdFilter = request()->filled('sale_id');
+		$hasExpenseIdFilter = request()->filled('expense_id');
 		$hasEmployeeFilter = request()->filled('employee');
 		$hasBranchFilter = request()->filled('branch');
 		$hasCategoryFilter = request()->filled('category');
@@ -105,16 +115,22 @@
 		$hasExpenseTypeFilter = request()->filled('expense_type');
 		$hasDateFilter = request()->filled('from') || request()->filled('to');
 		
-		// Check if ANY filter is applied
-		$hasAnyFilter = $hasEmployeeFilter || $hasBranchFilter || $hasCategoryFilter || $hasCaliberFilter || $hasPaymentMethodFilter || $hasExpenseTypeFilter || $hasDateFilter;
-		
-		// If no filters at all, show all tables
-		if (!$hasAnyFilter) {
+		// If sale_id is provided, show ONLY sales table
+		if ($hasSaleIdFilter) {
 			$showSales = true;
+			$showExpenses = false;
+			$showBranches = false;
+			$showEmployees = false;
+		}
+		// If expense_id is provided, show ONLY expenses table
+		elseif ($hasExpenseIdFilter) {
+			$showSales = false;
 			$showExpenses = true;
-			$showBranches = true;
-			$showEmployees = true;
-		} else {
+			$showBranches = false;
+			$showEmployees = false;
+		}
+		// Check if ANY filter is applied
+		elseif ($hasEmployeeFilter || $hasBranchFilter || $hasCategoryFilter || $hasCaliberFilter || $hasPaymentMethodFilter || $hasExpenseTypeFilter || $hasDateFilter) {
 			// Show sales if no expense-specific filters OR if employee/category/caliber/payment filters are set
 			$showSales = !$hasExpenseTypeFilter || $hasEmployeeFilter || $hasCategoryFilter || $hasCaliberFilter || $hasPaymentMethodFilter;
 			
@@ -126,6 +142,13 @@
 			
 			// Show employees table only if employee filter is selected
 			$showEmployees = $hasEmployeeFilter;
+		}
+		// If no filters at all, show all tables
+		else {
+			$showSales = true;
+			$showExpenses = true;
+			$showBranches = true;
+			$showEmployees = true;
 		}
 	@endphp
 
@@ -172,8 +195,16 @@
 											-
 										@endif
 									</td>
-									<td dir="ltr">{{ number_format($sale->total_amount, 2) }}</td>
-									<td dir="ltr">{{ number_format($sale->weight, 2) }}</td>
+									<td dir="ltr">
+										{{ number_format($sale->total_amount, 2) }}
+										@if($sale->isBelowMinimumPrice())
+											<br><small class="text-warning" style="text-decoration: underline;">{{ number_format($sale->price_per_gram, 2) }} ريال/جم</small>
+										@endif
+									</td>
+									<td dir="ltr">
+										{{ number_format($sale->weight, 2) }}
+										<br><small style="text-decoration: underline;">{{ number_format($sale->price_per_gram, 2) }} ريال/جم</small>
+									</td>
 									<td dir="ltr">{{ number_format($sale->tax_amount, 2) }}</td>
 									<td>{{ $sale->notes }}</td>
 								</tr>

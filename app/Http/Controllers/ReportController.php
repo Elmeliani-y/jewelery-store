@@ -608,6 +608,10 @@ class ReportController extends Controller
      */
     private function applySalesFilters($query, $filters)
     {
+        if (isset($filters['sale_id'])) {
+            $query->where('id', $filters['sale_id']);
+        }
+
         if (isset($filters['branch_id'])) {
             $query->where('branch_id', $filters['branch_id']);
         }
@@ -646,6 +650,10 @@ class ReportController extends Controller
     {
         $query = Expense::query();
 
+        if (isset($filters['expense_id'])) {
+            $query->where('id', $filters['expense_id']);
+        }
+
         if (isset($filters['branch_id'])) {
             $query->where('branch_id', $filters['branch_id']);
         }
@@ -671,6 +679,14 @@ class ReportController extends Controller
     private function validateFilters(Request $request)
     {
         $filters = [];
+
+        if ($request->filled('sale_id')) {
+            $filters['sale_id'] = $request->get('sale_id');
+        }
+
+        if ($request->filled('expense_id')) {
+            $filters['expense_id'] = $request->get('expense_id');
+        }
 
         if ($request->filled('branch') || $request->filled('branch_id')) {
             $filters['branch_id'] = $request->get('branch') ?: $request->get('branch_id');

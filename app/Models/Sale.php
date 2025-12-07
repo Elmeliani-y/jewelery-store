@@ -154,4 +154,28 @@ class Sale extends Model
             $this->net_amount = $this->total_amount - $this->tax_amount;
         }
     }
+
+    /**
+     * Get price per gram.
+     */
+    public function getPricePerGramAttribute()
+    {
+        return $this->weight > 0 ? $this->total_amount / $this->weight : 0;
+    }
+
+    /**
+     * Check if sale price per gram is below minimum threshold from settings.
+     */
+    public function isBelowMinimumPrice()
+    {
+        $settingsPath = storage_path('app/private/settings.json');
+        if (file_exists($settingsPath)) {
+            $settings = json_decode(file_get_contents($settingsPath), true);
+            $minPrice = (float)($settings['min_invoice_gram_avg'] ?? 0);
+        } else {
+            $minPrice = (float)config('sales.min_invoice_gram_avg', 0);
+        }
+
+        return $minPrice > 0 && $this->price_per_gram < $minPrice;
+    }
 }
