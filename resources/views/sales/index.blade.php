@@ -74,8 +74,6 @@
                                     <th scope="col">رقم الفاتورة</th>
                                     <th scope="col">الفرع</th>
                                     <th scope="col">الموظف</th>
-                                    <th scope="col">الفئة</th>
-                                    <th scope="col">العيار</th>
                                     <th scope="col">الوزن (جم)</th>
                                     <th scope="col">المبلغ</th>
                                     <th scope="col">التاريخ</th>
@@ -90,10 +88,6 @@
                                     </td>
                                     <td class="text-muted">{{ $sale->branch->name }}</td>
                                     <td class="text-muted">{{ $sale->employee->name }}</td>
-                                    <td class="text-muted">{{ $sale->category->name }}</td>
-                                    <td>
-                                        <span class="badge bg-warning-subtle text-warning">{{ $sale->caliber->name }}</span>
-                                    </td>
                                     <td class="text-muted">{{ number_format($sale->weight, 2) }}</td>
                                     <td dir="ltr">
                                         <span class="fw-semibold text-dark">{{ number_format($sale->total_amount, 0, ',', '.') }} <small class="text-muted">ريال</small></span>

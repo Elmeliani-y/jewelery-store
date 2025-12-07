@@ -12,6 +12,7 @@ class Sale extends Model
 
     protected $fillable = [
         'invoice_number',
+        'products',
         'branch_id',
         'employee_id',
         'category_id',
@@ -30,6 +31,7 @@ class Sale extends Model
     ];
 
     protected $casts = [
+        'products' => 'array',
         'weight' => 'decimal:3',
         'total_amount' => 'decimal:2',
         'cash_amount' => 'decimal:2',

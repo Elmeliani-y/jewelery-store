@@ -624,6 +624,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        // Auto-select caliber based on category
+        productItem.find('.product-category').on('change', function() {
+            const categoryName = $(this).find(':selected').text().trim();
+            const caliberSelect = productItem.find('.product-caliber');
+            
+            // Remove any existing hidden input
+            productItem.find('.caliber-hidden').remove();
+            
+            // غوايش -> عيار 21
+            if (categoryName === 'غوايش') {
+                caliberSelect.find('option').each(function() {
+                    if ($(this).text().trim().startsWith('21')) {
+                        const caliberValue = $(this).val();
+                        caliberSelect.val(caliberValue).prop('disabled', true).trigger('change');
+                        // Add hidden input to submit the value
+                        caliberSelect.after('<input type="hidden" name="' + caliberSelect.attr('name') + '" class="caliber-hidden" value="' + caliberValue + '">');
+                        return false;
+                    }
+                });
+            }
+            // سبايك -> عيار 24
+            else if (categoryName === 'سبايك') {
+                caliberSelect.find('option').each(function() {
+                    if ($(this).text().trim().startsWith('24')) {
+                        const caliberValue = $(this).val();
+                        caliberSelect.val(caliberValue).prop('disabled', true).trigger('change');
+                        // Add hidden input to submit the value
+                        caliberSelect.after('<input type="hidden" name="' + caliberSelect.attr('name') + '" class="caliber-hidden" value="' + caliberValue + '">');
+                        return false;
+                    }
+                });
+            }
+            // Other categories -> enable caliber selection
+            else {
+                caliberSelect.prop('disabled', false);
+            }
+        });
+        
         // Calculate on input
         productItem.find('.product-caliber, .product-amount, .product-weight').on('change input', function() {
             calculateProductTax(productItem);

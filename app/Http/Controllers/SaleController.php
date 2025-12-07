@@ -114,7 +114,7 @@ class SaleController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'products' => 'required|array|min:1',
             'products.*.category_id' => 'required|exists:categories,id',
-            'products.*.caliber_id' => 'required|exists:calibers,id',
+            'products.*.caliber_id' => 'nullable|exists:calibers,id',
             'products.*.weight' => 'required|numeric|min:0.001',
             'products.*.amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,network,mixed',
@@ -181,45 +181,59 @@ class SaleController extends Controller
         try {
             DB::beginTransaction();
 
-            // Generate invoice number for all products
+            // Generate unique invoice number
             $invoiceNumber = Sale::generateInvoiceNumber();
             
-            $firstSale = null;
+            // Calculate totals across all products
+            $totalWeight = 0;
+            $totalAmount = 0;
+            $totalTax = 0;
+            $totalNet = 0;
             
-            // Create a sale record for each product
+            $productsData = [];
             foreach ($validated['products'] as $product) {
-                // حساب الضريبة والمبلغ الصافي مسبقاً لتجنب خطأ عدم وجود قيمة net_amount
-                $caliber = Caliber::find($product['caliber_id']);
+                $caliberId = $product['caliber_id'] ?? null;
+                $caliber = $caliberId ? Caliber::find($caliberId) : null;
+                $category = Category::find($product['category_id']);
+                
                 $calculatedTax = $caliber ? $caliber->calculateTax($product['amount']) : 0;
                 $calculatedNet = $product['amount'] - $calculatedTax;
-                $saleData = [
-                    'invoice_number' => $invoiceNumber,
-                    'branch_id' => $validated['branch_id'],
-                    'employee_id' => $validated['employee_id'],
+                
+                $totalWeight += $product['weight'];
+                $totalAmount += $product['amount'];
+                $totalTax += $calculatedTax;
+                $totalNet += $calculatedNet;
+                
+                $productsData[] = [
                     'category_id' => $product['category_id'],
-                    'caliber_id' => $product['caliber_id'],
+                    'category_name' => $category?->name ?? '',
+                    'caliber_id' => $caliberId,
+                    'caliber_name' => $caliber?->name ?? '',
                     'weight' => $product['weight'],
-                    'total_amount' => $product['amount'],
-                    'payment_method' => $validated['payment_method'],
-                    'cash_amount' => $validated['cash_amount'] ?? 0,
-                    'network_amount' => $validated['network_amount'] ?? 0,
-                    'network_reference' => $validated['network_reference'] ?? null,
-                    'notes' => $validated['notes'] ?? null,
+                    'amount' => $product['amount'],
                     'tax_amount' => $calculatedTax,
                     'net_amount' => $calculatedNet,
                 ];
-
-                $sale = Sale::create($saleData);
-                
-                // Calculate tax and net amounts
-                $sale->calculateAmounts();
-                $sale->save();
-                
-                // Keep reference to first sale for redirect
-                if (!$firstSale) {
-                    $firstSale = $sale;
-                }
             }
+            
+            // Create single sale record with all products
+            $saleData = [
+                'invoice_number' => $invoiceNumber,
+                'products' => $productsData,
+                'branch_id' => $validated['branch_id'],
+                'employee_id' => $validated['employee_id'],
+                'weight' => $totalWeight,
+                'total_amount' => $totalAmount,
+                'payment_method' => $validated['payment_method'],
+                'cash_amount' => $validated['cash_amount'] ?? 0,
+                'network_amount' => $validated['network_amount'] ?? 0,
+                'network_reference' => $validated['network_reference'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'tax_amount' => $totalTax,
+                'net_amount' => $totalNet,
+            ];
+
+            $sale = Sale::create($saleData);
 
             DB::commit();
 
@@ -230,7 +244,7 @@ class SaleController extends Controller
                     'message' => 'تم تسجيل المبيعة بنجاح',
                     'data' => [
                         'invoice_number' => $invoiceNumber,
-                        'first_sale_id' => $firstSale?->id,
+                        'sale_id' => $sale->id,
                         'branch_id' => $validated['branch_id'],
                         'employee_id' => $validated['employee_id'],
                         'payment_method' => $validated['payment_method'],
@@ -241,7 +255,7 @@ class SaleController extends Controller
                 ]);
             }
 
-            return redirect()->route('sales.show', $firstSale)
+            return redirect()->route('sales.show', $sale)
                            ->with('success', 'تم تسجيل المبيعة بنجاح');
 
         } catch (\Exception $e) {
@@ -268,7 +282,8 @@ class SaleController extends Controller
             abort(403, 'غير مصرح لك بالوصول إلى هذه الفاتورة');
         }
 
-        $sale->load(['branch', 'employee', 'category', 'caliber']);
+        $sale->load(['branch', 'employee']);
+        
         return view('sales.show', compact('sale'));
     }
 
@@ -316,10 +331,11 @@ class SaleController extends Controller
         $updateRules = [
             'branch_id' => 'required|exists:branches,id',
             'employee_id' => 'required|exists:employees,id',
-            'category_id' => 'required|exists:categories,id',
-            'caliber_id' => 'required|exists:calibers,id',
-            'weight' => 'required|numeric|min:0.001',
-            'total_amount' => 'required|numeric|min:0.01',
+            'products' => 'required|array|min:1',
+            'products.*.category_id' => 'required|exists:categories,id',
+            'products.*.caliber_id' => 'nullable|exists:calibers,id',
+            'products.*.weight' => 'required|numeric|min:0.001',
+            'products.*.amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,network,mixed',
             'notes' => 'nullable|string|max:1000',
         ];
@@ -376,11 +392,52 @@ class SaleController extends Controller
         try {
             DB::beginTransaction();
 
-            $sale->update($validated);
+            // Recalculate totals from products
+            $totalWeight = 0;
+            $totalAmount = 0;
+            $totalTax = 0;
+            $totalNet = 0;
+            
+            $productsData = [];
+            foreach ($validated['products'] as $product) {
+                $caliberId = $product['caliber_id'] ?? null;
+                $caliber = $caliberId ? Caliber::find($caliberId) : null;
+                $category = Category::find($product['category_id']);
+                
+                $calculatedTax = $caliber ? $caliber->calculateTax($product['amount']) : 0;
+                $calculatedNet = $product['amount'] - $calculatedTax;
+                
+                $totalWeight += $product['weight'];
+                $totalAmount += $product['amount'];
+                $totalTax += $calculatedTax;
+                $totalNet += $calculatedNet;
+                
+                $productsData[] = [
+                    'category_id' => $product['category_id'],
+                    'category_name' => $category?->name ?? '',
+                    'caliber_id' => $caliberId,
+                    'caliber_name' => $caliber?->name ?? '',
+                    'weight' => $product['weight'],
+                    'amount' => $product['amount'],
+                    'tax_amount' => $calculatedTax,
+                    'net_amount' => $calculatedNet,
+                ];
+            }
 
-            // Recalculate tax and net amounts
-            $sale->calculateAmounts();
-            $sale->save();
+            $sale->update([
+                'products' => $productsData,
+                'branch_id' => $validated['branch_id'],
+                'employee_id' => $validated['employee_id'],
+                'weight' => $totalWeight,
+                'total_amount' => $totalAmount,
+                'tax_amount' => $totalTax,
+                'net_amount' => $totalNet,
+                'payment_method' => $validated['payment_method'],
+                'cash_amount' => $validated['cash_amount'] ?? 0,
+                'network_amount' => $validated['network_amount'] ?? 0,
+                'network_reference' => $validated['network_reference'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+            ]);
 
             DB::commit();
 

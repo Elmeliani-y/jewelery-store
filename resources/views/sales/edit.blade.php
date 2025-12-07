@@ -27,8 +27,9 @@
         <div class="d-flex flex-wrap gap-2">
             <span class="badge badge-meta bg-primary-subtle text-primary"><i class="mdi mdi-storefront-outline me-1"></i>{{ $sale->branch->name }}</span>
             <span class="badge badge-meta bg-info-subtle text-info"><i class="mdi mdi-account-outline me-1"></i>{{ $sale->employee->name }}</span>
-            <span class="badge badge-meta bg-warning-subtle text-warning"><i class="mdi mdi-gold me-1"></i>{{ $sale->caliber->name }}</span>
-            <span class="badge badge-meta bg-secondary-subtle text-secondary"><i class="mdi mdi-shape-outline me-1"></i>{{ $sale->category->name }}</span>
+            @if($sale->products && count($sale->products) > 0)
+            <span class="badge badge-meta bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i>{{ count($sale->products) }} منتج</span>
+            @endif
         </div>
     </div>
 
@@ -42,6 +43,54 @@
     <form method="POST" action="{{ route('sales.update', $sale) }}" novalidate>
         @csrf
         @method('PUT')
+
+    @if($sale->products && count($sale->products) > 0)
+    <div class="card mb-3">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
+            <h6 class="mb-0"><i class="mdi mdi-package-variant-closed me-1"></i> المنتجات ({{ count($sale->products) }})</h6>
+            <span class="badge bg-warning-subtle text-warning">قابل للتعديل</span>
+        </div>
+        <div class="card-body">
+            @foreach($sale->products as $index => $product)
+            <div class="row g-3 mb-3 pb-3 border-bottom">
+                <div class="col-12">
+                    <h6 class="text-muted">منتج {{ $index + 1 }}</h6>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الفئة <span class="text-danger">*</span></label>
+                    <select name="products[{{ $index }}][category_id]" class="form-select" required>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ $product['category_id'] == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">العيار <span class="text-danger">*</span></label>
+                    <select name="products[{{ $index }}][caliber_id]" class="form-select" required>
+                        @foreach($calibers as $caliber)
+                            <option value="{{ $caliber->id }}" {{ $product['caliber_id'] == $caliber->id ? 'selected' : '' }}>
+                                {{ $caliber->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الوزن (جم) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.001" name="products[{{ $index }}][weight]" 
+                           value="{{ $product['weight'] }}" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" name="products[{{ $index }}][amount]" 
+                           value="{{ $product['amount'] }}" class="form-control" required>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
         <div class="row g-3">
             <div class="col-xl-8">
@@ -65,34 +114,6 @@
                                 @endforeach
                             </select>
                             @error('employee_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label required">الفئة</label>
-                            <select name="category_id" class="form-select @error('category_id') is-invalid @enderror">
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id', $sale->category_id)==$category->id?'selected':'' }}>{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label required">العيار</label>
-                            <select name="caliber_id" class="form-select @error('caliber_id') is-invalid @enderror">
-                                @foreach($calibers as $caliber)
-                                    <option value="{{ $caliber->id }}" {{ old('caliber_id', $sale->caliber_id)==$caliber->id?'selected':'' }}>{{ $caliber->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('caliber_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label required">الوزن (جم)</label>
-                            <input type="number" step="0.001" name="weight" value="{{ old('weight', $sale->weight) }}" class="form-control @error('weight') is-invalid @enderror" placeholder="0.000">
-                            @error('weight')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label required">المبلغ الإجمالي</label>
-                            <input type="number" step="0.01" name="total_amount" value="{{ old('total_amount', $sale->total_amount) }}" class="form-control @error('total_amount') is-invalid @enderror" placeholder="0">
-                            @error('total_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12">
                             <label class="form-label">ملاحظات</label>

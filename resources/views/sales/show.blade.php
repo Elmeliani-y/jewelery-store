@@ -33,8 +33,9 @@
         <div class="sale-meta d-flex flex-wrap gap-2">
             <span class="badge bg-primary-subtle text-primary"><i class="mdi mdi-storefront-outline me-1"></i> {{ $sale->branch->name }}</span>
             <span class="badge bg-info-subtle text-info"><i class="mdi mdi-account-outline me-1"></i> {{ $sale->employee->name }}</span>
-            <span class="badge bg-warning-subtle text-warning"><i class="mdi mdi-gold me-1"></i> {{ $sale->caliber->name }}</span>
-            <span class="badge bg-secondary-subtle text-secondary"><i class="mdi mdi-shape-outline me-1"></i> {{ $sale->category->name }}</span>
+            @if($sale->products && count($sale->products) > 0)
+            <span class="badge bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i> {{ count($sale->products) }} منتج</span>
+            @endif
         </div>
     </div>
 
@@ -67,6 +68,51 @@
                 </div>
             </div>
 
+            @if($sale->products && count($sale->products) > 0)
+            <div class="card mb-3">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0"><i class="mdi mdi-package-variant-closed me-1"></i> المنتجات ({{ count($sale->products) }})</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>الفئة</th>
+                                    <th>العيار</th>
+                                    <th>الوزن (جم)</th>
+                                    <th>المبلغ</th>
+                                    <th>الضريبة</th>
+                                    <th>الصافي</th>
+                                </tr>
+                            </thead>
+                            <tbody class="fs-13">
+                                @foreach($sale->products as $index => $product)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $product['category_name'] ?? '' }}</td>
+                                    <td>{{ $product['caliber_name'] ?? '' }}</td>
+                                    <td>{{ number_format($product['weight'], 3) }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['amount'], 0, ',', '.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['tax_amount'], 0, ',', '.') }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['net_amount'], 0, ',', '.') }}</td>
+                                </tr>
+                                @endforeach
+                                <tr class="table-secondary fw-semibold">
+                                    <td colspan="3" class="text-end">المجموع:</td>
+                                    <td>{{ number_format($sale->weight, 3) }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount, 0, ',', '.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->tax_amount, 0, ',', '.') }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->net_amount, 0, ',', '.') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="card mb-3">
                 <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
                     <h6 class="mb-0">المعلومات التفصيلية</h6>
@@ -93,14 +139,18 @@
                                     <td class="text-muted">الموظف</td>
                                     <td>{{ $sale->employee->name }}</td>
                                 </tr>
+                                @if($sale->category)
                                 <tr>
                                     <td class="text-muted">الفئة</td>
                                     <td>{{ $sale->category->name }}</td>
                                 </tr>
+                                @endif
+                                @if($sale->caliber)
                                 <tr>
                                     <td class="text-muted">العيار</td>
                                     <td>{{ $sale->caliber->name }}</td>
                                 </tr>
+                                @endif
                                 <tr>
                                     <td class="text-muted">الوزن (جم)</td>
                                     <td>{{ number_format($sale->weight,2) }}</td>
