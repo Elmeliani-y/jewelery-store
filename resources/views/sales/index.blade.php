@@ -86,7 +86,7 @@
                                 @foreach($sales as $sale)
                                 <tr>
                                     <td>
-                                        <span class="badge bg-primary-subtle text-primary">{{ $sale->invoice_number }}</span>
+                                        <span class="badge bg-primary-subtle text-primary">{{ $sale->id }}</span>
                                     </td>
                                     <td class="text-muted">{{ $sale->branch->name }}</td>
                                     <td class="text-muted">{{ $sale->employee->name }}</td>

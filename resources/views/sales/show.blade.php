@@ -83,7 +83,7 @@
                             <tbody class="fs-13">
                                 <tr>
                                     <td class="text-muted">رقم الفاتورة</td>
-                                    <td class="fw-semibold text-mono" dir="ltr">{{ $sale->invoice_number }}</td>
+                                    <td class="fw-semibold text-mono" dir="ltr">{{ $sale->id }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">الفرع</td>
