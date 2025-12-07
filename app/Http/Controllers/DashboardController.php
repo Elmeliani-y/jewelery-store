@@ -20,27 +20,18 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Restrict dashboard access for branch users
+        // Branch users: restrict to today and their branch. Others: show all data by default.
         if (auth()->check() && auth()->user()->isBranch()) {
-            return redirect()->route('sales.create');
-        }
-        // Determine period
-        $period = $request->get('period', 'monthly'); // daily|weekly|monthly|custom
-        $branchId = $request->get('branch_id');
-
-        // Get date range (default by period)
-        if ($period === 'daily') {
+            $period = 'daily';
             $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
             $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
-        } elseif ($period === 'weekly') {
-            $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
-        } elseif ($period === 'monthly') {
-            $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
-        } else { // custom
-            $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-            $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+            $branchId = auth()->user()->branch_id;
+        } else {
+            // Show all data by default (no date/branch restriction)
+            $period = 'all';
+            $startDate = null;
+            $endDate = null;
+            $branchId = null;
         }
 
         // Key metrics
@@ -102,10 +93,16 @@ class DashboardController extends Controller
      */
     private function getKeyMetrics($startDate, $endDate, $branchId = null)
     {
-        $salesQuery = Sale::notReturned()->inDateRange($startDate, $endDate)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId));
-        $expensesQuery = Expense::inDateRange($startDate, $endDate)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId));
+        $salesQuery = Sale::notReturned();
+        $expensesQuery = Expense::query();
+        if ($startDate && $endDate) {
+            $salesQuery = $salesQuery->inDateRange($startDate, $endDate);
+            $expensesQuery = $expensesQuery->inDateRange($startDate, $endDate);
+        }
+        if ($branchId) {
+            $salesQuery = $salesQuery->where('branch_id', $branchId);
+            $expensesQuery = $expensesQuery->where('branch_id', $branchId);
+        }
 
         return [
             'total_sales' => $salesQuery->sum('total_amount'),
@@ -126,8 +123,6 @@ class DashboardController extends Controller
     {
         // Daily sales chart
         $dailySales = Sale::notReturned()
-            ->inDateRange($startDate, $endDate)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as amount, SUM(weight) as weight')
             ->groupBy('date')
             ->orderBy('date')
@@ -138,16 +133,8 @@ class DashboardController extends Controller
         for ($i = 11; $i >= 0; $i--) {
             $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
             $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
-            
-            $sales = Sale::notReturned()
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-                ->sum('total_amount');
-            
-            $expenses = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])
-                ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-                ->sum('amount');
-            
+            $sales = Sale::notReturned()->whereBetween('created_at', [$monthStart, $monthEnd])->sum('total_amount');
+            $expenses = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])->sum('amount');
             $monthlyRevenue[] = [
                 'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),
                 'sales' => $sales,
@@ -157,8 +144,6 @@ class DashboardController extends Controller
 
         // Sales by caliber
         $salesByCaliber = Sale::notReturned()
-            ->inDateRange($startDate, $endDate)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('caliber')
             ->selectRaw('caliber_id, SUM(total_amount) as amount, SUM(weight) as weight')
             ->groupBy('caliber_id')
@@ -173,8 +158,6 @@ class DashboardController extends Controller
 
         // Sales by category
         $salesByCategory = Sale::notReturned()
-            ->inDateRange($startDate, $endDate)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with('category')
             ->selectRaw('category_id, SUM(total_amount) as amount, COUNT(*) as count')
             ->groupBy('category_id')
@@ -189,7 +172,6 @@ class DashboardController extends Controller
 
         // Sales by branch
         $salesByBranch = Sale::notReturned()
-            ->inDateRange($startDate, $endDate)
             ->with('branch')
             ->selectRaw('branch_id, SUM(total_amount) as amount, COUNT(*) as count')
             ->groupBy('branch_id')
@@ -203,9 +185,7 @@ class DashboardController extends Controller
             });
 
         // Expenses by type
-        $expensesByType = Expense::inDateRange($startDate, $endDate)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-            ->with('expenseType')
+        $expensesByType = Expense::with('expenseType')
             ->selectRaw('expense_type_id, SUM(amount) as amount, COUNT(*) as count')
             ->groupBy('expense_type_id')
             ->get()

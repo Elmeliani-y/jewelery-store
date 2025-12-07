@@ -22,6 +22,7 @@
         <div class="flex-grow-1">
             <h4 class="fs-18 fw-semibold m-0">لوحة التحكم</h4>
         </div>
+        @if(auth()->check() && !auth()->user()->isBranch())
         <form method="GET" action="{{ route('dashboard') }}" class="dash-filter d-flex flex-wrap gap-3 align-items-end">
             <div>
                 <label class="form-label mb-1">الفترة</label>
@@ -56,6 +57,7 @@
                 <a href="{{ route('dashboard.print', request()->query()) }}" class="btn btn-outline-primary btn-sm" target="_blank"><iconify-icon icon="solar:printer-bold" class="me-1"></iconify-icon>تقرير للطباعة</a>
             </div>
         </form>
+        @endif
     </div>
 
     <!-- Start Main Widgets -->
@@ -207,7 +209,7 @@
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
-                        @foreach($topPerformers['branches'] as $branch)
+                        @forelse($topPerformers['branches'] as $branch)
                         <li class="list-group-item">
                             <div class="d-flex">
                                 <div class="flex-grow-1 align-content-center">
@@ -224,7 +226,9 @@
                                 </div>
                             </div>
                         </li>
-                        @endforeach
+                        @empty
+                        <li class="list-group-item text-center text-muted">لا توجد بيانات للفروع</li>
+                        @endforelse
                     </ul>
                 </div>
             </div>
@@ -241,7 +245,7 @@
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
-                        @foreach($topPerformers['employees'] as $sale)
+                        @forelse($topPerformers['employees'] as $sale)
                         <li class="list-group-item">
                             <div class="d-flex">
                                 <div class="flex-grow-1 align-content-center">
@@ -258,7 +262,9 @@
                                 </div>
                             </div>
                         </li>
-                        @endforeach
+                        @empty
+                        <li class="list-group-item text-center text-muted">لا توجد بيانات للموظفين</li>
+                        @endforelse
                     </ul>
                 </div>
             </div>

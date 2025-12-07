@@ -71,7 +71,7 @@ class SaleController extends Controller
     public function create()
     {
         $user = auth()->user();
-        
+
         // If user is a branch user, pre-select their branch
         if ($user->isBranch()) {
             $branches = Branch::where('id', $user->branch_id)->get();
@@ -82,11 +82,25 @@ class SaleController extends Controller
             $employees = collect(); // Empty collection, will be loaded via AJAX
             $selectedBranchId = null;
         }
-        
+
         $categories = Category::active()->get();
         $calibers = Caliber::active()->get();
-        
-        return view('sales.create', compact('branches', 'employees', 'categories', 'calibers', 'selectedBranchId'));
+
+        // Load settings from storage
+        $settingsPath = storage_path('app/private/settings.json');
+        if (file_exists($settingsPath)) {
+            $settings = json_decode(file_get_contents($settingsPath), true);
+        } else {
+            $settings = [
+                'min_invoice_gram_avg' => config('sales.min_invoice_gram_avg', 2.0)
+            ];
+        }
+        // Ensure min_invoice_gram_avg is float
+        if (isset($settings['min_invoice_gram_avg'])) {
+            $settings['min_invoice_gram_avg'] = (float)$settings['min_invoice_gram_avg'];
+        }
+
+        return view('sales.create', compact('branches', 'employees', 'categories', 'calibers', 'selectedBranchId', 'settings'));
     }
 
     /**

@@ -27,6 +27,7 @@ class SettingController extends Controller
             'logo' => 'nullable|image|max:2048',
             'enable_delete_modal' => 'nullable|boolean',
             'show_tax_in_totals' => 'nullable|boolean',
+            'min_invoice_gram_avg' => 'required|numeric|min:0',
         ]);
 
         // Normalize booleans
@@ -64,6 +65,7 @@ class SettingController extends Controller
             'logo_path' => null,
             'enable_delete_modal' => true,
             'show_tax_in_totals' => true,
+            'min_invoice_gram_avg' => config('sales.min_invoice_gram_avg', 2.0),
         ];
     }
 

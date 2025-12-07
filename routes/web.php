@@ -42,7 +42,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
     // Reports (unrestricted as original)
     Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/', [ReportController::class, 'all'])->name('all');
+        Route::get('/index', function() {
+            return redirect()->route('reports.all');
+        })->name('index');
         Route::get('comprehensive', [ReportController::class, 'comprehensive'])->name('comprehensive');
         Route::get('detailed', [ReportController::class, 'detailed'])->name('detailed');
         Route::get('calibers', [ReportController::class, 'calibers'])->name('calibers');

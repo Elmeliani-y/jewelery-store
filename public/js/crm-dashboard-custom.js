@@ -235,6 +235,10 @@ if(document.querySelector("#total_returns")) {
 
 // Top Selling Categories - CHANGED TO HORIZONTAL BAR CHART
 if(typeof categoriesData !== 'undefined' && categoriesData.length > 0) {
+    // Detect light/dark mode
+    function isLightMode() {
+        return document.documentElement.classList.contains('light') || document.body.classList.contains('light') || window.matchMedia('(prefers-color-scheme: light)').matches;
+    }
     var categoriesOptions = {
         series: [{
             name: 'المبيعات',
@@ -262,7 +266,7 @@ if(typeof categoriesData !== 'undefined' && categoriesData.length > 0) {
             offsetX: 30,
             style: {
                 fontSize: '12px',
-                colors: ["#ffffff"]
+                colors: [isLightMode() ? "#000000" : "#ffffff"]
             }
         },
         colors: ["#7168EE", "#46B277", "#963b68", "#01D4FF", "#E77636"],
@@ -298,11 +302,26 @@ if(typeof categoriesData !== 'undefined' && categoriesData.length > 0) {
     };
     if(document.querySelector("#categories_chart")) {
         new ApexCharts(document.querySelector("#categories_chart"), categoriesOptions).render();
+        // Listen for mode change if your app supports toggling
+        if (window.addEventListener) {
+            window.addEventListener('themechange', function() {
+                categoriesOptions.dataLabels.style.colors = [isLightMode() ? "#000000" : "#ffffff"];
+                document.querySelector("#categories_chart").innerHTML = '';
+                new ApexCharts(document.querySelector("#categories_chart"), categoriesOptions).render();
+            });
+        }
     }
 }
 
 // Sales Overtime - KEPT AS AREA CHART
 if(typeof dailySalesData !== 'undefined' && dailySalesData.length > 0) {
+    // Helper to reduce x-axis label overlap
+    function getXAxisLabels(dates) {
+        const maxLabels = 10;
+        if (dates.length <= maxLabels) return dates;
+        const step = Math.ceil(dates.length / maxLabels);
+        return dates.map((d, i) => (i % step === 0 ? d : ''));
+    }
     var salesOvertimeOptions = {
         series: [
             {
@@ -331,14 +350,16 @@ if(typeof dailySalesData !== 'undefined' && dailySalesData.length > 0) {
             }
         },
         xaxis: {
-            categories: dailySalesData.map(item => {
+            categories: getXAxisLabels(dailySalesData.map(item => {
                 const date = new Date(item.date);
                 return date.getDate() + '/' + (date.getMonth() + 1);
-            }),
+            })),
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
-                style: { colors: '#9aa0ac' }
+                style: { colors: '#9aa0ac' },
+                rotate: -45,
+                rotateAlways: false
             }
         },
         yaxis: {

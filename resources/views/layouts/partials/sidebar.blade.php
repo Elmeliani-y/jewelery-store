@@ -92,37 +92,11 @@
 
                 @if(!auth()->user()->isBranch())
                     <li class="menu-title mt-2">التقارير</li>
-
                     <li>
-                        <a href="#sidebarReports" data-bs-toggle="collapse" class="tp-link">
+                        <a href="{{ route('reports.all') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-chart-line"></i></span>
-                            <span> التقارير </span>
+                            <span> جميع التقارير </span>
                         </a>
-                        <div class="collapse" id="sidebarReports">
-                            <ul class="nav-second-level">
-                                <li>
-                                    <a href="{{ route('reports.comprehensive') }}" class="tp-link">التقرير الشامل</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('reports.detailed') }}" class="tp-link">التقرير المفصل</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('reports.calibers') }}" class="tp-link">تقرير العيارات</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('reports.categories') }}" class="tp-link">تقرير الأصناف</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('reports.employees') }}" class="tp-link">تقرير الموظفين</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('reports.net-profit') }}" class="tp-link">صافي الربح</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('reports.by-branch') }}" class="tp-link">تقرير حسب الفروع</a>
-                                </li>
-                            </ul>
-                        </div>
                     </li>
 
                     <li class="menu-title mt-2">الإدارة</li>

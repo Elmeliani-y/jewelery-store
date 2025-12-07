@@ -38,7 +38,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form id="sale-create-form" action="{{ route('sales.store') }}" method="POST" class="arabic-text">
+                    <form id="sale-create-form" action="{{ route('sales.store') }}" method="POST" class="arabic-text" novalidate>
                         @csrf
                         
                         <!-- Branch and Employee Section -->
@@ -53,7 +53,7 @@
                                     <select class="form-select @error('branch_id') is-invalid @enderror" 
                                             id="branch_id" name="branch_id" required 
                                             {{ isset($selectedBranchId) ? 'disabled' : '' }}>
-                                        <option value="">اختر الفرع</option>
+                                        <option value="" disabled selected hidden>اختر الفرع</option>
                                         @foreach($branches as $branch)
                                             <option value="{{ $branch->id }}" 
                                                 {{ (old('branch_id', $selectedBranchId ?? null) == $branch->id) ? 'selected' : '' }}>
@@ -94,10 +94,9 @@
                                 <h5 class="section-header mb-0">
                                     <iconify-icon icon="solar:gem-bold-duotone"></iconify-icon>
                                     المنتجات
+                                    <!-- <span class="badge bg-warning text-dark ms-2">الحد الأدنى لسعر الجرام: {{ (float)($settings['min_invoice_gram_avg'] ?? config('sales.min_invoice_gram_avg', 2.0)) }} ريال</span> -->
                                 </h5>
-                                <!-- زر إضافة منتج تمت إزالته: الآن الإضافة تلقائية -->
                             </div>
-                            
                             <div id="products-container">
                                 <!-- Product Item Template will be inserted here -->
                             </div>
@@ -115,19 +114,17 @@
                                         <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
                                     </button>
                                 </div>
-                                
                                 <div class="row">
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label">الصنف <span class="text-danger">*</span></label>
                                         <select class="form-select product-category" name="products[INDEX][category_id]" required>
-                                            <option value="">اختر الصنف</option>
+                                            <option value="" disabled selected hidden>اختر الصنف</option>
                                             @foreach($categories as $category)
                                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label">العيار <span class="text-danger">*</span></label>
                                         <select class="form-select product-caliber" name="products[INDEX][caliber_id]" required>
                                             <option value="">اختر العيار</option>
@@ -138,20 +135,25 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label">الوزن (جرام) <span class="text-danger">*</span></label>
                                         <input type="number" step="0.001" class="form-control product-weight" 
                                                name="products[INDEX][weight]" placeholder="0.000" required>
                                     </div>
-                                    
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" class="form-control product-amount" 
                                                name="products[INDEX][amount]" placeholder="0.00" required>
                                     </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">سعر الجرام</label>
+                                        <input type="text" class="form-control product-gram-price" name="products[INDEX][gram_price]" placeholder="0.00" disabled>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">عدد القطع <span class="text-danger">*</span></label>
+                                        <input type="number" min="1" step="1" class="form-control product-quantity" name="products[INDEX][quantity]" value="1" required>
+                                    </div>
                                 </div>
-                                
                                 <div class="row mt-2">
                                     <div class="col-12">
                                         <div class="d-flex gap-3 flex-wrap">
@@ -237,16 +239,6 @@
                                                id="network_amount" name="network_amount" value="{{ old('network_amount') }}" 
                                                placeholder="0.00">
                                         @error('network_amount')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    
-                                    <div class="col-md-4 mb-3" id="network_reference_field" style="display: none;">
-                                        <label for="network_reference" class="form-label">رقم المعاملة</label>
-                                        <input type="text" class="form-control @error('network_reference') is-invalid @enderror" 
-                                               id="network_reference" name="network_reference" value="{{ old('network_reference') }}" 
-                                               placeholder="رقم المعاملة">
-                                        @error('network_reference')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -342,6 +334,47 @@
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+        // Helper: update required attributes for all product rows
+        function updateProductRowRequired() {
+            document.querySelectorAll('.product-item').forEach(function(item) {
+                const category = item.querySelector('.product-category');
+                const caliber = item.querySelector('.product-caliber');
+                const weightInput = item.querySelector('.product-weight');
+                const amountInput = item.querySelector('.product-amount');
+                const categoryVal = category?.value;
+                const caliberVal = caliber?.value;
+                const weight = parseFloat(weightInput?.value || 0);
+                const amount = parseFloat(amountInput?.value || 0);
+                if (categoryVal && caliberVal && weight && amount) {
+                    category?.setAttribute('required', 'required');
+                    caliber?.setAttribute('required', 'required');
+                    weightInput?.setAttribute('required', 'required');
+                    amountInput?.setAttribute('required', 'required');
+                } else {
+                    category?.removeAttribute('required');
+                    caliber?.removeAttribute('required');
+                    weightInput?.removeAttribute('required');
+                    amountInput?.removeAttribute('required');
+                }
+            });
+        }
+
+        // Listen for changes in product fields to update required attributes
+        document.getElementById('products-container').addEventListener('input', function(e) {
+            if (e.target.classList.contains('product-category') ||
+                e.target.classList.contains('product-caliber') ||
+                e.target.classList.contains('product-weight') ||
+                e.target.classList.contains('product-amount')) {
+                updateProductRowRequired();
+            }
+        });
+
+        // Also update required attributes after adding/removing products
+        // (Assumes addProduct and remove-product logic exists elsewhere in the script)
+        setTimeout(updateProductRowRequired, 100); // Initial call after DOM ready
+    // Minimum price per gram from settings (passed from backend)
+    const minGramPrice = {{ isset($settings['min_invoice_gram_avg']) ? (float)$settings['min_invoice_gram_avg'] : config('sales.min_invoice_gram_avg', 2.0) }};
+    let lowGramConfirmed = false;
     // AJAX submit for sales create to show modal instead of redirect
     const form = document.getElementById('sale-create-form');
     const errorAlert = document.getElementById('saleErrorAlert');
@@ -374,9 +407,69 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     form.addEventListener('submit', async function(e) {
+        // Always update required attributes before validation
+        updateProductRowRequired();
         e.preventDefault();
         clearErrors();
 
+
+        // Check each product for low gram price, and disable empty rows
+        let lowGramProducts = [];
+        let validProductCount = 0;
+        document.querySelectorAll('.product-item').forEach(function(item, idx) {
+            const category = item.querySelector('.product-category');
+            const caliber = item.querySelector('.product-caliber');
+            const weightInput = item.querySelector('.product-weight');
+            const amountInput = item.querySelector('.product-amount');
+            const categoryVal = category?.value;
+            const caliberVal = caliber?.value;
+            const weight = parseFloat(weightInput?.value || 0);
+            const amount = parseFloat(amountInput?.value || 0);
+            // Only treat as filled if all required fields are present
+            if (categoryVal && caliberVal && weight && amount) {
+                validProductCount++;
+                // Set required attribute for filled row
+                category?.setAttribute('required', 'required');
+                caliber?.setAttribute('required', 'required');
+                weightInput?.setAttribute('required', 'required');
+                amountInput?.setAttribute('required', 'required');
+                if (weight > 0) {
+                    const gramPrice = amount / weight;
+                    if (gramPrice < minGramPrice) {
+                        lowGramProducts.push({idx: idx+1, gramPrice: gramPrice.toFixed(2)});
+                    }
+                }
+            } else {
+                // Remove required attribute for empty row
+                category?.removeAttribute('required');
+                caliber?.removeAttribute('required');
+                weightInput?.removeAttribute('required');
+                amountInput?.removeAttribute('required');
+                // Disable all inputs in this empty product row so it is not submitted
+                item.querySelectorAll('input, select, textarea').forEach(function(input) {
+                    input.disabled = true;
+                });
+            }
+        });
+        // If no valid products, show error and prevent submit
+        if (validProductCount === 0) {
+            errorAlert.textContent = 'يجب إدخال بيانات منتج واحد على الأقل.';
+            errorAlert.classList.remove('d-none');
+            return;
+        }
+
+        if (lowGramProducts.length > 0 && !lowGramConfirmed) {
+            let msg = 'هناك منتج أو أكثر سعر الجرام فيه أقل من الحد الأدنى (' + minGramPrice.toFixed(2) + '):<br>';
+            lowGramProducts.forEach(p => {
+                msg += 'منتج رقم ' + p.idx + ': سعر الجرام = ' + parseFloat(p.gramPrice).toFixed(2) + '<br>';
+            });
+            document.getElementById('lowGramWarningMsg').innerHTML = msg;
+            const modal = new bootstrap.Modal(document.getElementById('lowGramWarningModal'));
+            modal.show();
+            return;
+        }
+
+        // If confirmed or no low gram, proceed with submit
         const url = form.getAttribute('action');
         const csrfToken = form.querySelector('input[name="_token"]').value;
         const formData = new FormData(form);
@@ -418,6 +511,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Low gram modal confirm/cancel
+    window.confirmLowGram = function() {
+        lowGramConfirmed = true;
+        const modal = bootstrap.Modal.getInstance(document.getElementById('lowGramWarningModal'));
+        modal.hide();
+        form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
+    };
+    window.cancelLowGram = function() {
+        lowGramConfirmed = false;
+    };
+
     let productIndex = 0;
     
     // Add first product on page load
@@ -452,14 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#branch_id').change(function() {
         const branchId = $(this).val();
         const employeeSelect = $('#employee_id');
-        
-        // Don't load if employees are already present (branch user case)
-        if (employeeSelect.find('option').length > 1) {
-            return;
-        }
-        
         employeeSelect.html('<option value="">جاري التحميل...</option>');
-        
         if (branchId) {
             $.get('{{ route("api.employees-by-branch") }}', { branch_id: branchId })
                 .done(function(data) {
@@ -528,12 +625,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Calculate on input
-        productItem.find('.product-caliber, .product-amount').on('change input', function() {
+        productItem.find('.product-caliber, .product-amount, .product-weight').on('change input', function() {
             calculateProductTax(productItem);
             calculateTotals();
+            calculateGramPrice(productItem);
         });
-        
-        productItem.find('.product-weight').on('change input', function() {
+        productItem.find('.product-quantity').on('change input', function() {
             calculateTotals();
         });
     }
@@ -549,6 +646,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         productItem.find('.product-tax').text(tax.toFixed(2));
         productItem.find('.product-net').text(net.toFixed(2));
+    }
+
+    // Calculate price per gram for individual product
+    function calculateGramPrice(productItem) {
+        const amount = parseFloat(productItem.find('.product-amount').val()) || 0;
+        const weight = parseFloat(productItem.find('.product-weight').val()) || 0;
+        let gramPrice = 0;
+        if (weight > 0) {
+            gramPrice = amount / weight;
+        }
+        productItem.find('.product-gram-price').val(gramPrice.toFixed(2));
     }
     
     // Calculate totals for all products
@@ -667,7 +775,30 @@ document.addEventListener('DOMContentLoaded', function() {
         $('input[name="payment_method"][value="{{ old('payment_method') }}"]').trigger('change');
     @endif
 });
+// ...existing code...
 </script>
+<!-- Low Gram Warning Modal -->
+<div class="modal fade" id="lowGramWarningModal" tabindex="-1" aria-labelledby="lowGramWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="lowGramWarningModalLabel">
+                    <iconify-icon icon="solar:warning-bold" class="text-warning fs-4 me-2"></iconify-icon>
+                    تنبيه سعر الجرام منخفض
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lowGramWarningMsg" class="mb-2"></div>
+                هل تريد الاستمرار في حفظ الفاتورة بهذه الأسعار؟
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelLowGram()">تعديل البيانات</button>
+                <button type="button" class="btn btn-warning" onclick="confirmLowGram()">موافق (حفظ رغم التحذير)</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Success Modal -->
 <div class="modal fade" id="saleSuccessModal" tabindex="-1" aria-labelledby="saleSuccessModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

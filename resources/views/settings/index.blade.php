@@ -94,6 +94,12 @@
                     </h5>
                     <div class="row">
                         <div class="col-md-12 mb-3">
+                            <label class="form-label" for="min_invoice_gram_avg">الحد الأدنى لمتوسط الجرام للفاتورة <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="min_invoice_gram_avg" name="min_invoice_gram_avg" class="form-control @error('min_invoice_gram_avg') is-invalid @enderror" value="{{ old('min_invoice_gram_avg', $settings['min_invoice_gram_avg'] ?? config('sales.min_invoice_gram_avg')) }}" required>
+                            <small class="text-muted">سيتم تنبيه الموظف إذا كان متوسط الجرام أقل من هذا الرقم عند حفظ الفاتورة.</small>
+                            @error('min_invoice_gram_avg')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="enable_delete_modal" name="enable_delete_modal" value="1" {{ old('enable_delete_modal', ($settings['enable_delete_modal'] ?? true) ? '1' : '') ? 'checked' : '' }}>
                                 <label class="form-check-label" for="enable_delete_modal">استخدام نافذة تأكيد مخصصة عند الحذف</label>

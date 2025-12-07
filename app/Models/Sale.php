@@ -85,7 +85,10 @@ class Sale extends Model
      */
     public function scopeInDateRange($query, $startDate, $endDate)
     {
-        return $query->whereBetween('created_at', [$startDate, $endDate]);
+        if ($startDate && $endDate) {
+            return $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+        return $query;
     }
 
     /**
@@ -127,7 +130,7 @@ class Sale extends Model
     {
         $lastSale = self::orderBy('id', 'desc')->first();
         $number = $lastSale ? $lastSale->id + 1 : 1;
-        return 'INV-' . date('Y') . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+        return (string) $number; // Simple sequential: 1, 2, 3...
     }
 
     /**

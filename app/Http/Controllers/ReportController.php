@@ -18,6 +18,160 @@ use App\Exports\ReportsExport;
 
 class ReportController extends Controller
 {
+    public function all(Request $request)
+    {
+        // Gather all data needed for the all-in-one report page
+        $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
+        $perPage = (int) $request->get('per_page', 10);
+
+        // Sales and Expenses queries with pagination
+        $salesQuery = $this->buildSalesQuery($filters)->with(['branch', 'employee', 'category', 'caliber']);
+        $expensesQuery = $this->buildExpensesQuery($filters)->with(['branch', 'expenseType']);
+
+        $sales = $salesQuery->paginate($perPage, ['*'], 'sales_page');
+        $expenses = $expensesQuery->paginate($perPage, ['*'], 'expenses_page');
+
+        // Summary
+        $summary = [
+            'total_sales' => $sales->sum('total_amount'),
+            'total_net_sales' => $sales->sum('net_amount'),
+            'total_tax' => $sales->sum('tax_amount'),
+            'total_weight' => $sales->sum('weight'),
+            'total_expenses' => $expenses->sum('amount'),
+            'net_profit' => $sales->sum('net_amount') - $expenses->sum('amount'),
+            'sales_count' => $sales->count(),
+            'expenses_count' => $expenses->count(),
+        ];
+
+        // Grouped Data
+        $groupedData = [
+            'by_branch' => $sales->groupBy('branch.name'),
+            'by_employee' => $sales->groupBy('employee.name'),
+            'by_category' => $sales->groupBy('category.name'),
+            'by_caliber' => $sales->groupBy('caliber.name'),
+            'by_date' => $sales->groupBy(function ($sale) { return $sale->created_at->format('Y-m-d'); }),
+        ];
+
+        // Branch Data
+        $branchData = $lists['branches']->map(function($branch) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('branch_id', $branch->id);
+            $expensesQuery = Expense::where('branch_id', $branch->id);
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                $expensesQuery->whereDate('expense_date', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                $expensesQuery->whereDate('expense_date', '<=', $filters['date_to']);
+            }
+            $totalSales = $salesQuery->sum('total_amount');
+            $totalNetSales = $salesQuery->sum('net_amount');
+            $totalWeight = $salesQuery->sum('weight');
+            $salesCount = $salesQuery->count();
+            $totalExpenses = $expensesQuery->sum('amount');
+            $expensesCount = $expensesQuery->count();
+            $netProfit = $totalNetSales - $totalExpenses;
+            return [
+                'branch' => $branch,
+                'total_sales' => $totalSales,
+                'total_net_sales' => $totalNetSales,
+                'total_weight' => $totalWeight,
+                'sales_count' => $salesCount,
+                'total_expenses' => $totalExpenses,
+                'expenses_count' => $expensesCount,
+                'net_profit' => $netProfit,
+            ];
+        });
+
+        // Employees Data - filter by specific employee if selected
+        $employeesCollection = isset($filters['employee_id']) 
+            ? $lists['employees']->where('id', $filters['employee_id']) 
+            : $lists['employees'];
+            
+        $employeesData = $employeesCollection->map(function ($employee) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('employee_id', $employee->id);
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            return [
+                'employee' => $employee,
+                'total_sales' => $salesQuery->sum('total_amount'),
+                'total_weight' => $salesQuery->sum('weight'),
+                'sales_count' => $salesQuery->count(),
+                'net_profit' => $salesQuery->sum('net_amount') - $employee->salary,
+            ];
+        });
+
+        // Categories Data
+        $categoriesData = $lists['categories']->map(function ($category) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('category_id', $category->id);
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            return [
+                'category' => $category,
+                'total_amount' => $salesQuery->sum('total_amount'),
+                'total_weight' => $salesQuery->sum('weight'),
+                'sales_count' => $salesQuery->count(),
+            ];
+        });
+
+        // Calibers Data
+        $calibersData = $lists['calibers']->map(function ($caliber) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('caliber_id', $caliber->id);
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            return [
+                'caliber' => $caliber,
+                'total_amount' => $salesQuery->sum('total_amount'),
+                'total_weight' => $salesQuery->sum('weight'),
+                'total_tax' => $salesQuery->sum('tax_amount'),
+                'net_amount' => $salesQuery->sum('net_amount'),
+                'sales_count' => $salesQuery->count(),
+            ];
+        });
+
+        // Pass all lists for filters
+        $branches = $lists['branches'];
+        $employees = $lists['employees'];
+        $categories = $lists['categories'];
+        $calibers = $lists['calibers'];
+        $expenseTypes = $lists['expenseTypes'];
+
+        $data = compact('summary', 'sales', 'expenses', 'groupedData', 'branchData', 'employeesData', 'categoriesData', 'calibersData', 'branches', 'employees', 'categories', 'calibers', 'expenseTypes');
+
+        if ($request->get('format') === 'pdf') {
+            // Remove logo and company info from $data for PDF
+            $data['settings'] = [
+                'company_name' => '',
+                'address' => '',
+                'phones' => '',
+                'tax_number' => '',
+                'commercial_register' => '',
+                'logo_path' => '',
+            ];
+            return $this->generatePDF('reports.all', $data, 'جميع_التقارير');
+        }
+        if ($request->get('format') === 'excel') {
+            return Excel::download(new ReportsExport($data), 'all_reports.xlsx');
+        }
+        if ($request->get('format') === 'csv') {
+            return Excel::download(new ReportsExport($data), 'all_reports.csv', ExcelFormat::CSV);
+        }
+
+        return view('reports.all', $data);
+    }
     /**
      * Generate report by branch (sales and expenses grouped by branch).
      */
@@ -470,6 +624,10 @@ class ReportController extends Controller
             $query->where('caliber_id', $filters['caliber_id']);
         }
 
+        if (isset($filters['payment_method'])) {
+            $query->where('payment_method', $filters['payment_method']);
+        }
+
         if (isset($filters['date_from'])) {
             $query->whereDate('created_at', '>=', $filters['date_from']);
         }
@@ -514,28 +672,32 @@ class ReportController extends Controller
     {
         $filters = [];
 
-        if ($request->filled('branch_id')) {
-            $filters['branch_id'] = $request->branch_id;
+        if ($request->filled('branch') || $request->filled('branch_id')) {
+            $filters['branch_id'] = $request->get('branch') ?: $request->get('branch_id');
         }
 
-        if ($request->filled('employee_id')) {
-            $filters['employee_id'] = $request->employee_id;
+        if ($request->filled('employee') || $request->filled('employee_id')) {
+            $filters['employee_id'] = $request->get('employee') ?: $request->get('employee_id');
         }
 
-        if ($request->filled('category_id')) {
-            $filters['category_id'] = $request->category_id;
+        if ($request->filled('category') || $request->filled('category_id')) {
+            $filters['category_id'] = $request->get('category') ?: $request->get('category_id');
         }
 
-        if ($request->filled('caliber_id')) {
-            $filters['caliber_id'] = $request->caliber_id;
+        if ($request->filled('caliber') || $request->filled('caliber_id')) {
+            $filters['caliber_id'] = $request->get('caliber') ?: $request->get('caliber_id');
         }
 
-        if ($request->filled('expense_type_id')) {
-            $filters['expense_type_id'] = $request->expense_type_id;
+        if ($request->filled('expense_type') || $request->filled('expense_type_id')) {
+            $filters['expense_type_id'] = $request->get('expense_type') ?: $request->get('expense_type_id');
         }
 
-        $filters['date_from'] = $request->get('date_from', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $filters['date_to'] = $request->get('date_to', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        if ($request->filled('payment_method')) {
+            $filters['payment_method'] = $request->payment_method;
+        }
+
+        $filters['date_from'] = $request->get('from') ?: $request->get('date_from', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $filters['date_to'] = $request->get('to') ?: $request->get('date_to', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
         return $filters;
     }
