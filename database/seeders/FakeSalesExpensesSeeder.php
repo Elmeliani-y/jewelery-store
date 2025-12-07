@@ -29,15 +29,15 @@ class FakeSalesExpensesSeeder extends Seeder
             return;
         }
 
-        // Generate sales for the last 12 months
-        $startDate = Carbon::now()->subMonths(12);
+        // Generate sales for the last 30 days
+        $startDate = Carbon::now()->subDays(30);
         
         $this->command->info('Creating fake sales data...');
         
-        $totalDays = 365;
+        $totalDays = 30;
         for ($i = 0; $i < $totalDays; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $salesPerDay = rand(5, 15);
+            $salesPerDay = rand(2, 5);
             
             for ($j = 0; $j < $salesPerDay; $j++) {
                 $branch = $branches->random();
@@ -87,10 +87,10 @@ class FakeSalesExpensesSeeder extends Seeder
         
         $this->command->info('Creating fake expenses data...');
         
-        // Generate expenses for the last 12 months
+        // Generate expenses for the last 30 days
         for ($i = 0; $i < $totalDays; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $expensesPerDay = rand(2, 5);
+            $expensesPerDay = rand(1, 3);
             
             for ($j = 0; $j < $expensesPerDay; $j++) {
                 $branch = $branches->random();
