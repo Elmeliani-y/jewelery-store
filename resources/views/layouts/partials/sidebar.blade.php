@@ -114,6 +114,11 @@
                                 <li>
                                     <a href="{{ route('employees.index') }}" class="tp-link">الموظفين</a>
                                 </li>
+                                @if(auth()->user()->isAdmin() || auth()->user()->isAccountant())
+                                <li>
+                                    <a href="{{ route('users.index') }}" class="tp-link">المستخدمين</a>
+                                </li>
+                                @endif
                                 <li>
                                     <a href="{{ route('calibers.index') }}" class="tp-link">العيارات والضرائب</a>
                                 </li>

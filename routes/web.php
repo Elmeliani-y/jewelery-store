@@ -9,6 +9,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,6 +68,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Calibers Management
     Route::resource('calibers', CaliberController::class)->except(['show']);
     Route::post('calibers/{caliber}/toggle-status', [CaliberController::class, 'toggleStatus'])->name('calibers.toggle-status');
+
+    // Users Management
+    Route::resource('users', UserController::class);
 
     // System Settings
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
