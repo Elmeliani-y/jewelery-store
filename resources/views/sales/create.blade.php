@@ -377,6 +377,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let lowGramConfirmed = false;
     // AJAX submit for sales create to show modal instead of redirect
     const form = document.getElementById('sale-create-form');
+
+    // Prevent Enter key from submitting form in input fields
+    form.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+            return false;
+        }
+    });
     const errorAlert = document.getElementById('saleErrorAlert');
 
     function clearErrors() {
@@ -434,7 +442,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 weightInput?.setAttribute('required', 'required');
                 amountInput?.setAttribute('required', 'required');
                 if (weight > 0) {
-                    const gramPrice = amount / weight;
+                    // Calculate net price for gram price validation
+                    const caliberElem = caliber?.querySelector('option:checked');
+                    const taxRate = parseFloat(caliberElem?.getAttribute('data-tax-rate') || 0);
+                    const tax = (amount * taxRate) / 100;
+                    const netPrice = amount - tax;
+                    const gramPrice = netPrice / weight;
                     if (gramPrice < minGramPrice) {
                         lowGramProducts.push({idx: idx+1, gramPrice: gramPrice.toFixed(2)});
                     }
@@ -690,9 +703,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateGramPrice(productItem) {
         const amount = parseFloat(productItem.find('.product-amount').val()) || 0;
         const weight = parseFloat(productItem.find('.product-weight').val()) || 0;
+        const caliberSelect = productItem.find('.product-caliber');
+        const taxRate = parseFloat(caliberSelect.find(':selected').data('tax-rate')) || 0;
+        
+        // Calculate net price (without tax)
+        const tax = (amount * taxRate) / 100;
+        const netPrice = amount - tax;
+        
         let gramPrice = 0;
         if (weight > 0) {
-            gramPrice = amount / weight;
+            gramPrice = netPrice / weight;
         }
         productItem.find('.product-gram-price').val(gramPrice.toFixed(2));
     }

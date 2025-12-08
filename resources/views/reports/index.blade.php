@@ -1,21 +1,3 @@
-        <div class="col-md-6 col-xl-4">
-            <div class="card report-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">تقرير حسب الفروع</h6>
-                        <iconify-icon icon="solar:buildings-bold-duotone" class="text-primary fs-4"></iconify-icon>
-                    </div>
-                    <p class="text-muted small mt-2">ملخص مبيعات ومصروفات وصافي ربح لكل فرع</p>
-                    <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.by-branch', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.by-branch', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.by-branch', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.by-branch', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
-                        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 @extends('layouts.vertical', ['title' => 'التقارير'])
 @section('title','التقارير')
 @section('css')
@@ -208,6 +190,23 @@
                         <a class="btn btn-outline-success btn-sm" href="{{ route('reports.net-profit', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
                         <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.net-profit', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card report-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">التقرير المقارن</h6>
+                        <iconify-icon icon="solar:chart-square-bold-duotone" class="text-warning fs-4"></iconify-icon>
+                    </div>
+                    <p class="text-muted small mt-2">مقارنة بالرسوم البيانية بين الفروع والموظفين والفئات</p>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-warning btn-sm text-white" href="{{ route('reports.comparative', request()->query()) }}">
+                            <i class="mdi mdi-chart-line me-1"></i> عرض
+                        </a>
                     </div>
                 </div>
             </div>

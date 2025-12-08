@@ -258,6 +258,226 @@ class ReportController extends Controller
 
         return view('reports.by_branch', $data);
     }
+
+    /**
+     * Generate comparative report with charts and graphs.
+     */
+    public function comparative(Request $request)
+    {
+        $filters = $this->validateFilters($request);
+        $lists = $this->getFilterLists();
+
+        // Two-branch comparison mode
+        $branch1Id = $request->get('branch1');
+        $branch2Id = $request->get('branch2');
+        $compareTwoBranches = $branch1Id && $branch2Id && $branch1Id != $branch2Id;
+
+        // Branches comparison
+        $branchesComparison = $lists['branches']->map(function($branch) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('branch_id', $branch->id);
+            $expensesQuery = Expense::where('branch_id', $branch->id);
+            
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                $expensesQuery->whereDate('expense_date', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                $expensesQuery->whereDate('expense_date', '<=', $filters['date_to']);
+            }
+            
+            $totalSales = $salesQuery->sum('total_amount');
+            $totalExpenses = $expensesQuery->sum('amount');
+            $totalWeight = $salesQuery->sum('weight');
+            $salesCount = $salesQuery->count();
+            
+            return [
+                'id' => $branch->id,
+                'name' => $branch->name,
+                'sales' => $totalSales,
+                'expenses' => $totalExpenses,
+                'profit' => $totalSales - $totalExpenses,
+                'weight' => $totalWeight,
+                'count' => $salesCount,
+            ];
+        });
+
+        // Employees comparison
+        $employeesComparison = $lists['employees']->map(function($employee) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('employee_id', $employee->id);
+            
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            
+            return [
+                'name' => $employee->name,
+                'sales' => $salesQuery->sum('total_amount'),
+                'weight' => $salesQuery->sum('weight'),
+                'count' => $salesQuery->count(),
+            ];
+        })->sortByDesc('sales')->take(10);
+
+        // Categories comparison
+        $categoriesComparison = $lists['categories']->map(function($category) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('category_id', $category->id);
+            
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            
+            return [
+                'name' => $category->name,
+                'sales' => $salesQuery->sum('total_amount'),
+                'weight' => $salesQuery->sum('weight'),
+                'count' => $salesQuery->count(),
+            ];
+        });
+
+        // Calibers comparison
+        $calibersComparison = $lists['calibers']->map(function($caliber) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('caliber_id', $caliber->id);
+            
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            
+            return [
+                'name' => $caliber->name,
+                'sales' => $salesQuery->sum('total_amount'),
+                'weight' => $salesQuery->sum('weight'),
+                'count' => $salesQuery->count(),
+            ];
+        });
+
+        // Payment methods comparison
+        $paymentMethodsComparison = collect([
+            ['name' => 'نقدي', 'method' => 'cash'],
+            ['name' => 'شبكة', 'method' => 'network'],
+            ['name' => 'مختلط', 'method' => 'mixed'],
+        ])->map(function($item) use ($filters) {
+            $salesQuery = Sale::notReturned()->where('payment_method', $item['method']);
+            
+            if (isset($filters['date_from'])) {
+                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+            }
+            if (isset($filters['date_to'])) {
+                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+            }
+            
+            return [
+                'name' => $item['name'],
+                'sales' => $salesQuery->sum('total_amount'),
+                'count' => $salesQuery->count(),
+            ];
+        });
+
+        // Two-branch detailed comparison
+        $twoBranchComparison = null;
+        if ($compareTwoBranches) {
+            $branch1 = $branchesComparison->firstWhere('id', $branch1Id);
+            $branch2 = $branchesComparison->firstWhere('id', $branch2Id);
+            
+            // Get detailed sales data for both branches
+            $branch1Sales = Sale::notReturned()->where('branch_id', $branch1Id)
+                ->when(isset($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
+                ->when(isset($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
+                ->with(['employee', 'category', 'caliber'])
+                ->get();
+            
+            $branch2Sales = Sale::notReturned()->where('branch_id', $branch2Id)
+                ->when(isset($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
+                ->when(isset($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
+                ->with(['employee', 'category', 'caliber'])
+                ->get();
+            
+            // Get expenses for both branches
+            $branch1Expenses = Expense::where('branch_id', $branch1Id)
+                ->when(isset($filters['date_from']), fn($q) => $q->whereDate('expense_date', '>=', $filters['date_from']))
+                ->when(isset($filters['date_to']), fn($q) => $q->whereDate('expense_date', '<=', $filters['date_to']))
+                ->with('expenseType')
+                ->get();
+            
+            $branch2Expenses = Expense::where('branch_id', $branch2Id)
+                ->when(isset($filters['date_from']), fn($q) => $q->whereDate('expense_date', '>=', $filters['date_from']))
+                ->when(isset($filters['date_to']), fn($q) => $q->whereDate('expense_date', '<=', $filters['date_to']))
+                ->with('expenseType')
+                ->get();
+            
+            // Get employees data for both branches
+            $branch1Employees = Employee::where('branch_id', $branch1Id)->get()->map(function($employee) use ($filters, $branch1Id) {
+                $salesQuery = Sale::notReturned()->where('employee_id', $employee->id)->where('branch_id', $branch1Id);
+                if (isset($filters['date_from'])) {
+                    $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                }
+                if (isset($filters['date_to'])) {
+                    $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                }
+                $totalWeight = $salesQuery->sum('weight');
+                $totalSales = $salesQuery->sum('total_amount');
+                $pricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
+                
+                return [
+                    'name' => $employee->name,
+                    'sales' => $totalSales,
+                    'weight' => $totalWeight,
+                    'price_per_gram' => $pricePerGram,
+                    'count' => $salesQuery->count(),
+                ];
+            });
+            
+            $branch2Employees = Employee::where('branch_id', $branch2Id)->get()->map(function($employee) use ($filters, $branch2Id) {
+                $salesQuery = Sale::notReturned()->where('employee_id', $employee->id)->where('branch_id', $branch2Id);
+                if (isset($filters['date_from'])) {
+                    $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                }
+                if (isset($filters['date_to'])) {
+                    $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                }
+                $totalWeight = $salesQuery->sum('weight');
+                $totalSales = $salesQuery->sum('total_amount');
+                $pricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
+                
+                return [
+                    'name' => $employee->name,
+                    'sales' => $totalSales,
+                    'weight' => $totalWeight,
+                    'price_per_gram' => $pricePerGram,
+                    'count' => $salesQuery->count(),
+                ];
+            });
+            
+            $twoBranchComparison = [
+                'branch1' => $branch1,
+                'branch2' => $branch2,
+                'branch1Employees' => $branch1Employees,
+                'branch2Employees' => $branch2Employees,
+            ];
+        }
+
+        $data = [
+            'branchesComparison' => $branchesComparison,
+            'employeesComparison' => $employeesComparison,
+            'categoriesComparison' => $categoriesComparison,
+            'calibersComparison' => $calibersComparison,
+            'paymentMethodsComparison' => $paymentMethodsComparison,
+            'compareTwoBranches' => $compareTwoBranches,
+            'twoBranchComparison' => $twoBranchComparison,
+            'filters' => $filters,
+        ] + $lists;
+
+        return view('reports.comparative', $data);
+    }
+
     /**
      * Display reports index with filtering options.
      */

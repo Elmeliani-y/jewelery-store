@@ -21,6 +21,14 @@
         'filters' => $filters ?? []
     ])
 
+    <div class="alert alert-info alert-dismissible fade show no-print" role="alert">
+        <i class="mdi mdi-chart-line me-2"></i>
+        <strong>جديد!</strong> تفضل بزيارة 
+        <a href="{{ route('reports.comparative', request()->query()) }}" class="alert-link fw-bold">التقرير المقارن</a> 
+        لعرض مقارنات بصرية بين الفروع والموظفين والفئات بالرسوم البيانية
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <form method="GET" action="{{ route('reports.all') }}" class="card mb-4 no-print" id="filterForm">
         <div class="card-body">
             <div class="row g-3">

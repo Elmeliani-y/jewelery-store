@@ -53,6 +53,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('employees', [ReportController::class, 'employees'])->name('employees');
         Route::get('net-profit', [ReportController::class, 'netProfit'])->name('net-profit');
         Route::get('by-branch', [ReportController::class, 'byBranch'])->name('by-branch');
+        Route::get('comparative', [ReportController::class, 'comparative'])->name('comparative');
     });
 
     // Branches Management
