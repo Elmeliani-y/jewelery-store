@@ -142,29 +142,31 @@ class DashboardController extends Controller
             ];
         }
 
-        // Sales by caliber
+        // Sales by caliber - skip sales without caliber (multi-product sales)
         $salesByCaliber = Sale::notReturned()
             ->with('caliber')
+            ->whereNotNull('caliber_id')
             ->selectRaw('caliber_id, SUM(total_amount) as amount, SUM(weight) as weight')
             ->groupBy('caliber_id')
             ->get()
             ->map(function ($item) {
                 return [
-                    'caliber' => $item->caliber->name,
+                    'caliber' => $item->caliber?->name ?? 'غير محدد',
                     'amount' => $item->amount,
                     'weight' => $item->weight,
                 ];
             });
 
-        // Sales by category
+        // Sales by category - skip sales without category (multi-product sales)
         $salesByCategory = Sale::notReturned()
             ->with('category')
+            ->whereNotNull('category_id')
             ->selectRaw('category_id, SUM(total_amount) as amount, COUNT(*) as count')
             ->groupBy('category_id')
             ->get()
             ->map(function ($item) {
                 return [
-                    'category' => $item->category->name,
+                    'category' => $item->category?->name ?? 'غير محدد',
                     'amount' => $item->amount,
                     'count' => $item->count,
                 ];

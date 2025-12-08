@@ -125,20 +125,16 @@ class SaleController extends Controller
         if ($pm === 'cash') {
             $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'nullable|numeric|min:0';
-            $baseRules['network_reference'] = 'nullable|string|max:255';
         } elseif ($pm === 'network') {
             $baseRules['cash_amount'] = 'nullable|numeric|min:0';
             $baseRules['network_amount'] = 'required|numeric|min:0';
-            $baseRules['network_reference'] = 'required|string|max:255';
         } elseif ($pm === 'mixed') {
             $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'required|numeric|min:0';
-            $baseRules['network_reference'] = 'required|string|max:255';
         } else {
             // Fallback to nullable to prevent unwanted errors
             $baseRules['cash_amount'] = 'nullable|numeric|min:0';
             $baseRules['network_amount'] = 'nullable|numeric|min:0';
-            $baseRules['network_reference'] = 'nullable|string|max:255';
         }
 
         $validated = $request->validate($baseRules, [
@@ -250,7 +246,6 @@ class SaleController extends Controller
                         'payment_method' => $validated['payment_method'],
                         'cash_amount' => $validated['cash_amount'] ?? 0,
                         'network_amount' => $validated['network_amount'] ?? 0,
-                        'network_reference' => $validated['network_reference'] ?? null,
                     ],
                 ]);
             }
@@ -344,19 +339,15 @@ class SaleController extends Controller
         if ($pmUpdate === 'cash') {
             $updateRules['cash_amount'] = 'required|numeric|min:0';
             $updateRules['network_amount'] = 'nullable|numeric|min:0';
-            $updateRules['network_reference'] = 'nullable|string|max:255';
         } elseif ($pmUpdate === 'network') {
             $updateRules['cash_amount'] = 'nullable|numeric|min:0';
             $updateRules['network_amount'] = 'required|numeric|min:0';
-            $updateRules['network_reference'] = 'required|string|max:255';
         } elseif ($pmUpdate === 'mixed') {
             $updateRules['cash_amount'] = 'required|numeric|min:0';
             $updateRules['network_amount'] = 'required|numeric|min:0';
-            $updateRules['network_reference'] = 'required|string|max:255';
         } else {
             $updateRules['cash_amount'] = 'nullable|numeric|min:0';
             $updateRules['network_amount'] = 'nullable|numeric|min:0';
-            $updateRules['network_reference'] = 'nullable|string|max:255';
         }
 
         $validated = $request->validate($updateRules, [

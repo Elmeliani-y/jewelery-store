@@ -53,8 +53,12 @@ class ReportController extends Controller
             'by_date' => $sales->groupBy(function ($sale) { return $sale->created_at->format('Y-m-d'); }),
         ];
 
-        // Branch Data
-        $branchData = $lists['branches']->map(function($branch) use ($filters) {
+        // Branch Data - filter by specific branch if selected
+        $branchesCollection = isset($filters['branch_id']) 
+            ? $lists['branches']->where('id', $filters['branch_id']) 
+            : $lists['branches'];
+            
+        $branchData = $branchesCollection->map(function($branch) use ($filters) {
             $salesQuery = Sale::notReturned()->where('branch_id', $branch->id);
             $expensesQuery = Expense::where('branch_id', $branch->id);
             if (isset($filters['date_from'])) {
@@ -84,13 +88,19 @@ class ReportController extends Controller
             ];
         });
 
-        // Employees Data - filter by specific employee if selected
-        $employeesCollection = isset($filters['employee_id']) 
-            ? $lists['employees']->where('id', $filters['employee_id']) 
-            : $lists['employees'];
+        // Employees Data - filter by specific employee if selected, or by branch if branch is selected
+        $employeesCollection = $lists['employees'];
+        if (isset($filters['employee_id'])) {
+            $employeesCollection = $employeesCollection->where('id', $filters['employee_id']);
+        } elseif (isset($filters['branch_id'])) {
+            $employeesCollection = $employeesCollection->where('branch_id', $filters['branch_id']);
+        }
             
         $employeesData = $employeesCollection->map(function ($employee) use ($filters) {
             $salesQuery = Sale::notReturned()->where('employee_id', $employee->id);
+            if (isset($filters['branch_id'])) {
+                $salesQuery->where('branch_id', $filters['branch_id']);
+            }
             if (isset($filters['date_from'])) {
                 $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
             }

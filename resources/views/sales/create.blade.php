@@ -764,19 +764,19 @@ document.addEventListener('DOMContentLoaded', function() {
         $(this).closest('.payment-card').addClass('active');
         
         // Hide all payment fields first
-        $('#cash_amount_field, #network_amount_field, #network_reference_field').hide().removeClass('fade-in');
+        $('#cash_amount_field, #network_amount_field').hide().removeClass('fade-in');
         
         // Show relevant fields based on payment method with animation
         if (method === 'cash') {
             $('#cash_amount_field').show().addClass('fade-in');
             $('#cash_amount').val(total.toFixed(2));
-            $('#network_amount, #network_reference').val('');
+            $('#network_amount').val('');
         } else if (method === 'network') {
-            $('#network_amount_field, #network_reference_field').show().addClass('fade-in');
+            $('#network_amount_field').show().addClass('fade-in');
             $('#network_amount').val(total.toFixed(2));
             $('#cash_amount').val('');
         } else if (method === 'mixed') {
-            $('#cash_amount_field, #network_amount_field, #network_reference_field').show().addClass('fade-in');
+            $('#cash_amount_field, #network_amount_field').show().addClass('fade-in');
             $('#cash_amount, #network_amount').val('');
         }
     });
@@ -787,23 +787,47 @@ document.addEventListener('DOMContentLoaded', function() {
         checkedPayment.closest('.payment-card').addClass('active');
     }
     
-    // Validate mixed payment amounts
-    $('#cash_amount, #network_amount').on('input', function() {
+    // Auto-calculate mixed payment amounts
+    $('#cash_amount').on('input', function() {
         const paymentMethod = $('input[name="payment_method"]:checked').val();
         
         if (paymentMethod === 'mixed') {
-            const cashAmount = parseFloat($('#cash_amount').val()) || 0;
-            const networkAmount = parseFloat($('#network_amount').val()) || 0;
+            const cashAmount = parseFloat($(this).val()) || 0;
             const totalAmount = parseFloat($('#final_total_amount').val()) || 0;
-            const sum = cashAmount + networkAmount;
+            const networkAmount = totalAmount - cashAmount;
             
-            if (Math.abs(sum - totalAmount) > 0.01) {
+            if (networkAmount >= 0) {
+                $('#network_amount').val(networkAmount.toFixed(2));
+                $(this).removeClass('is-invalid');
+                $('#network_amount').removeClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $('#network_amount').siblings('.invalid-feedback').remove();
+            } else {
                 $(this).addClass('is-invalid');
                 $(this).siblings('.invalid-feedback').remove();
-                $(this).after('<div class="invalid-feedback">مجموع المبالغ يجب أن يساوي الإجمالي</div>');
-            } else {
+                $(this).after('<div class="invalid-feedback">المبلغ النقدي أكبر من الإجمالي</div>');
+            }
+        }
+    });
+    
+    $('#network_amount').on('input', function() {
+        const paymentMethod = $('input[name="payment_method"]:checked').val();
+        
+        if (paymentMethod === 'mixed') {
+            const networkAmount = parseFloat($(this).val()) || 0;
+            const totalAmount = parseFloat($('#final_total_amount').val()) || 0;
+            const cashAmount = totalAmount - networkAmount;
+            
+            if (cashAmount >= 0) {
+                $('#cash_amount').val(cashAmount.toFixed(2));
                 $(this).removeClass('is-invalid');
+                $('#cash_amount').removeClass('is-invalid');
                 $(this).siblings('.invalid-feedback').remove();
+                $('#cash_amount').siblings('.invalid-feedback').remove();
+            } else {
+                $(this).addClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $(this).after('<div class="invalid-feedback">مبلغ الشبكة أكبر من الإجمالي</div>');
             }
         }
     });

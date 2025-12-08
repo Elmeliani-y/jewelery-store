@@ -26,7 +26,7 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <label for="branch" class="form-label">الفرع</label>
-                    <select name="branch" id="branch" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <select name="branch" id="branch" class="form-select">
                         <option value="">كل الفروع</option>
                         @foreach($branches as $branch)
                             <option value="{{ $branch->id }}" {{ request('branch') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="employee" class="form-label">الموظف</label>
-                    <select name="employee" id="employee" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                    <select name="employee" id="employee" class="form-select">
                         <option value="">كل الموظفين</option>
                         @foreach($employees as $employee)
                             <option value="{{ $employee->id }}" {{ request('employee') == $employee->id ? 'selected' : '' }}>{{ $employee->name }}</option>
@@ -129,16 +129,23 @@
 			$showBranches = false;
 			$showEmployees = false;
 		}
-		// Check if ANY filter is applied
-		elseif ($hasEmployeeFilter || $hasBranchFilter || $hasCategoryFilter || $hasCaliberFilter || $hasPaymentMethodFilter || $hasExpenseTypeFilter || $hasDateFilter) {
+		// If branch is selected, show ALL tables with branch data
+		elseif ($hasBranchFilter) {
+			$showSales = true;
+			$showExpenses = true;
+			$showBranches = true;
+			$showEmployees = true;
+		}
+		// Check if ANY other filter is applied
+		elseif ($hasEmployeeFilter || $hasCategoryFilter || $hasCaliberFilter || $hasPaymentMethodFilter || $hasExpenseTypeFilter || $hasDateFilter) {
 			// Show sales if no expense-specific filters OR if employee/category/caliber/payment filters are set
 			$showSales = !$hasExpenseTypeFilter || $hasEmployeeFilter || $hasCategoryFilter || $hasCaliberFilter || $hasPaymentMethodFilter;
 			
 			// Show expenses only if expense type filter is selected OR if no sales-specific filters
 			$showExpenses = $hasExpenseTypeFilter || (!$hasEmployeeFilter && !$hasCategoryFilter && !$hasCaliberFilter && !$hasPaymentMethodFilter);
 			
-			// Show branches table if branch filter is selected OR if no specific filters
-			$showBranches = $hasBranchFilter && !$hasEmployeeFilter;
+			// Show branches table if no specific filters
+			$showBranches = false;
 			
 			// Show employees table only if employee filter is selected
 			$showEmployees = $hasEmployeeFilter;
@@ -336,4 +343,56 @@
 		@endif
 	</div>
 </div>
+@endsection
+
+@section('script')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Store all employees initially
+    const allEmployees = @json($employees);
+    const selectedEmployee = '{{ request("employee") }}';
+    
+    // Filter employees by branch
+    $('#branch').change(function() {
+        const branchId = $(this).val();
+        const employeeSelect = $('#employee');
+        
+        // Clear current options
+        employeeSelect.html('<option value="">كل الموظفين</option>');
+        
+        if (branchId) {
+            // Filter employees by selected branch
+            $.get('{{ route("api.employees-by-branch") }}', { branch_id: branchId })
+                .done(function(data) {
+                    data.forEach(function(employee) {
+                        const selected = selectedEmployee == employee.id ? 'selected' : '';
+                        employeeSelect.append(`<option value="${employee.id}" ${selected}>${employee.name}</option>`);
+                    });
+                })
+                .fail(function() {
+                    // If API fails, filter from allEmployees array
+                    allEmployees.forEach(function(employee) {
+                        if (employee.branch_id == branchId) {
+                            const selected = selectedEmployee == employee.id ? 'selected' : '';
+                            employeeSelect.append(`<option value="${employee.id}" ${selected}>${employee.name}</option>`);
+                        }
+                    });
+                });
+        } else {
+            // Show all employees
+            allEmployees.forEach(function(employee) {
+                const selected = selectedEmployee == employee.id ? 'selected' : '';
+                employeeSelect.append(`<option value="${employee.id}" ${selected}>${employee.name}</option>`);
+            });
+        }
+    });
+    
+    // Trigger change if branch is already selected on page load
+    const selectedBranch = $('#branch').val();
+    if (selectedBranch) {
+        $('#branch').trigger('change');
+    }
+});
+</script>
 @endsection

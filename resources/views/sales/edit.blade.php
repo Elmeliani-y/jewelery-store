@@ -146,11 +146,6 @@
                             <input type="number" step="0.01" name="network_amount" value="{{ old('network_amount', $sale->network_amount) }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0">
                             @error('network_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        <div class="col-md-6 payment-group" id="reference_group">
-                            <label class="form-label required">رقم المرجع الشبكي</label>
-                            <input type="text" name="network_reference" value="{{ old('network_reference', $sale->network_reference) }}" class="form-control @error('network_reference') is-invalid @enderror" placeholder="مثال: REF-123456">
-                            @error('network_reference')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
                     </div>
                 </div>
             </div>

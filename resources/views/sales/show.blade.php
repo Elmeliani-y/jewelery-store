@@ -160,6 +160,30 @@
                                     <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount,0,',','.') }} <small class="text-muted">ريال</small></td>
                                 </tr>
                                 <tr>
+                                    <td class="text-muted">طريقة الدفع</td>
+                                    <td>
+                                        @if($sale->payment_method === 'cash')
+                                            <span class="badge bg-success-subtle text-success"><i class="mdi mdi-cash me-1"></i>نقداً</span>
+                                        @elseif($sale->payment_method === 'network')
+                                            <span class="badge bg-info-subtle text-info"><i class="mdi mdi-credit-card-outline me-1"></i>شبكة</span>
+                                        @else
+                                            <span class="badge bg-warning-subtle text-warning"><i class="mdi mdi-swap-horizontal me-1"></i>مختلط</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @if($sale->payment_method === 'cash' || $sale->payment_method === 'mixed')
+                                <tr>
+                                    <td class="text-muted">المبلغ النقدي</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->cash_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                </tr>
+                                @endif
+                                @if($sale->payment_method === 'network' || $sale->payment_method === 'mixed')
+                                <tr>
+                                    <td class="text-muted">مبلغ الشبكة</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                </tr>
+                                @endif
+                                <tr>
                                     <td class="text-muted">تاريخ الإنشاء</td>
                                     <td>{{ $sale->created_at->format('Y-m-d H:i') }}</td>
                                 </tr>
