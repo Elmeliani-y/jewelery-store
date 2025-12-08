@@ -156,6 +156,25 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-12 col-lg-6 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">معدل سعر الجرام</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['price_per_gram'], 2, ',', '.') }} د/جرام</h3>
+                            <div class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-info-subtle text-info fs-13">المبيعات ÷ الوزن</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- End Main Widgets -->
 
@@ -214,13 +233,16 @@
                             <div class="d-flex">
                                 <div class="flex-grow-1 align-content-center">
                                     <div class="row">
-                                        <div class="col-8">
+                                        <div class="col-7">
                                             <h6 class="mb-1 text-dark fs-15">{{ $branch->branch->name }}</h6>
                                             <span class="fs-14 text-muted">{{ $branch->count }} فاتورة</span>
                                         </div>
-                                        <div class="col-4 text-end">
+                                        <div class="col-5 text-end">
                                             <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($branch->amount, 0, ',', '.') }}</h6>
                                             <span class="fs-13 text-muted" dir="ltr">{{ number_format($branch->weight, 1, ',', '.') }} جم</span>
+                                            @if($branch->weight > 0)
+                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($branch->amount / $branch->weight, 2) }} د/جرام</div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -250,13 +272,16 @@
                             <div class="d-flex">
                                 <div class="flex-grow-1 align-content-center">
                                     <div class="row">
-                                        <div class="col-8">
+                                        <div class="col-7">
                                             <h6 class="mb-1 text-dark fs-15">{{ $sale->employee->name }}</h6>
                                             <span class="fs-14 text-muted">{{ $sale->employee->branch->name }}</span>
                                         </div>
-                                        <div class="col-4 text-end">
+                                        <div class="col-5 text-end">
                                             <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($sale->amount, 0, ',', '.') }}</h6>
-                                            <span class="fs-13 text-muted">{{ number_format($sale->count, 0, ',', '.') }} فاتورة</span>
+                                            <span class="fs-13 text-muted" dir="ltr">{{ number_format($sale->weight, 1, ',', '.') }} جم</span>
+                                            @if($sale->weight > 0)
+                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($sale->amount / $sale->weight, 2) }} د/جرام</div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

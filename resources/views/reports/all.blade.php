@@ -96,11 +96,11 @@
                 </div>
                 <div class="col-md-3">
                     <label for="from" class="form-label">من تاريخ</label>
-                    <input type="date" name="from" id="from" value="{{ request('from') }}" class="form-control">
+                    <input type="date" name="from" id="from" value="{{ request('from', date('Y-m-d')) }}" class="form-control">
                 </div>
                 <div class="col-md-3">
                     <label for="to" class="form-label">إلى تاريخ</label>
-                    <input type="date" name="to" id="to" value="{{ request('to') }}" class="form-control">
+                    <input type="date" name="to" id="to" value="{{ request('to', date('Y-m-d')) }}" class="form-control">
                 </div>
                 <div class="col-12 text-end">
                     <button type="submit" class="btn btn-primary">تصفية</button>
@@ -290,6 +290,7 @@
 									<th>عدد المبيعات</th>
 									<th>إجمالي المبيعات</th>
 									<th>إجمالي الوزن</th>
+									<th>سعر الجرام</th>
 									<th>إجمالي المصروفات</th>
 									<th>صافي الربح</th>
 								</tr>
@@ -301,11 +302,18 @@
 									<td>{{ $row['sales_count'] }}</td>
 									<td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
+									<td dir="ltr" class="text-warning fw-bold">
+										@if($row['total_weight'] > 0)
+											{{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
+										@else
+											-
+										@endif
+									</td>
 									<td dir="ltr">{{ number_format($row['total_expenses'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
 								</tr>
 								@empty
-								<tr><td colspan="6" class="text-center text-muted">لا توجد بيانات فروع</td></tr>
+								<tr><td colspan="7" class="text-center text-muted">لا توجد بيانات فروع</td></tr>
 								@endforelse
 							</tbody>
 						</table>
@@ -327,6 +335,7 @@
 									<th>عدد المبيعات</th>
 									<th>إجمالي المبيعات</th>
 									<th>إجمالي الوزن</th>
+									<th>سعر الجرام</th>
 									<th>صافي الربح</th>
 								</tr>
 							</thead>
@@ -337,10 +346,17 @@
 									<td>{{ $row['sales_count'] }}</td>
 									<td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
+									<td dir="ltr" class="text-warning fw-bold">
+										@if($row['total_weight'] > 0)
+											{{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
+										@else
+											-
+										@endif
+									</td>
 									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
 								</tr>
 								@empty
-								<tr><td colspan="5" class="text-center text-muted">لا توجد بيانات موظفين</td></tr>
+								<tr><td colspan="6" class="text-center text-muted">لا توجد بيانات موظفين</td></tr>
 								@endforelse
 							</tbody>
 						</table>

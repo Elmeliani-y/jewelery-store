@@ -27,6 +27,7 @@
                             <th>إجمالي المبيعات</th>
                             <th>صافي المبيعات</th>
                             <th>إجمالي الوزن</th>
+                            <th>سعر الجرام</th>
                             <th>عدد المصروفات</th>
                             <th>إجمالي المصروفات</th>
                             <th>صافي الربح</th>
@@ -40,6 +41,13 @@
                             <td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
                             <td dir="ltr">{{ number_format($row['total_net_sales'],2) }}</td>
                             <td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
+                            <td dir="ltr" class="text-warning fw-bold">
+                                @if($row['total_weight'] > 0)
+                                    {{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>{{ $row['expenses_count'] }}</td>
                             <td dir="ltr">{{ number_format($row['total_expenses'],2) }}</td>
                             <td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>

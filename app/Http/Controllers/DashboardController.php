@@ -125,15 +125,19 @@ class DashboardController extends Controller
             $expensesQuery = $expensesQuery->where('branch_id', $branchId);
         }
 
+        $totalSales = $salesQuery->sum('total_amount');
+        $totalWeight = $salesQuery->sum('weight');
+        
         return [
-            'total_sales' => $salesQuery->sum('total_amount'),
+            'total_sales' => $totalSales,
             'total_net_sales' => $salesQuery->sum('net_amount'),
             'total_tax' => $salesQuery->sum('tax_amount'),
-            'total_weight' => $salesQuery->sum('weight'),
+            'total_weight' => $totalWeight,
             'total_expenses' => $expensesQuery->sum('amount'),
             'sales_count' => $salesQuery->count(),
             'expenses_count' => $expensesQuery->count(),
             'net_profit' => $salesQuery->sum('net_amount') - $expensesQuery->sum('amount'),
+            'price_per_gram' => $totalWeight > 0 ? $totalSales / $totalWeight : 0,
         ];
     }
 

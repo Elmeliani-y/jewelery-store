@@ -18,7 +18,7 @@
     <div class="card"><div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-sm mb-0">
-                <thead><tr><th>الموظف</th><th>الفرع</th><th>عدد المبيعات</th><th>إجمالي المبيعات</th><th>إجمالي الوزن</th><th>صافي الربح (بعد الراتب)</th></tr></thead>
+                <thead><tr><th>الموظف</th><th>الفرع</th><th>عدد المبيعات</th><th>إجمالي المبيعات</th><th>إجمالي الوزن</th><th>سعر الجرام</th><th>صافي الربح (بعد الراتب)</th></tr></thead>
                 <tbody>
                     @forelse($employeesData as $row)
                     <tr>
@@ -27,22 +27,38 @@
                         <td>{{ $row['sales_count'] }}</td>
                         <td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
                         <td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
+                        <td dir="ltr" class="text-warning fw-bold">
+                            @if($row['total_weight'] > 0)
+                                {{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center text-muted">لا توجد بيانات</td></tr>
+                    <tr><td colspan="7" class="text-center text-muted">لا توجد بيانات</td></tr>
                     @endforelse
                 </tbody>
                 @php
                     $employeeRows = $employeesData instanceof \Illuminate\Pagination\LengthAwarePaginator ? collect($employeesData->items()) : $employeesData;
+                    $totalWeight = $employeeRows->sum('total_weight');
+                    $totalSales = $employeeRows->sum('total_sales');
                 @endphp
                 @if($employeeRows->count())
                 <tfoot class="table-light">
                     <tr class="fw-semibold">
                         <td colspan="2">الإجماليات</td>
                         <td>{{ number_format($employeeRows->sum('sales_count')) }}</td>
-                        <td dir="ltr">{{ number_format($employeeRows->sum('total_sales'),2) }}</td>
-                        <td dir="ltr">{{ number_format($employeeRows->sum('total_weight'),2) }}</td>
+                        <td dir="ltr">{{ number_format($totalSales,2) }}</td>
+                        <td dir="ltr">{{ number_format($totalWeight,2) }}</td>
+                        <td dir="ltr" class="text-warning">
+                            @if($totalWeight > 0)
+                                {{ number_format($totalSales / $totalWeight, 2) }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td dir="ltr">{{ number_format($employeeRows->sum('net_profit'),2) }}</td>
                     </tr>
                 </tfoot>
