@@ -442,12 +442,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 weightInput?.setAttribute('required', 'required');
                 amountInput?.setAttribute('required', 'required');
                 if (weight > 0) {
-                    // Calculate net price for gram price validation
+                    // Calculate base price from total for validation
                     const caliberElem = caliber?.querySelector('option:checked');
                     const taxRate = parseFloat(caliberElem?.getAttribute('data-tax-rate') || 0);
-                    const tax = (amount * taxRate) / 100;
-                    const netPrice = amount - tax;
-                    const gramPrice = netPrice / weight;
+                    const baseAmount = amount / (1 + taxRate / 100);
+                    const gramPrice = baseAmount / weight;
                     if (gramPrice < minGramPrice) {
                         lowGramProducts.push({idx: idx+1, gramPrice: gramPrice.toFixed(2)});
                     }
@@ -688,31 +687,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculate tax for individual product
     function calculateProductTax(productItem) {
-        const amount = parseFloat(productItem.find('.product-amount').val()) || 0;
+        const totalPrice = parseFloat(productItem.find('.product-amount').val()) || 0;
         const caliberSelect = productItem.find('.product-caliber');
         const taxRate = parseFloat(caliberSelect.find(':selected').data('tax-rate')) || 0;
         
-        const tax = (amount * taxRate) / 100;
-        const net = amount - tax;
+        // Calculate base price from total: basePrice = totalPrice / (1 + taxRate/100)
+        const baseAmount = totalPrice / (1 + taxRate / 100);
+        const tax = totalPrice - baseAmount;
         
         productItem.find('.product-tax').text(tax.toFixed(2));
-        productItem.find('.product-net').text(net.toFixed(2));
+        productItem.find('.product-net').text(baseAmount.toFixed(2));
     }
 
     // Calculate price per gram for individual product
     function calculateGramPrice(productItem) {
-        const amount = parseFloat(productItem.find('.product-amount').val()) || 0;
+        const totalPrice = parseFloat(productItem.find('.product-amount').val()) || 0;
         const weight = parseFloat(productItem.find('.product-weight').val()) || 0;
         const caliberSelect = productItem.find('.product-caliber');
         const taxRate = parseFloat(caliberSelect.find(':selected').data('tax-rate')) || 0;
         
-        // Calculate net price (without tax)
-        const tax = (amount * taxRate) / 100;
-        const netPrice = amount - tax;
-        
+        // Calculate base price from total, then price per gram = basePrice / weight
+        const baseAmount = totalPrice / (1 + taxRate / 100);
         let gramPrice = 0;
         if (weight > 0) {
-            gramPrice = netPrice / weight;
+            gramPrice = baseAmount / weight;
         }
         productItem.find('.product-gram-price').val(gramPrice.toFixed(2));
     }

@@ -20,18 +20,39 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Branch users: restrict to today and their branch. Others: show all data by default.
+        // Branch users: restrict to today and their branch. Others: allow filtering
         if (auth()->check() && auth()->user()->isBranch()) {
             $period = 'daily';
             $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
             $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
             $branchId = auth()->user()->branch_id;
         } else {
-            // Show all data by default (no date/branch restriction)
-            $period = 'all';
-            $startDate = null;
-            $endDate = null;
-            $branchId = null;
+            // Admin users: use request parameters or default to monthly
+            $period = $request->get('period', 'monthly');
+            $branchId = $request->get('branch_id');
+            
+            // Calculate date range based on period
+            switch ($period) {
+                case 'daily':
+                    $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
+                    $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
+                    break;
+                case 'weekly':
+                    $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
+                    $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
+                    break;
+                case 'monthly':
+                    $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+                    $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+                    break;
+                case 'custom':
+                    $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+                    $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+                    break;
+                default:
+                    $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
+                    $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+            }
         }
 
         // Key metrics

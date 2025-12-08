@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sale;
 use App\Models\Branch;
-use App\Models\Employee;
-use App\Models\Category;
 use App\Models\Caliber;
+use App\Models\Category;
+use App\Models\Employee;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -52,7 +52,7 @@ class SaleController extends Controller
         }
 
         if ($request->filled('invoice_number')) {
-            $query->where('invoice_number', 'like', '%' . $request->invoice_number . '%');
+            $query->where('invoice_number', 'like', '%'.$request->invoice_number.'%');
         }
 
         $sales = $query->paginate(15);
@@ -92,12 +92,12 @@ class SaleController extends Controller
             $settings = json_decode(file_get_contents($settingsPath), true);
         } else {
             $settings = [
-                'min_invoice_gram_avg' => config('sales.min_invoice_gram_avg', 2.0)
+                'min_invoice_gram_avg' => config('sales.min_invoice_gram_avg', 2.0),
             ];
         }
         // Ensure min_invoice_gram_avg is float
         if (isset($settings['min_invoice_gram_avg'])) {
-            $settings['min_invoice_gram_avg'] = (float)$settings['min_invoice_gram_avg'];
+            $settings['min_invoice_gram_avg'] = (float) $settings['min_invoice_gram_avg'];
         }
 
         return view('sales.create', compact('branches', 'employees', 'categories', 'calibers', 'selectedBranchId', 'settings'));
@@ -179,39 +179,42 @@ class SaleController extends Controller
 
             // Generate unique invoice number
             $invoiceNumber = Sale::generateInvoiceNumber();
-            
+
             // Calculate totals across all products
             $totalWeight = 0;
             $totalAmount = 0;
             $totalTax = 0;
             $totalNet = 0;
-            
+
             $productsData = [];
             foreach ($validated['products'] as $product) {
                 $caliberId = $product['caliber_id'] ?? null;
                 $caliber = $caliberId ? Caliber::find($caliberId) : null;
                 $category = Category::find($product['category_id']);
-                
-                $calculatedTax = $caliber ? $caliber->calculateTax($product['amount']) : 0;
-                $calculatedNet = $product['amount'] - $calculatedTax;
-                
+
+                // amount entered is total price (with tax), calculate base price = amount / (1 + tax_rate)
+                $totalPrice = $product['amount'];
+                $taxRate = $caliber ? ($caliber->tax_rate / 100) : 0;
+                $baseAmount = $totalPrice / (1 + $taxRate);
+                $calculatedTax = $totalPrice - $baseAmount;
+
                 $totalWeight += $product['weight'];
-                $totalAmount += $product['amount'];
+                $totalAmount += $totalPrice;
                 $totalTax += $calculatedTax;
-                $totalNet += $calculatedNet;
-                
+                $totalNet += $baseAmount;
+
                 $productsData[] = [
                     'category_id' => $product['category_id'],
                     'category_name' => $category?->name ?? '',
                     'caliber_id' => $caliberId,
                     'caliber_name' => $caliber?->name ?? '',
                     'weight' => $product['weight'],
-                    'amount' => $product['amount'],
+                    'amount' => $totalPrice,
                     'tax_amount' => $calculatedTax,
-                    'net_amount' => $calculatedNet,
+                    'net_amount' => $baseAmount,
                 ];
             }
-            
+
             // Create single sale record with all products
             $saleData = [
                 'invoice_number' => $invoiceNumber,
@@ -251,18 +254,19 @@ class SaleController extends Controller
             }
 
             return redirect()->route('sales.show', $sale)
-                           ->with('success', 'تم تسجيل المبيعة بنجاح');
+                ->with('success', 'تم تسجيل المبيعة بنجاح');
 
         } catch (\Exception $e) {
             DB::rollBack();
             if ($request->ajax() || $request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'حدث خطأ في تسجيل المبيعة: ' . $e->getMessage(),
+                    'message' => 'حدث خطأ في تسجيل المبيعة: '.$e->getMessage(),
                 ], 500);
             }
+
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في تسجيل المبيعة: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في تسجيل المبيعة: '.$e->getMessage());
         }
     }
 
@@ -278,7 +282,7 @@ class SaleController extends Controller
         }
 
         $sale->load(['branch', 'employee']);
-        
+
         return view('sales.show', compact('sale'));
     }
 
@@ -295,14 +299,14 @@ class SaleController extends Controller
 
         if ($sale->is_returned) {
             return redirect()->route('sales.show', $sale)
-                           ->with('error', 'لا يمكن تعديل فاتورة مسترجعة');
+                ->with('error', 'لا يمكن تعديل فاتورة مسترجعة');
         }
 
         $branches = Branch::active()->get();
         $employees = Employee::active()->where('branch_id', $sale->branch_id)->get();
         $categories = Category::active()->get();
         $calibers = Caliber::active()->get();
-        
+
         return view('sales.edit', compact('sale', 'branches', 'employees', 'categories', 'calibers'));
     }
 
@@ -319,7 +323,7 @@ class SaleController extends Controller
 
         if ($sale->is_returned) {
             return redirect()->route('sales.show', $sale)
-                           ->with('error', 'لا يمكن تعديل فاتورة مسترجعة');
+                ->with('error', 'لا يمكن تعديل فاتورة مسترجعة');
         }
 
         // Dynamic rules for update similar to store
@@ -388,30 +392,33 @@ class SaleController extends Controller
             $totalAmount = 0;
             $totalTax = 0;
             $totalNet = 0;
-            
+
             $productsData = [];
             foreach ($validated['products'] as $product) {
                 $caliberId = $product['caliber_id'] ?? null;
                 $caliber = $caliberId ? Caliber::find($caliberId) : null;
                 $category = Category::find($product['category_id']);
-                
-                $calculatedTax = $caliber ? $caliber->calculateTax($product['amount']) : 0;
-                $calculatedNet = $product['amount'] - $calculatedTax;
-                
+
+                // amount entered is total price (with tax), calculate base price = amount / (1 + tax_rate)
+                $totalPrice = $product['amount'];
+                $taxRate = $caliber ? ($caliber->tax_rate / 100) : 0;
+                $baseAmount = $totalPrice / (1 + $taxRate);
+                $calculatedTax = $totalPrice - $baseAmount;
+
                 $totalWeight += $product['weight'];
-                $totalAmount += $product['amount'];
+                $totalAmount += $totalPrice;
                 $totalTax += $calculatedTax;
-                $totalNet += $calculatedNet;
-                
+                $totalNet += $baseAmount;
+
                 $productsData[] = [
                     'category_id' => $product['category_id'],
                     'category_name' => $category?->name ?? '',
                     'caliber_id' => $caliberId,
                     'caliber_name' => $caliber?->name ?? '',
                     'weight' => $product['weight'],
-                    'amount' => $product['amount'],
+                    'amount' => $totalPrice,
                     'tax_amount' => $calculatedTax,
-                    'net_amount' => $calculatedNet,
+                    'net_amount' => $baseAmount,
                 ];
             }
 
@@ -433,12 +440,13 @@ class SaleController extends Controller
             DB::commit();
 
             return redirect()->route('sales.show', $sale)
-                           ->with('success', 'تم تحديث المبيعة بنجاح');
+                ->with('success', 'تم تحديث المبيعة بنجاح');
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في تحديث المبيعة: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في تحديث المبيعة: '.$e->getMessage());
         }
     }
 
@@ -449,17 +457,17 @@ class SaleController extends Controller
     {
         if ($sale->is_returned) {
             return redirect()->route('sales.show', $sale)
-                           ->with('error', 'هذه الفاتورة مسترجعة بالفعل');
+                ->with('error', 'هذه الفاتورة مسترجعة بالفعل');
         }
 
         try {
             $sale->returnSale();
 
             return redirect()->route('sales.show', $sale)
-                           ->with('success', 'تم استرجاع الفاتورة بنجاح');
+                ->with('success', 'تم استرجاع الفاتورة بنجاح');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ في استرجاع الفاتورة: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في استرجاع الفاتورة: '.$e->getMessage());
         }
     }
 
@@ -469,8 +477,8 @@ class SaleController extends Controller
     public function getEmployeesByBranch(Request $request)
     {
         $employees = Employee::active()
-                            ->where('branch_id', $request->branch_id)
-                            ->get(['id', 'name']);
+            ->where('branch_id', $request->branch_id)
+            ->get(['id', 'name']);
 
         return response()->json($employees);
     }
@@ -481,11 +489,11 @@ class SaleController extends Controller
     public function searchByInvoice(Request $request)
     {
         $query = $request->get('q');
-        
+
         $sales = Sale::with(['branch', 'employee', 'category', 'caliber'])
-                    ->where('invoice_number', 'like', '%' . $query . '%')
-                    ->limit(10)
-                    ->get();
+            ->where('invoice_number', 'like', '%'.$query.'%')
+            ->limit(10)
+            ->get();
 
         return response()->json($sales);
     }
@@ -505,10 +513,10 @@ class SaleController extends Controller
             $sale->delete();
 
             return redirect()->route('sales.index')
-                           ->with('success', 'تم حذف المبيعة بنجاح');
+                ->with('success', 'تم حذف المبيعة بنجاح');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ في حذف المبيعة: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في حذف المبيعة: '.$e->getMessage());
         }
     }
 }
