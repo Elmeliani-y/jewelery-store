@@ -120,7 +120,7 @@
                                         <select class="form-select product-category" name="products[INDEX][category_id]" required>
                                             <option value="" disabled selected hidden>اختر الصنف</option>
                                             @foreach($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                <option value="{{ $category->id }}" data-default-caliber="{{ $category->default_caliber_id }}">{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -287,6 +287,26 @@
                         <!-- Hidden input to store total amount for payment -->
                         <input type="hidden" id="final_total_amount" name="total_amount" value="0">
                         <input type="hidden" id="final_total_weight" name="weight" value="0">
+
+                        <!-- Customer Status Section -->
+                        <div class="form-section">
+                            <h5 class="section-header">
+                                <iconify-icon icon="solar:user-check-bold-duotone"></iconify-icon>
+                                حالة الفاتورة
+                            </h5>
+                            <div class="mb-3">
+                                <div class="form-check form-switch form-switch-lg">
+                                    <input class="form-check-input" type="checkbox" id="customer_received" 
+                                           name="customer_received" value="1" 
+                                           {{ old('customer_received') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="customer_received">
+                                        <strong>هل استلم العميل الفاتورة؟</strong>
+                                        <br>
+                                        <small class="text-muted">فعّل هذا الخيار إذا كان العميل قد استلم فاتورته</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Notes Section -->
                         <div class="form-section">
@@ -636,41 +656,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Auto-select caliber based on category
+        // Auto-select caliber based on category default
         productItem.find('.product-category').on('change', function() {
-            const categoryName = $(this).find(':selected').text().trim();
+            const selectedOption = $(this).find(':selected');
+            const defaultCaliberId = selectedOption.data('default-caliber');
             const caliberSelect = productItem.find('.product-caliber');
             
-            // Remove any existing hidden input
-            productItem.find('.caliber-hidden').remove();
-            
-            // غوايش -> عيار 21
-            if (categoryName === 'غوايش') {
-                caliberSelect.find('option').each(function() {
-                    if ($(this).text().trim().startsWith('21')) {
-                        const caliberValue = $(this).val();
-                        caliberSelect.val(caliberValue).prop('disabled', true).trigger('change');
-                        // Add hidden input to submit the value
-                        caliberSelect.after('<input type="hidden" name="' + caliberSelect.attr('name') + '" class="caliber-hidden" value="' + caliberValue + '">');
-                        return false;
-                    }
-                });
-            }
-            // سبايك -> عيار 24
-            else if (categoryName === 'سبايك') {
-                caliberSelect.find('option').each(function() {
-                    if ($(this).text().trim().startsWith('24')) {
-                        const caliberValue = $(this).val();
-                        caliberSelect.val(caliberValue).prop('disabled', true).trigger('change');
-                        // Add hidden input to submit the value
-                        caliberSelect.after('<input type="hidden" name="' + caliberSelect.attr('name') + '" class="caliber-hidden" value="' + caliberValue + '">');
-                        return false;
-                    }
-                });
-            }
-            // Other categories -> enable caliber selection
-            else {
-                caliberSelect.prop('disabled', false);
+            // If category has a default caliber, select it
+            if (defaultCaliberId) {
+                caliberSelect.val(defaultCaliberId).trigger('change');
             }
         });
         

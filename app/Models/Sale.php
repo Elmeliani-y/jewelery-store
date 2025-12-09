@@ -28,6 +28,7 @@ class Sale extends Model
         'notes',
         'is_returned',
         'returned_at',
+        'customer_received',
     ];
 
     protected $casts = [
@@ -40,6 +41,7 @@ class Sale extends Model
         'net_amount' => 'decimal:2',
         'is_returned' => 'boolean',
         'returned_at' => 'datetime',
+        'customer_received' => 'boolean',
     ];
 
     /**

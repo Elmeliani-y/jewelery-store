@@ -28,28 +28,39 @@ class JewelrySystemSeeder extends Seeder
             Caliber::firstOrCreate(['name' => $caliber['name']], $caliber);
         }
 
-        // Create default categories
+        // Get calibers for default assignment
+        $caliber21 = Caliber::where('name', '21')->first();
+        $caliber22 = Caliber::where('name', '22')->first();
+        $caliber24 = Caliber::where('name', '24')->first();
+
+        // Create default categories with their default calibers
         $categories = [
-            'غوايش',
-            'سبايك', 
-            'طقم',
-            'نص طقم',
-            'حلق',
-            'دبلة',
-            'خاتم',
-            'سلسلة',
-            'تعليقة',
-            'كف',
-            'سبحة',
-            'سوارة',
-            'عقد',
-            'خلخال',
-            'تشكيلة',
-            'جنية'
+            ['name' => 'غوايش', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'سبايك', 'default_caliber_id' => $caliber24?->id],
+            ['name' => 'طقم', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'نص طقم', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'حلق', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'دبلة', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'خاتم', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'سلسلة', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'تعليقة', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'كف', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'سبحة', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'سوارة', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'عقد', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'خلخال', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'تشكيلة', 'default_caliber_id' => $caliber21?->id],
+            ['name' => 'جنية', 'default_caliber_id' => $caliber22?->id]
         ];
 
-        foreach ($categories as $categoryName) {
-            Category::firstOrCreate(['name' => $categoryName]);
+        foreach ($categories as $categoryData) {
+            Category::updateOrCreate(
+                ['name' => $categoryData['name']],
+                [
+                    'default_caliber_id' => $categoryData['default_caliber_id'],
+                    'is_active' => true
+                ]
+            );
         }
 
         // Create default expense types

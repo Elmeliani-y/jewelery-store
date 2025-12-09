@@ -39,9 +39,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::post('sales/{sale}/return', [SaleController::class, 'returnSale'])->name('sales.return');
     Route::get('api/employees-by-branch', [SaleController::class, 'getEmployeesByBranch'])->name('api.employees-by-branch');
     Route::get('api/sales/search', [SaleController::class, 'searchByInvoice'])->name('api.sales.search');
+    Route::get('branch/daily-sales', [SaleController::class, 'dailySales'])->name('branch.daily-sales');
 
     // Expenses Management (original single resource)
     Route::resource('expenses', ExpenseController::class);
+    Route::get('branch/daily-expenses', [ExpenseController::class, 'dailyExpenses'])->name('branch.daily-expenses');
 
     // Reports (unrestricted as original)
     Route::prefix('reports')->name('reports.')->group(function () {

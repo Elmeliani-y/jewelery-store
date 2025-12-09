@@ -52,7 +52,18 @@
                     </div>
                     
                     <div class="mb-3">
-                        <small class="text-muted">عدد المبيعات: {{ $category->sales_count }}</small>
+                        <small class="text-muted d-block">عدد المبيعات: {{ $category->sales_count }}</small>
+                        @if($category->defaultCaliber)
+                            <small class="text-muted d-block mt-1">
+                                <iconify-icon icon="solar:medal-star-bold-duotone" class="text-warning"></iconify-icon>
+                                العيار الافتراضي: <strong>{{ $category->defaultCaliber->name }}</strong>
+                            </small>
+                        @else
+                            <small class="text-muted d-block mt-1">
+                                <iconify-icon icon="solar:info-circle-bold-duotone"></iconify-icon>
+                                بدون عيار افتراضي
+                            </small>
+                        @endif
                     </div>
 
                     <div class="d-flex gap-2">

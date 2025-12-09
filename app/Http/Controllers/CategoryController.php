@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Caliber;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -12,7 +13,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::withCount('sales')->orderBy('name')->paginate(15);
+        $categories = Category::with('defaultCaliber')->withCount('sales')->orderBy('name')->paginate(15);
         return view('categories.index', compact('categories'));
     }
 
@@ -21,7 +22,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('categories.create');
+        $calibers = Caliber::active()->orderBy('name')->get();
+        return view('categories.create', compact('calibers'));
     }
 
     /**
@@ -31,6 +33,7 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
+            'default_caliber_id' => 'nullable|exists:calibers,id',
         ], [
             'name.required' => 'اسم الصنف مطلوب.',
             'name.unique' => 'هذا الصنف موجود بالفعل.',
@@ -58,7 +61,8 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('categories.edit', compact('category'));
+        $calibers = Caliber::active()->orderBy('name')->get();
+        return view('categories.edit', compact('category', 'calibers'));
     }
 
     /**
@@ -68,6 +72,7 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'default_caliber_id' => 'nullable|exists:calibers,id',
             'is_active' => 'boolean',
         ], [
             'name.required' => 'اسم الصنف مطلوب.',

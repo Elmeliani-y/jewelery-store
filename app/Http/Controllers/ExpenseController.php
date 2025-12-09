@@ -135,6 +135,12 @@ class ExpenseController extends Controller
                 ]);
             }
 
+            // Redirect branch users to daily expenses, others to expense list
+            if ($user->isBranch()) {
+                return redirect()->route('branch.daily-expenses')
+                    ->with('success', 'تم تسجيل المصروف بنجاح');
+            }
+
             return redirect()->route('expenses.index')
                 ->with('success', 'تم تسجيل المصروف بنجاح');
 
@@ -252,5 +258,41 @@ class ExpenseController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'حدث خطأ في حذف المصروف: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Display daily expenses for the current branch
+     */
+    public function dailyExpenses(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Only branch users can access this page
+        if (!$user->isBranch()) {
+            abort(403, 'هذه الصفحة مخصصة لحسابات الفروع فقط');
+        }
+
+        // Get today's expenses for the user's branch
+        $query = Expense::with(['expenseType'])
+            ->where('branch_id', $user->branch_id)
+            ->whereDate('expense_date', today())
+            ->orderBy('expense_date', 'desc');
+
+        // Get all expense types for filter
+        $expenseTypes = ExpenseType::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        // Apply expense type filter if provided
+        if ($request->filled('expense_type_id')) {
+            $query->where('expense_type_id', $request->expense_type_id);
+        }
+
+        $expenses = $query->get();
+
+        // Calculate totals
+        $totalAmount = $expenses->sum('amount');
+
+        return view('expenses.daily', compact('expenses', 'expenseTypes', 'totalAmount'));
     }
 }

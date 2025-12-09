@@ -65,6 +65,7 @@
                                 <label for="amount" class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
                                 <input type="number" name="amount" id="amount" class="form-control @error('amount') is-invalid @enderror" value="{{ old('amount', $expense->amount) }}" step="0.01" min="0.01" required>
                                 @error('amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <small class="form-text text-muted">يمكنك تعديل المبلغ المصروف</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="expense_date" class="form-label">تاريخ المصروف <span class="text-danger">*</span></label>
@@ -97,9 +98,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">معلومات إضافية</h6>
+                        <p class="mb-1 small text-muted">تاريخ الإنشاء: {{ $expense->created_at->format('Y-m-d H:i') }}</p>
+                        <p class="mb-0 small text-muted">آخر تحديث: {{ $expense->updated_at->format('Y-m-d H:i') }}</p>
+                    </div>
+                </div>
                 <div class="alert alert-info mt-3">
                     <i class="mdi mdi-information-outline me-1"></i>
-                    قم بمراجعة البيانات قبل الحفظ.
+                    يمكنك تعديل جميع الحقول بما في ذلك المبلغ.
                 </div>
             </div>
         </div>

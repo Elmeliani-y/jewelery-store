@@ -83,7 +83,7 @@ class SaleController extends Controller
             $selectedBranchId = null;
         }
 
-        $categories = Category::active()->get();
+        $categories = Category::with('defaultCaliber')->active()->get();
         $calibers = Caliber::active()->get();
 
         // Load settings from storage
@@ -118,6 +118,7 @@ class SaleController extends Controller
             'products.*.weight' => 'required|numeric|min:0.001',
             'products.*.amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,network,mixed',
+            'customer_received' => 'nullable|boolean',
             'notes' => 'nullable|string|max:1000',
         ];
 
@@ -227,6 +228,7 @@ class SaleController extends Controller
                 'cash_amount' => $validated['cash_amount'] ?? 0,
                 'network_amount' => $validated['network_amount'] ?? 0,
                 'network_reference' => $validated['network_reference'] ?? null,
+                'customer_received' => $request->has('customer_received') ? true : false,
                 'notes' => $validated['notes'] ?? null,
                 'tax_amount' => $totalTax,
                 'net_amount' => $totalNet,
@@ -251,6 +253,12 @@ class SaleController extends Controller
                         'network_amount' => $validated['network_amount'] ?? 0,
                     ],
                 ]);
+            }
+
+            // Redirect branch users to daily sales, others to sale details
+            if ($user->isBranch()) {
+                return redirect()->route('branch.daily-sales')
+                    ->with('success', 'تم تسجيل المبيعة بنجاح');
             }
 
             return redirect()->route('sales.show', $sale)
@@ -336,19 +344,20 @@ class SaleController extends Controller
             'products.*.weight' => 'required|numeric|min:0.001',
             'products.*.amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|in:cash,network,mixed',
+            'customer_received' => 'nullable|boolean',
             'notes' => 'nullable|string|max:1000',
         ];
 
         $pmUpdate = $request->input('payment_method');
         if ($pmUpdate === 'cash') {
-            $updateRules['cash_amount'] = 'required|numeric|min:0';
+            $updateRules['cash_amount'] = 'required|numeric|min:0.01';
             $updateRules['network_amount'] = 'nullable|numeric|min:0';
         } elseif ($pmUpdate === 'network') {
             $updateRules['cash_amount'] = 'nullable|numeric|min:0';
-            $updateRules['network_amount'] = 'required|numeric|min:0';
+            $updateRules['network_amount'] = 'required|numeric|min:0.01';
         } elseif ($pmUpdate === 'mixed') {
-            $updateRules['cash_amount'] = 'required|numeric|min:0';
-            $updateRules['network_amount'] = 'required|numeric|min:0';
+            $updateRules['cash_amount'] = 'required|numeric|min:0.01';
+            $updateRules['network_amount'] = 'required|numeric|min:0.01';
         } else {
             $updateRules['cash_amount'] = 'nullable|numeric|min:0';
             $updateRules['network_amount'] = 'nullable|numeric|min:0';
@@ -364,9 +373,11 @@ class SaleController extends Controller
             'total_amount.required' => 'المبلغ الإجمالي مطلوب.',
             'total_amount.numeric' => 'المبلغ الإجمالي يجب أن يكون رقماً.',
             'payment_method.required' => 'طريقة الدفع مطلوبة.',
-            'cash_amount.required_if' => 'المبلغ النقدي مطلوب لطريقة الدفع المختارة.',
+            'cash_amount.required' => 'المبلغ النقدي مطلوب عند اختيار الدفع نقداً أو الدفع المختلط.',
+            'cash_amount.min' => 'المبلغ النقدي يجب أن يكون أكبر من صفر.',
             'cash_amount.numeric' => 'المبلغ النقدي يجب أن يكون رقماً.',
-            'network_amount.required_if' => 'مبلغ الشبكة مطلوب لطريقة الدفع المختارة.',
+            'network_amount.required' => 'مبلغ الشبكة مطلوب عند اختيار الدفع بالشبكة أو الدفع المختلط.',
+            'network_amount.min' => 'مبلغ الشبكة يجب أن يكون أكبر من صفر.',
             'network_amount.numeric' => 'مبلغ الشبكة يجب أن يكون رقماً.',
             'network_reference.required_if' => 'المرجع الشبكي مطلوب لطريقة الدفع المختارة.',
             'network_reference.string' => 'المرجع الشبكي يجب أن يكون نصاً.',
@@ -434,6 +445,7 @@ class SaleController extends Controller
                 'cash_amount' => $validated['cash_amount'] ?? 0,
                 'network_amount' => $validated['network_amount'] ?? 0,
                 'network_reference' => $validated['network_reference'] ?? null,
+                'customer_received' => $request->has('customer_received') ? true : false,
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -518,5 +530,50 @@ class SaleController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'حدث خطأ في حذف المبيعة: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Display daily sales for the current branch
+     */
+    public function dailySales(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Only branch users can access this page
+        if (!$user->isBranch()) {
+            abort(403, 'هذه الصفحة مخصصة لحسابات الفروع فقط');
+        }
+
+        // Get today's sales for the user's branch
+        $query = Sale::with(['employee', 'category', 'caliber'])
+            ->where('branch_id', $user->branch_id)
+            ->whereDate('created_at', today())
+            ->orderBy('created_at', 'desc');
+
+        // Get all employees for filter
+        $employees = Employee::where('branch_id', $user->branch_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        // Apply employee filter if provided
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        // Apply customer received filter if provided
+        if ($request->filled('customer_received')) {
+            $customerReceived = $request->customer_received === 'yes' ? true : false;
+            $query->where('customer_received', $customerReceived);
+        }
+
+        $sales = $query->get();
+
+        // Calculate totals
+        $totalWeight = $sales->sum('weight');
+        $totalAmount = $sales->sum('total_amount');
+        $averageRate = $totalWeight > 0 ? $totalAmount / $totalWeight : 0;
+
+        return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate'));
     }
 }

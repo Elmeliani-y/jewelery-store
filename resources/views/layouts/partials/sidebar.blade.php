@@ -6,7 +6,7 @@
         <div id="sidebar-menu">
 
             <div class="logo-box">
-                <a href="{{ auth()->user()->isBranch() ? route('sales.create') : route('dashboard') }}" class="logo logo-light">
+                <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo logo-light">
                     <span class="logo-sm">
                         <img src="/images/logo-sm.png" alt="" height="22">
                     </span>
@@ -14,7 +14,7 @@
                         <img src="/images/logo-light.png" alt="" height="24">
                     </span>
                 </a>
-                <a href="{{ auth()->user()->isBranch() ? route('sales.create') : route('dashboard') }}" class="logo logo-dark">
+                <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo logo-dark">
                     <span class="logo-sm">
                         <img src="/images/logo-sm.png" alt="" height="22">
                     </span>
@@ -39,6 +39,12 @@
 
                 <li class="menu-title mt-2">إدارة المبيعات</li>
                 @if(auth()->user()->isBranch())
+                    <li>
+                        <a href="{{ route('branch.daily-sales') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-calendar-today"></i></span>
+                            <span> المبيعات اليومية </span>
+                        </a>
+                    </li>
                     <li>
                         <a href="{{ route('sales.create') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
@@ -65,6 +71,12 @@
                 @endif
 
                 @if(auth()->user()->isBranch())
+                    <li>
+                        <a href="{{ route('branch.daily-expenses') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-calendar-month"></i></span>
+                            <span> المصروفات اليومية </span>
+                        </a>
+                    </li>
                     <li>
                         <a href="{{ route('expenses.create') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>

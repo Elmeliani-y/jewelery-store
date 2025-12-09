@@ -167,20 +167,43 @@
                                         @elseif($sale->payment_method === 'network')
                                             <span class="badge bg-info-subtle text-info"><i class="mdi mdi-credit-card-outline me-1"></i>شبكة</span>
                                         @else
-                                            <span class="badge bg-warning-subtle text-warning"><i class="mdi mdi-swap-horizontal me-1"></i>مختلط</span>
+                                            <span class="badge bg-warning-subtle text-warning"><i class="mdi mdi-swap-horizontal me-1"></i>مختلط (نقدي + شبكة)</span>
                                         @endif
                                     </td>
                                 </tr>
-                                @if($sale->payment_method === 'cash' || $sale->payment_method === 'mixed')
+                                @if($sale->payment_method === 'mixed')
+                                <tr class="table-active">
+                                    <td colspan="2" class="text-center fw-semibold">
+                                        <i class="mdi mdi-information-outline me-1"></i>تفاصيل الدفع المختلط
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted ps-4">
+                                        <i class="mdi mdi-cash text-success me-1"></i>المبلغ النقدي
+                                    </td>
+                                    <td class="text-mono fw-semibold text-success" dir="ltr">{{ number_format($sale->cash_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted ps-4">
+                                        <i class="mdi mdi-credit-card-outline text-info me-1"></i>مبلغ الشبكة
+                                    </td>
+                                    <td class="text-mono fw-semibold text-info" dir="ltr">{{ number_format($sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted ps-4">
+                                        <i class="mdi mdi-calculator me-1"></i>المجموع
+                                    </td>
+                                    <td class="text-mono fw-bold" dir="ltr">{{ number_format($sale->cash_amount + $sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                </tr>
+                                @elseif($sale->payment_method === 'cash')
                                 <tr>
                                     <td class="text-muted">المبلغ النقدي</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($sale->cash_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-semibold text-success" dir="ltr">{{ number_format($sale->cash_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
                                 </tr>
-                                @endif
-                                @if($sale->payment_method === 'network' || $sale->payment_method === 'mixed')
+                                @else
                                 <tr>
                                     <td class="text-muted">مبلغ الشبكة</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-semibold text-info" dir="ltr">{{ number_format($sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
                                 </tr>
                                 @endif
                                 <tr>
@@ -190,6 +213,20 @@
                                 <tr>
                                     <td class="text-muted">آخر تحديث</td>
                                     <td>{{ $sale->updated_at->format('Y-m-d H:i') }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">حالة استلام العميل</td>
+                                    <td>
+                                        @if($sale->customer_received)
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="mdi mdi-check-circle me-1"></i>استلم الفاتورة
+                                            </span>
+                                        @else
+                                            <span class="badge bg-warning-subtle text-warning">
+                                                <i class="mdi mdi-clock-outline me-1"></i>لم يستلم بعد
+                                            </span>
+                                        @endif
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

@@ -14,6 +14,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'is_active',
+        'default_caliber_id',
     ];
 
     protected $casts = [
@@ -26,6 +27,14 @@ class Category extends Model
     public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
+    }
+
+    /**
+     * Get the default caliber for the category.
+     */
+    public function defaultCaliber()
+    {
+        return $this->belongsTo(Caliber::class, 'default_caliber_id');
     }
 
     /**
