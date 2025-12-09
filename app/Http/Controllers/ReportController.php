@@ -479,6 +479,167 @@ class ReportController extends Controller
     }
 
     /**
+     * Display speed report with quick metrics.
+     */
+    public function speed(Request $request)
+    {
+        $branchId = $request->get('branch_id');
+        $date = $request->get('date', date('Y-m-d'));
+        
+        // Quick metrics using raw queries for speed
+        $salesQuery = DB::table('sales')
+            ->where('is_returned', false)
+            ->whereDate('created_at', $date);
+        
+        $expensesQuery = DB::table('expenses')
+            ->whereDate('expense_date', $date);
+        
+        if ($branchId) {
+            $salesQuery->where('branch_id', $branchId);
+            $expensesQuery->where('branch_id', $branchId);
+        }
+        
+        // Get aggregated data in single queries
+        $salesStats = $salesQuery->selectRaw('
+            COUNT(*) as count,
+            SUM(total_amount) as total,
+            SUM(net_amount) as net,
+            SUM(tax_amount) as tax,
+            SUM(weight) as weight,
+            SUM(cash_amount) as cash,
+            SUM(network_amount) as network
+        ')->first();
+        
+        $expensesStats = $expensesQuery->selectRaw('
+            COUNT(*) as count,
+            SUM(amount) as total
+        ')->first();
+        
+        // Calculate derived metrics
+        $profit = ($salesStats->net ?? 0) - ($expensesStats->total ?? 0);
+        $pricePerGram = ($salesStats->weight ?? 0) > 0 ? ($salesStats->total ?? 0) / $salesStats->weight : 0;
+        
+        // Top 5 employees (fast query)
+        $topEmployees = DB::table('sales')
+            ->join('employees', 'sales.employee_id', '=', 'employees.id')
+            ->where('sales.is_returned', false)
+            ->whereDate('sales.created_at', $date)
+            ->when($branchId, fn($q) => $q->where('sales.branch_id', $branchId))
+            ->selectRaw('employees.name, COUNT(*) as sales_count, SUM(sales.total_amount) as total_sales, SUM(sales.weight) as total_weight')
+            ->groupBy('employees.id', 'employees.name')
+            ->orderByDesc('total_sales')
+            ->limit(5)
+            ->get();
+        
+        // Sales by caliber (fast query)
+        $salesByCaliber = DB::table('sales')
+            ->join('calibers', 'sales.caliber_id', '=', 'calibers.id')
+            ->where('sales.is_returned', false)
+            ->whereDate('sales.created_at', $date)
+            ->when($branchId, fn($q) => $q->where('sales.branch_id', $branchId))
+            ->selectRaw('calibers.name, COUNT(*) as count, SUM(sales.total_amount) as amount, SUM(sales.weight) as weight')
+            ->groupBy('calibers.id', 'calibers.name')
+            ->orderByDesc('amount')
+            ->get();
+        
+        // Payment methods breakdown
+        $paymentMethods = DB::table('sales')
+            ->where('is_returned', false)
+            ->whereDate('created_at', $date)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(total_amount) as amount')
+            ->groupBy('payment_method')
+            ->get();
+        
+        // Top expense types
+        $topExpenseTypes = DB::table('expenses')
+            ->join('expense_types', 'expenses.expense_type_id', '=', 'expense_types.id')
+            ->whereDate('expenses.expense_date', $date)
+            ->when($branchId, fn($q) => $q->where('expenses.branch_id', $branchId))
+            ->selectRaw('expense_types.name, COUNT(*) as count, SUM(expenses.amount) as total')
+            ->groupBy('expense_types.id', 'expense_types.name')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+        
+        $branches = Branch::active()->get();
+        
+        $metrics = [
+            'sales_count' => $salesStats->count ?? 0,
+            'sales_total' => $salesStats->total ?? 0,
+            'sales_net' => $salesStats->net ?? 0,
+            'sales_tax' => $salesStats->tax ?? 0,
+            'sales_weight' => $salesStats->weight ?? 0,
+            'cash_amount' => $salesStats->cash ?? 0,
+            'network_amount' => $salesStats->network ?? 0,
+            'expenses_count' => $expensesStats->count ?? 0,
+            'expenses_total' => $expensesStats->total ?? 0,
+            'profit' => $profit,
+            'price_per_gram' => $pricePerGram,
+        ];
+        
+        $data = compact(
+            'metrics',
+            'topEmployees',
+            'salesByCaliber',
+            'paymentMethods',
+            'topExpenseTypes',
+            'branches',
+            'branchId',
+            'date'
+        );
+
+        // Handle exports
+        $format = $request->get('format');
+        if ($format === 'pdf') {
+            return $this->generatePDF('reports.speed', $data, 'تقرير_سريع_' . $date);
+        }
+        if ($format === 'csv') {
+            $filename = 'speed_report_' . $date . '.csv';
+            return response()->streamDownload(function () use ($metrics, $topEmployees, $salesByCaliber, $date, $branchId, $branches) {
+                $out = fopen('php://output', 'w');
+                fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM
+                
+                // Header info
+                fputcsv($out, ['التقرير السريع']);
+                fputcsv($out, ['التاريخ', $date]);
+                fputcsv($out, ['الفرع', $branchId ? $branches->find($branchId)?->name : 'جميع الفروع']);
+                fputcsv($out, []);
+                
+                // Metrics
+                fputcsv($out, ['المقاييس الرئيسية']);
+                fputcsv($out, ['المؤشر', 'القيمة']);
+                fputcsv($out, ['إجمالي المبيعات', $metrics['sales_total']]);
+                fputcsv($out, ['عدد الفواتير', $metrics['sales_count']]);
+                fputcsv($out, ['إجمالي المصروفات', $metrics['expenses_total']]);
+                fputcsv($out, ['صافي الربح', $metrics['profit']]);
+                fputcsv($out, ['إجمالي الوزن', $metrics['sales_weight']]);
+                fputcsv($out, ['متوسط سعر الجرام', $metrics['price_per_gram']]);
+                fputcsv($out, []);
+                
+                // Top employees
+                fputcsv($out, ['أفضل 5 موظفين']);
+                fputcsv($out, ['الموظف', 'العدد', 'المبيعات', 'الوزن']);
+                foreach ($topEmployees as $emp) {
+                    fputcsv($out, [$emp->name, $emp->sales_count, $emp->total_sales, $emp->total_weight]);
+                }
+                fputcsv($out, []);
+                
+                // Sales by caliber
+                fputcsv($out, ['المبيعات حسب العيار']);
+                fputcsv($out, ['العيار', 'العدد', 'المبلغ', 'الوزن']);
+                foreach ($salesByCaliber as $caliber) {
+                    fputcsv($out, [$caliber->name, $caliber->count, $caliber->amount, $caliber->weight]);
+                }
+                
+                fclose($out);
+            }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
+        
+        return view('reports.speed', $data);
+    }
+
+    /**
      * Display reports index with filtering options.
      */
     public function index()

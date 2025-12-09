@@ -47,6 +47,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('/index', function() {
             return redirect()->route('reports.all');
         })->name('index');
+        Route::get('speed', [ReportController::class, 'speed'])->name('speed');
         Route::get('comprehensive', [ReportController::class, 'comprehensive'])->name('comprehensive');
         Route::get('detailed', [ReportController::class, 'detailed'])->name('detailed');
         Route::get('calibers', [ReportController::class, 'calibers'])->name('calibers');

@@ -43,15 +43,15 @@ class DashboardController extends Controller
                     break;
                 case 'monthly':
                     $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-                    $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+                    $endDate = Carbon::now()->format('Y-m-d');
                     break;
                 case 'custom':
                     $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-                    $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+                    $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
                     break;
                 default:
                     $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-                    $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
+                    $endDate = Carbon::now()->format('Y-m-d');
             }
         }
 

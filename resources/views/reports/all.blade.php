@@ -21,14 +21,6 @@
         'filters' => $filters ?? []
     ])
 
-    <div class="alert alert-info alert-dismissible fade show no-print" role="alert">
-        <i class="mdi mdi-chart-line me-2"></i>
-        <strong>جديد!</strong> تفضل بزيارة 
-        <a href="{{ route('reports.comparative', request()->query()) }}" class="alert-link fw-bold">التقرير المقارن</a> 
-        لعرض مقارنات بصرية بين الفروع والموظفين والفئات بالرسوم البيانية
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
     <form method="GET" action="{{ route('reports.all') }}" class="card mb-4 no-print" id="filterForm">
         <div class="card-body">
             <div class="row g-3">
@@ -96,7 +88,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="from" class="form-label">من تاريخ</label>
-                    <input type="date" name="from" id="from" value="{{ request('from', date('Y-m-d')) }}" class="form-control">
+                    <input type="date" name="from" id="from" value="{{ request('from', date('Y-m-01')) }}" class="form-control">
                 </div>
                 <div class="col-md-3">
                     <label for="to" class="form-label">إلى تاريخ</label>
@@ -183,22 +175,40 @@
 									<th>الموظف</th>
 									<th>القسم</th>
 									<th>العيار</th>
+									<th>الوزن (جم)</th>
+									<th>سعر الجرام</th>
 									<th>طريقة الدفع</th>
 									<th>المبلغ</th>
-									<th>الوزن</th>
 									<th>الضريبة</th>
 									<th>ملاحظات</th>
 								</tr>
 							</thead>
 							<tbody>
 								@forelse($sales as $sale)
+								@php
+									$pricePerGram = $sale->price_per_gram;
+									$minPrice = config('sales.min_price_per_gram', 3.0);
+									$isLow = $pricePerGram < $minPrice;
+								@endphp
 								<tr>
 									<td><strong>{{ $sale->id }}</strong></td>
 									<td>{{ $sale->created_at->format('Y-m-d') }}</td>
 									<td>{{ $sale->branch->name ?? '-' }}</td>
 									<td>{{ $sale->employee->name ?? '-' }}</td>
 									<td>{{ $sale->category->name ?? '-' }}</td>
-									<td>{{ $sale->caliber->name ?? '-' }}</td>
+									<td>
+										@if($sale->caliber)
+											<span class="badge bg-secondary">{{ $sale->caliber->name }}</span>
+										@else
+											-
+										@endif
+									</td>
+									<td dir="ltr">{{ number_format($sale->weight, 2) }}</td>
+									<td dir="ltr">
+										<span class="{{ $isLow ? 'text-danger fw-bold' : 'text-success' }}" style="{{ $isLow ? 'text-decoration: underline;' : '' }}">
+											{{ number_format($pricePerGram, 2) }}
+										</span>
+									</td>
 									<td>
 										@if($sale->payment_method == 'cash')
 											<span class="badge bg-success">نقدي</span>
@@ -210,21 +220,12 @@
 											-
 										@endif
 									</td>
-									<td dir="ltr">
-										{{ number_format($sale->total_amount, 2) }}
-										@if($sale->isBelowMinimumPrice())
-											<br><small class="text-warning" style="text-decoration: underline;">{{ number_format($sale->price_per_gram, 2) }} ريال/جم</small>
-										@endif
-									</td>
-									<td dir="ltr">
-										{{ number_format($sale->weight, 2) }}
-										<br><small style="text-decoration: underline;">{{ number_format($sale->price_per_gram, 2) }} ريال/جم</small>
-									</td>
+									<td dir="ltr"><strong>{{ number_format($sale->total_amount, 2) }}</strong></td>
 									<td dir="ltr">{{ number_format($sale->tax_amount, 2) }}</td>
-									<td>{{ $sale->notes }}</td>
+									<td>{{ $sale->notes ?: '-' }}</td>
 								</tr>
 								@empty
-								<tr><td colspan="11" class="text-center text-muted">لا توجد بيانات مبيعات</td></tr>
+								<tr><td colspan="12" class="text-center text-muted">لا توجد بيانات مبيعات</td></tr>
 								@endforelse
 							</tbody>
 						</table>
