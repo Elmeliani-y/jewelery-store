@@ -23,8 +23,8 @@ class DashboardController extends Controller
         // Branch users: restrict to today and their branch. Others: allow filtering
         if (auth()->check() && auth()->user()->isBranch()) {
             $period = 'daily';
-            $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
+            $startDate = Carbon::now()->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
             $branchId = auth()->user()->branch_id;
         } else {
             // Admin users: use request parameters or default to monthly
@@ -34,24 +34,24 @@ class DashboardController extends Controller
             // Calculate date range based on period
             switch ($period) {
                 case 'daily':
-                    $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
-                    $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
+                    $startDate = Carbon::now()->startOfDay();
+                    $endDate = Carbon::now()->endOfDay();
                     break;
                 case 'weekly':
-                    $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
-                    $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
+                    $startDate = Carbon::now()->startOfWeek();
+                    $endDate = Carbon::now()->endOfWeek();
                     break;
                 case 'monthly':
-                    $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-                    $endDate = Carbon::now()->format('Y-m-d');
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfDay();
                     break;
                 case 'custom':
-                    $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-                    $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
+                    $startDate = Carbon::parse($request->get('start_date', Carbon::now()->startOfMonth()))->startOfDay();
+                    $endDate = Carbon::parse($request->get('end_date', Carbon::now()))->endOfDay();
                     break;
                 default:
-                    $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-                    $endDate = Carbon::now()->format('Y-m-d');
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfDay();
             }
         }
 
@@ -69,11 +69,13 @@ class DashboardController extends Controller
         // CSV export of key metrics
         if ($request->get('format') === 'csv') {
             $filename = 'dashboard_metrics_' . date('Y-m-d') . '.csv';
-            return response()->streamDownload(function () use ($metrics, $period, $startDate, $endDate, $branchId) {
+            $startDateFormatted = $startDate->format('Y-m-d');
+            $endDateFormatted = $endDate->format('Y-m-d');
+            return response()->streamDownload(function () use ($metrics, $period, $startDateFormatted, $endDateFormatted, $branchId) {
                 $out = fopen('php://output', 'w');
                 // UTF-8 BOM for Excel
                 fwrite($out, "\xEF\xBB\xBF");
-                fputcsv($out, ['الفترة', $period === 'custom' ? ($startDate.' - '.$endDate) : $period]);
+                fputcsv($out, ['الفترة', $period === 'custom' ? ($startDateFormatted.' - '.$endDateFormatted) : $period]);
                 fputcsv($out, ['الفرع', $branchId ?: 'كل الفروع']);
                 fputcsv($out, []);
                 fputcsv($out, ['المؤشر', 'القيمة']);
@@ -101,12 +103,13 @@ class DashboardController extends Controller
             'metrics',
             'chartsData', 
             'topPerformers',
-            'startDate',
-            'endDate',
             'period',
             'branchId',
             'branches'
-        ));
+        ))->with([
+            'startDate' => $startDate->format('Y-m-d'),
+            'endDate' => $endDate->format('Y-m-d'),
+        ]);
     }
 
     /**
@@ -205,7 +208,7 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'branch' => $item->branch->name,
+                    'branch' => $item->branch?->name ?? 'غير محدد',
                     'amount' => $item->amount,
                     'count' => $item->count,
                 ];
@@ -218,7 +221,7 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'type' => $item->expenseType->name,
+                    'type' => $item->expenseType?->name ?? 'غير محدد',
                     'amount' => $item->amount,
                     'count' => $item->count,
                 ];
