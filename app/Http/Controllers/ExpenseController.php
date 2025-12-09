@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Expense;
 use App\Models\Branch;
+use App\Models\Expense;
 use App\Models\ExpenseType;
 use Illuminate\Http\Request;
 
@@ -41,7 +41,7 @@ class ExpenseController extends Controller
         }
 
         if ($request->filled('description')) {
-            $query->where('description', 'like', '%' . $request->description . '%');
+            $query->where('description', 'like', '%'.$request->description.'%');
         }
 
         $expenses = $query->paginate(15);
@@ -58,7 +58,7 @@ class ExpenseController extends Controller
     public function create()
     {
         $user = auth()->user();
-        
+
         // For branch users, pre-select their branch
         if ($user->isBranch()) {
             $branches = Branch::where('id', $user->branch_id)->get();
@@ -67,9 +67,9 @@ class ExpenseController extends Controller
             $branches = Branch::active()->get();
             $selectedBranchId = null;
         }
-        
+
         $expenseTypes = ExpenseType::active()->get();
-        
+
         return view('expenses.create', compact('branches', 'expenseTypes', 'selectedBranchId'));
     }
 
@@ -136,17 +136,18 @@ class ExpenseController extends Controller
             }
 
             return redirect()->route('expenses.index')
-                           ->with('success', 'تم تسجيل المصروف بنجاح');
+                ->with('success', 'تم تسجيل المصروف بنجاح');
 
         } catch (\Exception $e) {
             if ($request->ajax() || $request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'حدث خطأ في تسجيل المصروف: ' . $e->getMessage(),
+                    'message' => 'حدث خطأ في تسجيل المصروف: '.$e->getMessage(),
                 ], 500);
             }
+
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في تسجيل المصروف: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في تسجيل المصروف: '.$e->getMessage());
         }
     }
 
@@ -162,6 +163,7 @@ class ExpenseController extends Controller
         }
 
         $expense->load(['branch', 'expenseType']);
+
         return view('expenses.show', compact('expense'));
     }
 
@@ -178,7 +180,7 @@ class ExpenseController extends Controller
 
         $branches = Branch::active()->get();
         $expenseTypes = ExpenseType::active()->get();
-        
+
         return view('expenses.edit', compact('expense', 'branches', 'expenseTypes'));
     }
 
@@ -228,11 +230,11 @@ class ExpenseController extends Controller
             $expense->update($validated);
 
             return redirect()->route('expenses.show', $expense)
-                           ->with('success', 'تم تحديث المصروف بنجاح');
+                ->with('success', 'تم تحديث المصروف بنجاح');
 
         } catch (\Exception $e) {
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في تحديث المصروف: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في تحديث المصروف: '.$e->getMessage());
         }
     }
 
@@ -245,10 +247,10 @@ class ExpenseController extends Controller
             $expense->delete();
 
             return redirect()->route('expenses.index')
-                           ->with('success', 'تم حذف المصروف بنجاح');
+                ->with('success', 'تم حذف المصروف بنجاح');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ في حذف المصروف: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في حذف المصروف: '.$e->getMessage());
         }
     }
 }

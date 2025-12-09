@@ -123,6 +123,12 @@
                                     <a href="{{ route('calibers.index') }}" class="tp-link">العيارات والضرائب</a>
                                 </li>
                                 <li>
+                                    <a href="{{ route('categories.index') }}" class="tp-link">الأصناف</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('expense-types.index') }}" class="tp-link">أنواع المصروفات</a>
+                                </li>
+                                <li>
                                     <a href="{{ route('settings.index') }}" class="tp-link">إعدادات النظام</a>
                                 </li>
                             </ul>

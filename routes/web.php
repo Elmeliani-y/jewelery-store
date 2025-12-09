@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CaliberController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SaleController;
@@ -69,6 +71,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Calibers Management
     Route::resource('calibers', CaliberController::class)->except(['show']);
     Route::post('calibers/{caliber}/toggle-status', [CaliberController::class, 'toggleStatus'])->name('calibers.toggle-status');
+
+    // Categories Management
+    Route::resource('categories', CategoryController::class)->except(['show']);
+
+    // Expense Types Management
+    Route::resource('expense-types', ExpenseTypeController::class)->except(['show']);
 
     // Users Management
     Route::resource('users', UserController::class);

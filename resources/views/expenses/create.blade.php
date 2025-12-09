@@ -84,6 +84,7 @@
                                     class="form-select @error('expense_type_id') is-invalid @enderror"
                                     required>
                                 <option value="">اختر نوع المصروف</option>
+                                <option value="add_new" style="color: #0d6efd; font-weight: bold;">+ إضافة نوع جديد</option>
                                 @foreach($expenseTypes as $type)
                                     <option value="{{ $type->id }}" @if(old('expense_type_id') == $type->id) selected @endif>
                                         {{ $type->name }}
@@ -315,6 +316,44 @@
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
                 dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+        });
+
+        // Handle expense type dropdown change for "add new"
+        const expenseTypeSelect = document.getElementById('expense_type_id');
+        expenseTypeSelect?.addEventListener('change', function() {
+            if (this.value === 'add_new') {
+                const typeName = prompt('أدخل اسم نوع المصروف الجديد:');
+                if (typeName && typeName.trim()) {
+                    // Send AJAX request to create expense type
+                    fetch('{{ route("expense-types.store") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            name: typeName.trim(),
+                            is_active: true
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.id) {
+                            // Add new option to select
+                            const newOption = new Option(data.name, data.id, true, true);
+                            this.add(newOption, this.options[2]); // Add after "add_new" option
+                            this.value = data.id;
+                            alert('تم إضافة نوع المصروف بنجاح');
+                        }
+                    })
+                    .catch(error => {
+                        alert('حدث خطأ في إضافة نوع المصروف');
+                        this.value = '';
+                    });
+                } else {
+                    this.value = '';
+                }
             }
         });
     })();

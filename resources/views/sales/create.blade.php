@@ -117,12 +117,15 @@
                                 <div class="row">
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">الصنف <span class="text-danger">*</span></label>
-                                        <select class="form-select product-category" name="products[INDEX][category_id]" required>
-                                            <option value="" disabled selected hidden>اختر الصنف</option>
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="input-group">
+                                            <select class="form-select product-category" name="products[INDEX][category_id]" required>
+                                                <option value="" disabled selected hidden>اختر الصنف</option>
+                                                <option value="add_new" style="color: #0d6efd; font-weight: bold;">+ إضافة صنف جديد</option>
+                                                @foreach($categories as $category)
+                                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">العيار <span class="text-danger">*</span></label>
@@ -910,6 +913,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 productsContainer.innerHTML = '';
                 // Reset counters in current scope
                 window.location.reload(); // simplest way to reset dynamic state
+            }
+        });
+
+        // Handle category dropdown change for "add new"
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('product-category')) {
+                if (e.target.value === 'add_new') {
+                    const categoryName = prompt('أدخل اسم الصنف الجديد:');
+                    if (categoryName && categoryName.trim()) {
+                        // Send AJAX request to create category
+                        fetch('{{ route("categories.store") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                name: categoryName.trim(),
+                                is_active: true
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.id) {
+                                // Add new option to all category selects
+                                document.querySelectorAll('.product-category').forEach(select => {
+                                    const newOption = new Option(data.name, data.id, true, true);
+                                    select.add(newOption, select.options[2]); // Add after "add_new" option
+                                });
+                                e.target.value = data.id;
+                                alert('تم إضافة الصنف بنجاح');
+                            }
+                        })
+                        .catch(error => {
+                            alert('حدث خطأ في إضافة الصنف');
+                            e.target.value = '';
+                        });
+                    } else {
+                        e.target.value = '';
+                    }
+                }
             }
         });
     </script>
