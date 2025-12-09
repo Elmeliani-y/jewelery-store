@@ -117,15 +117,12 @@
                                 <div class="row">
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">الصنف <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <select class="form-select product-category" name="products[INDEX][category_id]" required>
-                                                <option value="" disabled selected hidden>اختر الصنف</option>
-                                                <option value="add_new" style="color: #0d6efd; font-weight: bold;">+ إضافة صنف جديد</option>
-                                                @foreach($categories as $category)
-                                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                        <select class="form-select product-category" name="products[INDEX][category_id]" required>
+                                            <option value="" disabled selected hidden>اختر الصنف</option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">العيار <span class="text-danger">*</span></label>

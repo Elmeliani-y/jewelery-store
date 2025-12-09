@@ -84,7 +84,6 @@
                                     class="form-select @error('expense_type_id') is-invalid @enderror"
                                     required>
                                 <option value="">اختر نوع المصروف</option>
-                                <option value="add_new" style="color: #0d6efd; font-weight: bold;">+ إضافة نوع جديد</option>
                                 @foreach($expenseTypes as $type)
                                     <option value="{{ $type->id }}" @if(old('expense_type_id') == $type->id) selected @endif>
                                         {{ $type->name }}

@@ -53,7 +53,6 @@
                                     نوع المصروف <span class="text-danger">*</span>
                                 </label>
                                 <select name="expense_type_id" id="expense_type_id" class="form-select @error('expense_type_id') is-invalid @enderror" required>
-                                    <option value="add_new" style="color: #0d6efd; font-weight: bold;">+ إضافة نوع جديد</option>
                                     @foreach($expenseTypes as $type)
                                         <option value="{{ $type->id }}" {{ old('expense_type_id', $expense->expense_type_id) == $type->id ? 'selected' : '' }}>
                                             {{ $type->name }}
