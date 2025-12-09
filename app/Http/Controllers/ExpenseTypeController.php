@@ -88,10 +88,6 @@ class ExpenseTypeController extends Controller
      */
     public function destroy(ExpenseType $expenseType)
     {
-        if ($expenseType->expenses()->count() > 0) {
-            return back()->with('error', 'لا يمكن حذف هذا النوع لأنه مرتبط بمصروفات');
-        }
-
         $expenseType->delete();
 
         return redirect()->route('expense-types.index')

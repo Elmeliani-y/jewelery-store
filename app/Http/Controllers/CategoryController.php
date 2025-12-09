@@ -88,10 +88,6 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        if ($category->sales()->count() > 0) {
-            return back()->with('error', 'لا يمكن حذف هذا الصنف لأنه مرتبط بمبيعات');
-        }
-
         $category->delete();
 
         return redirect()->route('categories.index')
