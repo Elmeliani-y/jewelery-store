@@ -116,12 +116,10 @@ class JewelrySystemSeeder extends Seeder
 
             foreach ($employeeNames as $index => $empData) {
                 Employee::firstOrCreate(
-                    ['email' => strtolower(str_replace(' ', '', $empData['name'])) . $branch->id . '@jewelry.com'],
+                    ['name' => $empData['name'], 'branch_id' => $branch->id],
                     [
-                        'name' => $empData['name'],
                         'phone' => '012' . rand(10000000, 99999999),
                         'salary' => $empData['salary'],
-                        'branch_id' => $branch->id,
                         'is_active' => true
                     ]
                 );

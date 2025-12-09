@@ -15,6 +15,13 @@
 
 @section('content')
 <div class="container-fluid">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="mdi mdi-check-circle me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
     <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h4 class="mb-1"><iconify-icon icon="solar:users-group-rounded-bold-duotone" class="fs-4 me-2"></iconify-icon> إدارة المستخدمين</h4>
@@ -62,7 +69,6 @@
                             <span>الفرع:</span>
                             <strong>{{ $user->branch?->name ?? '-' }}</strong>
                         </div>
-                        <div class="text-muted small">✉ {{ $user->email }}</div>
                         <div class="text-muted small">📅 {{ $user->created_at->format('Y-m-d') }}</div>
                     </div>
 

@@ -61,12 +61,6 @@
                                 <h6>{{ $user->username }}</h6>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <p class="text-muted mb-1">البريد الإلكتروني</p>
-                                <h6>{{ $user->email }}</h6>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="row">

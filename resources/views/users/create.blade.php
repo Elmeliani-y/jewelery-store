@@ -33,13 +33,6 @@
                                        value="{{ old('username') }}" required>
                                 @error('username')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">البريد الإلكتروني <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                                       value="{{ old('email') }}" required>
-                                @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            </div>
                         </div>
 
                         <div class="row">
@@ -58,7 +51,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">الدور <span class="text-danger">*</span></label>
-                                <select name="role" class="form-select @error('role') is-invalid @enderror" required>
+                                <select name="role" id="roleSelect" class="form-select @error('role') is-invalid @enderror" required>
                                     <option value="">اختر الدور</option>
                                     <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>مدير</option>
                                     <option value="accountant" {{ old('role') === 'accountant' ? 'selected' : '' }}>محاسب</option>
@@ -67,7 +60,7 @@
                                 @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3" id="branchField">
                                 <label class="form-label">الفرع</label>
                                 <select name="branch_id" class="form-select @error('branch_id') is-invalid @enderror">
                                     <option value="">بدون فرع</option>
@@ -97,4 +90,25 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('roleSelect');
+        const branchField = document.getElementById('branchField');
+        
+        function toggleBranchField() {
+            const role = roleSelect.value;
+            if (role === 'admin' || role === 'accountant') {
+                branchField.style.display = 'none';
+            } else {
+                branchField.style.display = 'block';
+            }
+        }
+        
+        roleSelect.addEventListener('change', toggleBranchField);
+        toggleBranchField();
+    });
+</script>
 @endsection

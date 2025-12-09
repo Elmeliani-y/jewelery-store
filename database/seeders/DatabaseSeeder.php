@@ -28,8 +28,6 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'مدير النظام',
             'username' => 'admin',
-            'email' => 'admin@dusty.com',
-            'email_verified_at' => now(),
             'password' => Hash::make('admin123'),
             'role' => 'admin',
             'branch_id' => null,
@@ -40,8 +38,6 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'المحاسب',
             'username' => 'accountant',
-            'email' => 'accountant@dusty.com',
-            'email_verified_at' => now(),
             'password' => Hash::make('accountant123'),
             'role' => 'accountant',
             'branch_id' => null,
@@ -57,8 +53,6 @@ class DatabaseSeeder extends Seeder
                 User::factory()->create([
                     'name' => 'حساب '.$branch->name,
                     'username' => $username,
-                    'email' => $username.'@dusty.com',
-                    'email_verified_at' => now(),
                     'password' => Hash::make('branch123'),
                     'role' => 'branch',
                     'branch_id' => $branch->id,
