@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         // Seed jewelry system data first to create branches
         $this->call([
             JewelrySystemSeeder::class,
-            FakeSalesExpensesSeeder::class,
+            // nFakeSalesExpensesSeeder::class,
         ]);
 
         // Get branches for creating branch users
