@@ -13,8 +13,28 @@
 @endsection
 @section('content')
 <div class="container-fluid">
+    <!-- Page Title -->
+    <div class="mb-4 no-print">
+        <h2 class="mb-1">
+            <i class="mdi mdi-file-document-multiple text-primary"></i>
+            تقرير شامل - المبيعات والمصروفات
+        </h2>
+        <p class="text-muted mb-0">عرض تفصيلي لجميع المبيعات والمصروفات مع الإحصائيات</p>
+    </div>
+
+    <!-- Print Title (only visible when printing) -->
+    <div class="print-title" style="display: none;">
+        <h2>تقرير شامل - المبيعات والمصروفات</h2>
+        <p>
+            التاريخ: {{ request('from', date('Y-m-01')) }} - {{ request('to', date('Y-m-d')) }}
+            @if(request('branch'))
+                | الفرع: {{ $branches->find(request('branch'))?->name }}
+            @endif
+        </p>
+    </div>
+
     @include('reports.partials.toolbar', [
-        'title' => 'تقرير الكل',
+        'title' => '',
         'backUrl' => route('reports.index'),
         'exportRoute' => 'reports.all',
         'exportQuery' => request()->query(),

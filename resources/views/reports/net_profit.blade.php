@@ -5,6 +5,12 @@
 @endsection
 @section('content')
 <div class="container-fluid">
+    <!-- Print Title -->
+    <div class="print-title" style="display: none;">
+        <h2>تقرير صافي الربح</h2>
+        <p>التاريخ: {{ $filters['date_from'] ?? '-' }} - {{ $filters['date_to'] ?? '-' }}</p>
+    </div>
+
     @include('reports.partials.toolbar', [
         'title' => 'تقرير صافي الربح',
         'backUrl' => route('reports.index'),

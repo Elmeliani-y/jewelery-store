@@ -1,6 +1,7 @@
 @extends('layouts.vertical', ['title' => 'التقرير السريع'])
 @section('title','التقرير السريع')
 @section('css')
+@include('reports.partials.print-css')
 <style>
     .metric-card {
         border-radius: 12px;
@@ -69,6 +70,15 @@
 @endsection
 @section('content')
 <div class="container-fluid">
+    <!-- Print Title -->
+    <div class="print-title" style="display: none;">
+        <h2>التقرير السريع</h2>
+        <p>التاريخ: {{ request('date_from') ?? date('Y-m-d') }} - {{ request('date_to') ?? date('Y-m-d') }}</p>
+        @if(request('branch_id'))
+            <p>الفرع: {{ $branches->firstWhere('id', request('branch_id'))->name ?? 'جميع الفروع' }}</p>
+        @endif
+    </div>
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>

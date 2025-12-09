@@ -1,6 +1,7 @@
 @extends('layouts.vertical', ['title' => 'التقرير المقارن'])
 @section('title','التقرير المقارن')
 @section('css')
+@include('reports.partials.print-css')
 <style>
     .chart-container {
         position: relative;
@@ -43,6 +44,12 @@
 @endsection
 @section('content')
 <div class="container-fluid">
+    <!-- Print Title -->
+    <div class="print-title" style="display: none;">
+        <h2>تقرير المقارنة</h2>
+        <p>التاريخ: {{ $filters['date_from'] ?? '-' }} - {{ $filters['date_to'] ?? '-' }}</p>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="page-title-box">
