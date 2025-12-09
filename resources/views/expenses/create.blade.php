@@ -318,43 +318,7 @@
             }
         });
 
-        // Handle expense type dropdown change for "add new"
-        const expenseTypeSelect = document.getElementById('expense_type_id');
-        expenseTypeSelect?.addEventListener('change', function() {
-            if (this.value === 'add_new') {
-                const typeName = prompt('أدخل اسم نوع المصروف الجديد:');
-                if (typeName && typeName.trim()) {
-                    // Send AJAX request to create expense type
-                    fetch('{{ route("expense-types.store") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            name: typeName.trim(),
-                            is_active: true
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.id) {
-                            // Add new option to select
-                            const newOption = new Option(data.name, data.id, true, true);
-                            this.add(newOption, this.options[2]); // Add after "add_new" option
-                            this.value = data.id;
-                            alert('تم إضافة نوع المصروف بنجاح');
-                        }
-                    })
-                    .catch(error => {
-                        alert('حدث خطأ في إضافة نوع المصروف');
-                        this.value = '';
-                    });
-                } else {
-                    this.value = '';
-                }
-            }
-        });
+
     })();
 </script>
 @endsection

@@ -31,13 +31,12 @@ class ExpenseTypeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:expense_types,name',
-            'is_active' => 'boolean',
         ], [
             'name.required' => 'اسم نوع المصروف مطلوب.',
             'name.unique' => 'هذا نوع المصروف موجود بالفعل.',
         ]);
 
-        $validated['is_active'] = $request->has('is_active') ? true : ($request->input('is_active', true));
+        $validated['is_active'] = $request->has('is_active') ? true : false;
 
         $expenseType = ExpenseType::create($validated);
 

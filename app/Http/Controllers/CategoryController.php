@@ -31,13 +31,12 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
-            'is_active' => 'boolean',
         ], [
             'name.required' => 'اسم الصنف مطلوب.',
             'name.unique' => 'هذا الصنف موجود بالفعل.',
         ]);
 
-        $validated['is_active'] = $request->has('is_active') ? true : ($request->input('is_active', true));
+        $validated['is_active'] = $request->has('is_active') ? true : false;
 
         $category = Category::create($validated);
 

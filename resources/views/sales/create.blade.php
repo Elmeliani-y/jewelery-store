@@ -913,46 +913,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Handle category dropdown change for "add new"
-        document.addEventListener('change', function(e) {
-            if (e.target.classList.contains('product-category')) {
-                if (e.target.value === 'add_new') {
-                    const categoryName = prompt('أدخل اسم الصنف الجديد:');
-                    if (categoryName && categoryName.trim()) {
-                        // Send AJAX request to create category
-                        fetch('{{ route("categories.store") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                name: categoryName.trim(),
-                                is_active: true
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.id) {
-                                // Add new option to all category selects
-                                document.querySelectorAll('.product-category').forEach(select => {
-                                    const newOption = new Option(data.name, data.id, true, true);
-                                    select.add(newOption, select.options[2]); // Add after "add_new" option
-                                });
-                                e.target.value = data.id;
-                                alert('تم إضافة الصنف بنجاح');
-                            }
-                        })
-                        .catch(error => {
-                            alert('حدث خطأ في إضافة الصنف');
-                            e.target.value = '';
-                        });
-                    } else {
-                        e.target.value = '';
-                    }
-                }
-            }
-        });
+
     </script>
 </div>
 @endsection
