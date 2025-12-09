@@ -15,25 +15,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed jewelry system data first to create branches
-        $this->call([
-            JewelrySystemSeeder::class,
-            // nFakeSalesExpensesSeeder::class,
-        ]);
-
-        // Get branches for creating branch users
-        $branches = \App\Models\Branch::all();
-
-        // Create default admin user
-        User::factory()->create([
-            'name' => 'مدير النظام',
-            'username' => 'admin',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-            'branch_id' => null,
-            'remember_token' => Str::random(10),
-        ]);
-
         // Create accountant user
         User::factory()->create([
             'name' => 'المحاسب',
@@ -43,22 +24,5 @@ class DatabaseSeeder extends Seeder
             'branch_id' => null,
             'remember_token' => Str::random(10),
         ]);
-
-        // Create branch users for each branch
-        if ($branches->count() > 0) {
-            foreach ($branches as $branch) {
-                $branchSlug = preg_replace('/[^a-z0-9]+/i', '', $branch->name);
-                $username = 'branch_'.$branch->id;
-
-                User::factory()->create([
-                    'name' => 'حساب '.$branch->name,
-                    'username' => $username,
-                    'password' => Hash::make('branch123'),
-                    'role' => 'branch',
-                    'branch_id' => $branch->id,
-                    'remember_token' => Str::random(10),
-                ]);
-            }
-        }
     }
 }
