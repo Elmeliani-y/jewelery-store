@@ -37,7 +37,7 @@ class UserController extends Controller
             'username' => 'required|string|max:255|unique:users,username',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:admin,accountant,branch',
-            'branch_id' => 'nullable|exists:branches,id',
+            'branch_id' => $request->role === 'branch' ? 'required|exists:branches,id' : 'nullable|exists:branches,id',
         ]);
 
         try {
@@ -82,7 +82,7 @@ class UserController extends Controller
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6|confirmed',
             'role' => 'required|in:admin,accountant,branch',
-            'branch_id' => 'nullable|exists:branches,id',
+            'branch_id' => $request->role === 'branch' ? 'required|exists:branches,id' : 'nullable|exists:branches,id',
         ]);
 
         try {

@@ -61,8 +61,8 @@
                             </div>
 
                             <div class="col-md-6 mb-3" id="branchField">
-                                <label class="form-label">الفرع</label>
-                                <select name="branch_id" class="form-select @error('branch_id') is-invalid @enderror">
+                                <label class="form-label">الفرع <span class="text-danger" id="branchRequired" style="display:none;">*</span></label>
+                                <select name="branch_id" id="branchSelect" class="form-select @error('branch_id') is-invalid @enderror">
                                     <option value="">بدون فرع</option>
                                     @foreach($branches as $branch)
                                     <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
@@ -97,13 +97,23 @@
     document.addEventListener('DOMContentLoaded', function() {
         const roleSelect = document.getElementById('roleSelect');
         const branchField = document.getElementById('branchField');
+        const branchSelect = document.getElementById('branchSelect');
+        const branchRequired = document.getElementById('branchRequired');
         
         function toggleBranchField() {
             const role = roleSelect.value;
             if (role === 'admin' || role === 'accountant') {
                 branchField.style.display = 'none';
+                branchSelect.removeAttribute('required');
+                branchRequired.style.display = 'none';
+            } else if (role === 'branch') {
+                branchField.style.display = 'block';
+                branchSelect.setAttribute('required', 'required');
+                branchRequired.style.display = 'inline';
             } else {
                 branchField.style.display = 'block';
+                branchSelect.removeAttribute('required');
+                branchRequired.style.display = 'none';
             }
         }
         
