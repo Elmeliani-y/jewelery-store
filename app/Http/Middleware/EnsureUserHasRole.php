@@ -24,7 +24,7 @@ class EnsureUserHasRole
         }
         $allowed = array_map('trim', $roles);
 
-        if (!$user || !in_array($user->role, $allowed, true)) {
+        if (! $user || ! in_array($user->role, $allowed, true)) {
             abort(403, 'غير مسموح لك بالوصول إلى هذه الصفحة.');
         }
 

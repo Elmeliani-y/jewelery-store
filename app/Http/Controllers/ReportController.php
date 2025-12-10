@@ -86,7 +86,7 @@ class ReportController extends Controller
                 'expenses_count' => $expensesCount,
                 'net_profit' => $netProfit,
             ];
-        });
+        })->sortByDesc('total_sales')->values();
 
         // Employees Data - filter by specific employee if selected, or by branch if branch is selected
         $employeesCollection = $lists['employees'];
@@ -107,14 +107,15 @@ class ReportController extends Controller
             if (isset($filters['date_to'])) {
                 $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
             }
+            $netAmount = $salesQuery->sum('net_amount');
             return [
                 'employee' => $employee,
                 'total_sales' => $salesQuery->sum('total_amount'),
                 'total_weight' => $salesQuery->sum('weight'),
                 'sales_count' => $salesQuery->count(),
-                'net_profit' => $salesQuery->sum('net_amount') - $employee->salary,
+                'net_profit' => $netAmount,
             ];
-        });
+        })->sortByDesc('total_sales')->values();
 
         // Categories Data
         $categoriesData = $lists['categories']->map(function ($category) use ($filters) {

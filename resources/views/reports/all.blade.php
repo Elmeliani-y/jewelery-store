@@ -193,8 +193,6 @@
 									<th>التاريخ</th>
 									<th>الفرع</th>
 									<th>الموظف</th>
-									<th>القسم</th>
-									<th>العيار</th>
 									<th>الوزن (جم)</th>
 									<th>سعر الجرام</th>
 									<th>طريقة الدفع</th>
@@ -215,14 +213,6 @@
 									<td>{{ $sale->created_at->format('Y-m-d') }}</td>
 									<td>{{ $sale->branch->name ?? '-' }}</td>
 									<td>{{ $sale->employee->name ?? '-' }}</td>
-									<td>{{ $sale->category->name ?? '-' }}</td>
-									<td>
-										@if($sale->caliber)
-											<span class="badge bg-secondary">{{ $sale->caliber->name }}</span>
-										@else
-											-
-										@endif
-									</td>
 									<td dir="ltr">{{ number_format($sale->weight, 2) }}</td>
 									<td dir="ltr">
 										<span class="{{ $isLow ? 'text-danger fw-bold' : 'text-success' }}" style="{{ $isLow ? 'text-decoration: underline;' : '' }}">
@@ -245,7 +235,7 @@
 									<td>{{ $sale->notes ?: '-' }}</td>
 								</tr>
 								@empty
-								<tr><td colspan="12" class="text-center text-muted">لا توجد بيانات مبيعات</td></tr>
+								<tr><td colspan="10" class="text-center text-muted">لا توجد بيانات مبيعات</td></tr>
 								@endforelse
 							</tbody>
 						</table>
@@ -353,6 +343,7 @@
 							<thead>
 								<tr>
 									<th>الموظف</th>
+									<th>الفرع</th>
 									<th>عدد المبيعات</th>
 									<th>إجمالي المبيعات</th>
 									<th>إجمالي الوزن</th>
@@ -364,6 +355,7 @@
 								@forelse($employeesData as $row)
 								<tr>
 									<td>{{ $row['employee']->name }}</td>
+									<td>{{ $row['employee']->branch->name ?? '-' }}</td>
 									<td>{{ $row['sales_count'] }}</td>
 									<td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
@@ -377,7 +369,7 @@
 									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
 								</tr>
 								@empty
-								<tr><td colspan="6" class="text-center text-muted">لا توجد بيانات موظفين</td></tr>
+								<tr><td colspan="7" class="text-center text-muted">لا توجد بيانات موظفين</td></tr>
 								@endforelse
 							</tbody>
 						</table>
