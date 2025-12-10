@@ -205,19 +205,29 @@ class DashboardController extends Controller
         }
 
         // Sales by caliber - skip sales without caliber (multi-product sales)
-        $salesByCaliber = Sale::notReturned()
-            ->with('caliber')
-            ->whereNotNull('caliber_id')
-            ->selectRaw('caliber_id, SUM(total_amount) as amount, SUM(weight) as weight')
-            ->groupBy('caliber_id')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'caliber' => $item->caliber?->name ?? 'غير محدد',
-                    'amount' => $item->amount,
-                    'weight' => $item->weight,
-                ];
-            });
+        $salesByCaliber = collect();
+        $calibers = \App\Models\Caliber::all();
+        $sales = Sale::notReturned()->whereNotNull('products')->get();
+        foreach ($calibers as $caliber) {
+            $amount = 0;
+            $weight = 0;
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        if (isset($product['caliber_id']) && $product['caliber_id'] == $caliber->id) {
+                            $amount += $product['amount'] ?? 0;
+                            $weight += $product['weight'] ?? 0;
+                        }
+                    }
+                }
+            }
+            $salesByCaliber->push([
+                'caliber' => $caliber->name,
+                'amount' => $amount,
+                'weight' => $weight,
+            ]);
+        }
 
         // Sales by category - from products JSON
         $salesByCategory = collect();
