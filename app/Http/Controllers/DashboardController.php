@@ -302,25 +302,61 @@ class DashboardController extends Controller
     private function getTopPerformers($startDate, $endDate, $branchId = null)
     {
         // Top branches by sales
-        $topBranches = Sale::notReturned()
+        $branchSales = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
             ->with('branch')
-            ->selectRaw('branch_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
-            ->groupBy('branch_id')
-            ->orderBy('amount', 'desc')
-            ->limit(5)
             ->get();
+        $branchData = [];
+        foreach ($branchSales as $sale) {
+            $branchId = $sale->branch_id;
+            if (!isset($branchData[$branchId])) {
+                $branchData[$branchId] = [
+                    'branch_id' => $branchId,
+                    'amount' => 0,
+                    'weight' => 0,
+                    'count' => 0,
+                    'branch' => $sale->branch,
+                ];
+            }
+            $branchData[$branchId]['amount'] += $sale->total_amount;
+            $branchData[$branchId]['count']++;
+            $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+            if (is_array($products)) {
+                foreach ($products as $product) {
+                    $branchData[$branchId]['weight'] += $product['weight'] ?? 0;
+                }
+            }
+        }
+        $topBranches = collect($branchData)->sortByDesc('amount')->take(5)->values();
 
         // Top employees by sales
-        $topEmployees = Sale::notReturned()
+        $employeeSales = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with(['employee', 'employee.branch'])
-            ->selectRaw('employee_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
-            ->groupBy('employee_id')
-            ->orderBy('amount', 'desc')
-            ->limit(5)
             ->get();
+        $employeeData = [];
+        foreach ($employeeSales as $sale) {
+            $employeeId = $sale->employee_id;
+            if (!isset($employeeData[$employeeId])) {
+                $employeeData[$employeeId] = [
+                    'employee_id' => $employeeId,
+                    'amount' => 0,
+                    'weight' => 0,
+                    'count' => 0,
+                    'employee' => $sale->employee,
+                ];
+            }
+            $employeeData[$employeeId]['amount'] += $sale->total_amount;
+            $employeeData[$employeeId]['count']++;
+            $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+            if (is_array($products)) {
+                foreach ($products as $product) {
+                    $employeeData[$employeeId]['weight'] += $product['weight'] ?? 0;
+                }
+            }
+        }
+        $topEmployees = collect($employeeData)->sortByDesc('amount')->take(5)->values();
 
         // Top categories by sales - parse from products JSON
         $sales = Sale::notReturned()

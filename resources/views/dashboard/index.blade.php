@@ -234,14 +234,14 @@
                                 <div class="flex-grow-1 align-content-center">
                                     <div class="row">
                                         <div class="col-7">
-                                            <h6 class="mb-1 text-dark fs-15">{{ $branch->branch->name }}</h6>
-                                            <span class="fs-14 text-muted">{{ $branch->count }} فاتورة</span>
+                                            <h6 class="mb-1 text-dark fs-15">{{ $branch['branch']['name'] }}</h6>
+                                            <span class="fs-14 text-muted">{{ $branch['count'] }} فاتورة</span>
                                         </div>
                                         <div class="col-5 text-end">
-                                            <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($branch->amount, 0, ',', '.') }}</h6>
-                                            <span class="fs-13 text-muted" dir="ltr">{{ number_format($branch->weight, 1, ',', '.') }} جم</span>
-                                            @if($branch->weight > 0)
-                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($branch->amount / $branch->weight, 2) }} د/جرام</div>
+                                            <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($branch['amount'], 0, ',', '.') }}</h6>
+                                            <span class="fs-13 text-muted" dir="ltr">{{ number_format($branch['weight'], 1, ',', '.') }} جم</span>
+                                            @if($branch['weight'] > 0)
+                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($branch['amount'] / $branch['weight'], 2) }} د/جرام</div>
                                             @endif
                                         </div>
                                     </div>
@@ -273,14 +273,14 @@
                                 <div class="flex-grow-1 align-content-center">
                                     <div class="row">
                                         <div class="col-7">
-                                            <h6 class="mb-1 text-dark fs-15">{{ $sale->employee->name }}</h6>
-                                            <span class="fs-14 text-muted">{{ $sale->employee->branch->name }}</span>
+                                            <h6 class="mb-1 text-dark fs-15">{{ $sale['employee']['name'] }}</h6>
+                                            <span class="fs-14 text-muted">{{ $sale['employee']['branch']['name'] }}</span>
                                         </div>
                                         <div class="col-5 text-end">
-                                            <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($sale->amount, 0, ',', '.') }}</h6>
-                                            <span class="fs-13 text-muted" dir="ltr">{{ number_format($sale->weight, 1, ',', '.') }} جم</span>
-                                            @if($sale->weight > 0)
-                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($sale->amount / $sale->weight, 2) }} د/جرام</div>
+                                            <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($sale['amount'], 0, ',', '.') }}</h6>
+                                            <span class="fs-13 text-muted" dir="ltr">{{ number_format($sale['weight'], 1, ',', '.') }} جم</span>
+                                            @if($sale['weight'] > 0)
+                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($sale['amount'] / $sale['weight'], 2) }} د/جرام</div>
                                             @endif
                                         </div>
                                     </div>
