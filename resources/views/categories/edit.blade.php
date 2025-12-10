@@ -11,6 +11,25 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>خطأ!</strong>
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-lg-6">
             <div class="card">
@@ -29,9 +48,8 @@
                         <div class="mb-3">
                             <label class="form-label">العيار الافتراضي</label>
                             <select name="default_caliber_id" class="form-select @error('default_caliber_id') is-invalid @enderror">
-                                <option value="">بدون عيار افتراضي</option>
                                 @foreach($calibers as $caliber)
-                                    <option value="{{ $caliber->id }}" {{ old('default_caliber_id', $category->default_caliber_id) == $caliber->id ? 'selected' : '' }}>
+                                    <option value="{{ $caliber->id }}" {{ old('default_caliber_id', $category->default_caliber_id ?? ($caliber->name == '21' ? $caliber->id : null)) == $caliber->id ? 'selected' : '' }}>
                                         {{ $caliber->name }}
                                     </option>
                                 @endforeach

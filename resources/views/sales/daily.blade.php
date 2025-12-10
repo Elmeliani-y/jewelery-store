@@ -75,7 +75,7 @@
 
     <!-- Summary Cards -->
     <div class="row mb-3">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card summary-card" style="border-left-color: var(--bs-primary);">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -90,7 +90,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card summary-card" style="border-left-color: var(--bs-success);">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -105,7 +105,41 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card summary-card" style="border-left-color: var(--bs-info);">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <iconify-icon icon="solar:cash-out-bold-duotone" class="fs-1 text-info"></iconify-icon>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">كاش فقط</h6>
+                            <h4 class="mb-0">{{ number_format($cashOnlyTotal, 2) }} <small>ريال</small></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card summary-card" style="border-left-color: var(--bs-danger);">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <iconify-icon icon="solar:card-bold-duotone" class="fs-1 text-danger"></iconify-icon>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">شبكة فقط</h6>
+                            <h4 class="mb-0">{{ number_format($networkOnlyTotal, 2) }} <small>ریال</small></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Second Row for Average -->
+    <div class="row mb-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card summary-card" style="border-left-color: var(--bs-warning);">
                 <div class="card-body">
                     <div class="d-flex align-items-center">

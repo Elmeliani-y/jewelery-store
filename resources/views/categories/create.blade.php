@@ -28,9 +28,8 @@
                         <div class="mb-3">
                             <label class="form-label">العيار الافتراضي</label>
                             <select name="default_caliber_id" class="form-select @error('default_caliber_id') is-invalid @enderror">
-                                <option value="">بدون عيار افتراضي</option>
                                 @foreach($calibers as $caliber)
-                                    <option value="{{ $caliber->id }}" {{ old('default_caliber_id') == $caliber->id ? 'selected' : '' }}>
+                                    <option value="{{ $caliber->id }}" {{ old('default_caliber_id', $caliber->name == '21' ? $caliber->id : null) == $caliber->id ? 'selected' : '' }}>
                                         {{ $caliber->name }}
                                     </option>
                                 @endforeach

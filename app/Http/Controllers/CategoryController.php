@@ -33,10 +33,11 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
-            'default_caliber_id' => 'nullable|exists:calibers,id',
+            'default_caliber_id' => 'required|exists:calibers,id',
         ], [
             'name.required' => 'اسم الصنف مطلوب.',
             'name.unique' => 'هذا الصنف موجود بالفعل.',
+            'default_caliber_id.required' => 'العيار الافتراضي مطلوب.',
         ]);
 
         $validated['is_active'] = $request->has('is_active') ? true : false;
@@ -72,11 +73,11 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
-            'default_caliber_id' => 'nullable|exists:calibers,id',
-            'is_active' => 'boolean',
+            'default_caliber_id' => 'required|exists:calibers,id',
         ], [
             'name.required' => 'اسم الصنف مطلوب.',
             'name.unique' => 'هذا الصنف موجود بالفعل.',
+            'default_caliber_id.required' => 'العيار الافتراضي مطلوب.',
         ]);
 
         $validated['is_active'] = $request->has('is_active');

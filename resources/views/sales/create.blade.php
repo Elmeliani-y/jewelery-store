@@ -138,12 +138,12 @@
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">الوزن (جرام) <span class="text-danger">*</span></label>
                                         <input type="number" step="0.001" class="form-control product-weight" 
-                                               name="products[INDEX][weight]" placeholder="0.000" required>
+                                               name="products[INDEX][weight]" placeholder="0.000" inputmode="decimal" required>
                                     </div>
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" class="form-control product-amount" 
-                                               name="products[INDEX][amount]" placeholder="0.00" required>
+                                               name="products[INDEX][amount]" placeholder="0.00" inputmode="decimal" required>
                                     </div>
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">سعر الجرام</label>
@@ -151,7 +151,7 @@
                                     </div>
                                     <div class="col-md-2 mb-3">
                                         <label class="form-label">عدد القطع <span class="text-danger">*</span></label>
-                                        <input type="number" min="1" step="1" class="form-control product-quantity" name="products[INDEX][quantity]" value="1" required>
+                                        <input type="number" min="1" step="1" class="form-control product-quantity" name="products[INDEX][quantity]" value="1" inputmode="numeric" required>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -227,7 +227,7 @@
                                         <label for="cash_amount" class="form-label">المبلغ النقدي</label>
                                         <input type="number" step="0.01" class="form-control @error('cash_amount') is-invalid @enderror" 
                                                id="cash_amount" name="cash_amount" value="{{ old('cash_amount') }}" 
-                                               placeholder="0.00">
+                                               placeholder="0.00" inputmode="decimal">
                                         @error('cash_amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -237,7 +237,7 @@
                                         <label for="network_amount" class="form-label">مبلغ الشبكة</label>
                                         <input type="number" step="0.01" class="form-control @error('network_amount') is-invalid @enderror" 
                                                id="network_amount" name="network_amount" value="{{ old('network_amount') }}" 
-                                               placeholder="0.00">
+                                               placeholder="0.00" inputmode="decimal">
                                         @error('network_amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror

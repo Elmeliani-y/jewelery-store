@@ -574,6 +574,17 @@ class SaleController extends Controller
         $totalAmount = $sales->sum('total_amount');
         $averageRate = $totalWeight > 0 ? $totalAmount / $totalWeight : 0;
 
-        return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate'));
+        // Calculate payment type totals
+        // Cash only includes: pure cash payments + cash portion of mixed payments
+        $cashOnlyTotal = $sales->where('payment_method', 'cash')->sum('total_amount') 
+                       + $sales->where('payment_method', 'mixed')->sum('cash_amount');
+        
+        // Network only includes: pure network payments + network portion of mixed payments
+        $networkOnlyTotal = $sales->where('payment_method', 'network')->sum('total_amount') 
+                          + $sales->where('payment_method', 'mixed')->sum('network_amount');
+        
+        $mixedTotal = $sales->where('payment_method', 'mixed')->sum('total_amount');
+
+        return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate', 'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal'));
     }
 }

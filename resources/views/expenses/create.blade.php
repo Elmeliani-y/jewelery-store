@@ -107,6 +107,7 @@
                                    step="0.01"
                                    min="0.01"
                                    placeholder="0.00"
+                                   inputmode="decimal"
                                    required>
                             @error('amount')
                                 <div class="invalid-feedback">{{ $message }}</div>
