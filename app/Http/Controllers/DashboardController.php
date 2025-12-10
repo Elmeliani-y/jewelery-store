@@ -129,7 +129,19 @@ class DashboardController extends Controller
         }
 
         $totalSales = $salesQuery->sum('total_amount');
-        $totalWeight = $salesQuery->sum('weight');
+        // Sum weights from products JSON, not a column
+        $totalWeight = $salesQuery->get()->reduce(function($carry, $sale) {
+            $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+            $weight = 0;
+            if ($products) {
+                foreach ($products as $product) {
+                    if (isset($product['weight'])) {
+                        $weight += (float)$product['weight'];
+                    }
+                }
+            }
+            return $carry + $weight;
+        }, 0);
         
         return [
             'total_sales' => $totalSales,
