@@ -205,8 +205,7 @@
 								@forelse($sales as $sale)
 								@php
 									$pricePerGram = $sale->price_per_gram;
-									$minPrice = config('sales.min_price_per_gram', 3.0);
-									$isLow = $pricePerGram < $minPrice;
+									$isLow = $minGramPrice > 0 && $pricePerGram < $minGramPrice;
 								@endphp
 								<tr>
 									<td><strong>{{ $sale->id }}</strong></td>
@@ -215,8 +214,11 @@
 									<td>{{ $sale->employee->name ?? '-' }}</td>
 									<td dir="ltr">{{ number_format($sale->weight, 2) }}</td>
 									<td dir="ltr">
-										<span class="{{ $isLow ? 'text-danger fw-bold' : 'text-success' }}" style="{{ $isLow ? 'text-decoration: underline;' : '' }}">
+										<span class="{{ $isLow ? 'text-danger fw-bold' : '' }}" style="{{ $isLow ? 'color: #dc3545 !important; text-decoration: underline;' : '' }}" data-bs-toggle="tooltip" title="{{ $isLow ? 'أقل من الحد الأدنى (' . number_format($minGramPrice, 2) . ')' : '' }}">
 											{{ number_format($pricePerGram, 2) }}
+											@if($isLow)
+												<i class="mdi mdi-alert-circle-outline"></i>
+											@endif
 										</span>
 									</td>
 									<td>
@@ -308,18 +310,27 @@
 							</thead>
 							<tbody>
 								@forelse($branchData as $row)
+								@php
+									$branchPricePerGram = $row['total_weight'] > 0 ? $row['total_sales'] / $row['total_weight'] : 0;
+									$isBranchLow = $minGramPrice > 0 && $branchPricePerGram > 0 && $branchPricePerGram < $minGramPrice;
+								@endphp
 								<tr>
 									<td>{{ $row['branch']->name }}</td>
 									<td>{{ $row['sales_count'] }}</td>
 									<td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
-									<td dir="ltr" class="text-warning fw-bold">
+								<td dir="ltr">
+									<span class="{{ $isBranchLow ? 'text-danger fw-bold' : 'text-warning fw-bold' }}" style="{{ $isBranchLow ? 'color: #dc3545 !important; text-decoration: underline;' : '' }}" data-bs-toggle="tooltip" title="{{ $isBranchLow ? 'أقل من الحد الأدنى (' . number_format($minGramPrice, 2) . ')' : '' }}">
 										@if($row['total_weight'] > 0)
-											{{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
+											{{ number_format($branchPricePerGram, 2) }}
+											@if($isBranchLow)
+												<i class="mdi mdi-alert-circle-outline"></i>
+											@endif
 										@else
 											-
 										@endif
-									</td>
+									</span>
+								</td>
 									<td dir="ltr">{{ number_format($row['total_expenses'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
 								</tr>
@@ -353,19 +364,28 @@
 							</thead>
 							<tbody>
 								@forelse($employeesData as $row)
+								@php
+									$empPricePerGram = $row['total_weight'] > 0 ? $row['total_sales'] / $row['total_weight'] : 0;
+									$isEmpLow = $minGramPrice > 0 && $empPricePerGram > 0 && $empPricePerGram < $minGramPrice;
+								@endphp
 								<tr>
 									<td>{{ $row['employee']->name }}</td>
 									<td>{{ $row['employee']->branch->name ?? '-' }}</td>
 									<td>{{ $row['sales_count'] }}</td>
 									<td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
 									<td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
-									<td dir="ltr" class="text-warning fw-bold">
+								<td dir="ltr">
+									<span class="{{ $isEmpLow ? 'text-danger fw-bold' : 'text-warning fw-bold' }}" style="{{ $isEmpLow ? 'color: #dc3545 !important; text-decoration: underline;' : '' }}" data-bs-toggle="tooltip" title="{{ $isEmpLow ? 'أقل من الحد الأدنى (' . number_format($minGramPrice, 2) . ')' : '' }}">
 										@if($row['total_weight'] > 0)
-											{{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
+											{{ number_format($empPricePerGram, 2) }}
+											@if($isEmpLow)
+												<i class="mdi mdi-alert-circle-outline"></i>
+											@endif
 										@else
 											-
 										@endif
-									</td>
+									</span>
+								</td>
 									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
 								</tr>
 								@empty
@@ -430,6 +450,12 @@ $(document).ready(function() {
     if (selectedBranch) {
         $('#branch').trigger('change');
     }
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 });
 </script>
 @endsection

@@ -33,14 +33,13 @@
     <div class="card mb-3"><div class="card-header">المبيعات</div><div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-sm mb-0">
-                <thead><tr><th>#فاتورة</th><th>الفرع</th><th>الموظف</th><th>الصنف</th><th>العيار</th><th>الوزن</th><th>الإجمالي</th><th>الصافي</th><th>التاريخ</th></tr></thead>
+                <thead><tr><th>#فاتورة</th><th>الفرع</th><th>الموظف</th><th>العيار</th><th>الوزن</th><th>الإجمالي</th><th>الصافي</th><th>التاريخ</th></tr></thead>
                 <tbody>
                     @forelse($sales as $s)
                     <tr>
                         <td>{{ $s->invoice_number }}</td>
                         <td>{{ $s->branch->name ?? '-' }}</td>
                         <td>{{ $s->employee->name ?? '-' }}</td>
-                        <td>{{ $s->category->name ?? '-' }}</td>
                         <td>{{ $s->caliber->name ?? '-' }}</td>
                         <td dir="ltr">{{ number_format($s->weight,2) }}</td>
                         <td dir="ltr">{{ number_format($s->total_amount,2) }}</td>

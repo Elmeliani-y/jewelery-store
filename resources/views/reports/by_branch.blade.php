@@ -41,18 +41,27 @@
                     </thead>
                     <tbody>
                         @forelse($branchData as $row)
+                        @php
+                            $branchPricePerGram = $row['total_weight'] > 0 ? $row['total_sales'] / $row['total_weight'] : 0;
+                            $isBranchLow = $minGramPrice > 0 && $branchPricePerGram > 0 && $branchPricePerGram < $minGramPrice;
+                        @endphp
                         <tr>
                             <td>{{ $row['branch']->name }}</td>
                             <td>{{ $row['sales_count'] }}</td>
                             <td dir="ltr">{{ number_format($row['total_sales'],2) }}</td>
                             <td dir="ltr">{{ number_format($row['total_net_sales'],2) }}</td>
                             <td dir="ltr">{{ number_format($row['total_weight'],2) }}</td>
-                            <td dir="ltr" class="text-warning fw-bold">
-                                @if($row['total_weight'] > 0)
-                                    {{ number_format($row['total_sales'] / $row['total_weight'], 2) }}
-                                @else
-                                    -
-                                @endif
+                            <td dir="ltr">
+                                <span class="{{ $isBranchLow ? 'text-danger fw-bold' : 'text-warning fw-bold' }}" style="{{ $isBranchLow ? 'color: #dc3545 !important; text-decoration: underline;' : '' }}" data-bs-toggle="tooltip" title="{{ $isBranchLow ? 'أقل من الحد الأدنى (' . number_format($minGramPrice, 2) . ')' : '' }}">
+                                    @if($row['total_weight'] > 0)
+                                        {{ number_format($branchPricePerGram, 2) }}
+                                        @if($isBranchLow)
+                                            <i class="mdi mdi-alert-circle-outline"></i>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </span>
                             </td>
                             <td>{{ $row['expenses_count'] }}</td>
                             <td dir="ltr">{{ number_format($row['total_expenses'],2) }}</td>
@@ -72,4 +81,16 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
 @endsection

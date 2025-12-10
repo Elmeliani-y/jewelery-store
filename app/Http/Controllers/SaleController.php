@@ -23,7 +23,7 @@ class SaleController extends Controller
             abort(403, 'غير مسموح لحساب الفرع بعرض قائمة المبيعات');
         }
 
-        $query = Sale::with(['branch', 'employee', 'category', 'caliber'])
+        $query = Sale::with(['branch', 'employee', 'caliber'])
             ->orderBy('created_at', 'desc');
 
         // Apply filters
@@ -35,9 +35,10 @@ class SaleController extends Controller
             $query->where('employee_id', $request->employee_id);
         }
 
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+        // Category filter removed - categories are now in products JSON
+        // if ($request->filled('category_id')) {
+        //     $query->where('category_id', $request->category_id);
+        // }
 
         if ($request->filled('caliber_id')) {
             $query->where('caliber_id', $request->caliber_id);
@@ -62,7 +63,10 @@ class SaleController extends Controller
         $categories = Category::active()->get();
         $calibers = Caliber::active()->get();
 
-        return view('sales.index', compact('sales', 'branches', 'employees', 'categories', 'calibers'));
+        // Load minimum price setting from database
+        $minGramPrice = (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
+
+        return view('sales.index', compact('sales', 'branches', 'employees', 'categories', 'calibers', 'minGramPrice'));
     }
 
     /**
@@ -86,19 +90,10 @@ class SaleController extends Controller
         $categories = Category::with('defaultCaliber')->active()->get();
         $calibers = Caliber::active()->get();
 
-        // Load settings from storage
-        $settingsPath = storage_path('app/private/settings.json');
-        if (file_exists($settingsPath)) {
-            $settings = json_decode(file_get_contents($settingsPath), true);
-        } else {
-            $settings = [
-                'min_invoice_gram_avg' => config('sales.min_invoice_gram_avg', 2.0),
-            ];
-        }
-        // Ensure min_invoice_gram_avg is float
-        if (isset($settings['min_invoice_gram_avg'])) {
-            $settings['min_invoice_gram_avg'] = (float) $settings['min_invoice_gram_avg'];
-        }
+        // Load settings from database
+        $settings = [
+            'min_invoice_gram_avg' => (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0)),
+        ];
 
         return view('sales.create', compact('branches', 'employees', 'categories', 'calibers', 'selectedBranchId', 'settings'));
     }
@@ -299,10 +294,10 @@ class SaleController extends Controller
      */
     public function edit(Sale $sale)
     {
-        // Check if branch user is trying to access another branch's sale
+        // Block branch users from editing sales
         $user = auth()->user();
-        if ($user->isBranch() && $sale->branch_id != $user->branch_id) {
-            abort(403, 'غير مصرح لك بتعديل هذه الفاتورة');
+        if ($user->isBranch()) {
+            abort(403, 'غير مسموح لحساب الفرع بتعديل المبيعات');
         }
 
         if ($sale->is_returned) {
@@ -323,10 +318,10 @@ class SaleController extends Controller
      */
     public function update(Request $request, Sale $sale)
     {
-        // Check if branch user is trying to access another branch's sale
+        // Block branch users from updating sales
         $user = auth()->user();
-        if ($user->isBranch() && $sale->branch_id != $user->branch_id) {
-            abort(403, 'غير مصرح لك بتعديل هذه الفاتورة');
+        if ($user->isBranch()) {
+            abort(403, 'غير مسموح لحساب الفرع بتعديل المبيعات');
         }
 
         if ($sale->is_returned) {
@@ -502,7 +497,7 @@ class SaleController extends Controller
     {
         $query = $request->get('q');
 
-        $sales = Sale::with(['branch', 'employee', 'category', 'caliber'])
+        $sales = Sale::with(['branch', 'employee', 'caliber'])
             ->where('invoice_number', 'like', '%'.$query.'%')
             ->limit(10)
             ->get();
@@ -545,7 +540,7 @@ class SaleController extends Controller
         }
 
         // Get today's sales for the user's branch
-        $query = Sale::with(['employee', 'category', 'caliber'])
+        $query = Sale::with(['employee', 'caliber'])
             ->where('branch_id', $user->branch_id)
             ->whereDate('created_at', today())
             ->orderBy('created_at', 'desc');

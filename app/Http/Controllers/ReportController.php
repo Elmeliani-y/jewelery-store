@@ -26,7 +26,7 @@ class ReportController extends Controller
         $perPage = (int) $request->get('per_page', 10);
 
         // Sales and Expenses queries with pagination
-        $salesQuery = $this->buildSalesQuery($filters)->with(['branch', 'employee', 'category', 'caliber']);
+        $salesQuery = $this->buildSalesQuery($filters)->with(['branch', 'employee', 'caliber']);
         $expensesQuery = $this->buildExpensesQuery($filters)->with(['branch', 'expenseType']);
 
         $sales = $salesQuery->paginate($perPage, ['*'], 'sales_page');
@@ -117,20 +117,39 @@ class ReportController extends Controller
             ];
         })->sortByDesc('total_sales')->values();
 
-        // Categories Data
+        // Categories Data (from products JSON)
         $categoriesData = $lists['categories']->map(function ($category) use ($filters) {
-            $salesQuery = Sale::notReturned()->where('category_id', $category->id);
+            $salesQuery = Sale::notReturned()->whereNotNull('products');
             if (isset($filters['date_from'])) {
                 $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
             }
             if (isset($filters['date_to'])) {
                 $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
             }
+            
+            $sales = $salesQuery->get();
+            $totalAmount = 0;
+            $totalWeight = 0;
+            $salesCount = 0;
+            
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        if (isset($product['category_id']) && $product['category_id'] == $category->id) {
+                            $totalAmount += $product['amount'] ?? 0;
+                            $totalWeight += $product['weight'] ?? 0;
+                            $salesCount++;
+                        }
+                    }
+                }
+            }
+            
             return [
                 'category' => $category,
-                'total_amount' => $salesQuery->sum('total_amount'),
-                'total_weight' => $salesQuery->sum('weight'),
-                'sales_count' => $salesQuery->count(),
+                'total_amount' => $totalAmount,
+                'total_weight' => $totalWeight,
+                'sales_count' => $salesCount,
             ];
         });
 
@@ -160,7 +179,10 @@ class ReportController extends Controller
         $calibers = $lists['calibers'];
         $expenseTypes = $lists['expenseTypes'];
 
-        $data = compact('summary', 'sales', 'expenses', 'groupedData', 'branchData', 'employeesData', 'categoriesData', 'calibersData', 'branches', 'employees', 'categories', 'calibers', 'expenseTypes');
+        // Load minimum price setting from database
+        $minGramPrice = (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
+
+        $data = compact('summary', 'sales', 'expenses', 'groupedData', 'branchData', 'employeesData', 'categoriesData', 'calibersData', 'branches', 'employees', 'categories', 'calibers', 'expenseTypes', 'minGramPrice');
 
         if ($request->get('format') === 'pdf') {
             // Remove logo and company info from $data for PDF
@@ -245,7 +267,10 @@ class ReportController extends Controller
             );
         }
 
-        $data = compact('branchData', 'filters') + $lists;
+        // Load minimum price setting from database
+        $minGramPrice = (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
+
+        $data = compact('branchData', 'filters', 'minGramPrice') + $lists;
 
         if ($format === 'pdf') {
             return $this->generatePDF('reports.by_branch', $data, 'تقرير حسب الفروع');
@@ -316,49 +341,87 @@ class ReportController extends Controller
             
             return [
                 'name' => $employee->name,
-                'sales' => $salesQuery->sum('total_amount'),
-                'weight' => $salesQuery->sum('weight'),
-                'count' => $salesQuery->count(),
-            ];
-        })->sortByDesc('sales')->take(10);
-
-        // Categories comparison
-        $categoriesComparison = $lists['categories']->map(function($category) use ($filters) {
-            $salesQuery = Sale::notReturned()->where('category_id', $category->id);
-            
-            if (isset($filters['date_from'])) {
-                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
-            }
-            if (isset($filters['date_to'])) {
-                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
-            }
-            
-            return [
-                'name' => $category->name,
+                'branch_id' => $employee->branch_id,
                 'sales' => $salesQuery->sum('total_amount'),
                 'weight' => $salesQuery->sum('weight'),
                 'count' => $salesQuery->count(),
             ];
         });
 
-        // Calibers comparison
-        $calibersComparison = $lists['calibers']->map(function($caliber) use ($filters) {
-            $salesQuery = Sale::notReturned()->where('caliber_id', $caliber->id);
-            
-            if (isset($filters['date_from'])) {
-                $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+        // Categories comparison - grouped by branch (from products JSON)
+        $categoriesComparison = collect();
+        foreach ($lists['branches'] as $branch) {
+            foreach ($lists['categories'] as $category) {
+                $salesQuery = Sale::notReturned()
+                    ->where('branch_id', $branch->id)
+                    ->whereNotNull('products');
+                
+                if (isset($filters['date_from'])) {
+                    $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                }
+                if (isset($filters['date_to'])) {
+                    $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                }
+                
+                // Get all sales and filter by products containing this category
+                $sales = $salesQuery->get();
+                $totalSales = 0;
+                $totalWeight = 0;
+                $count = 0;
+                
+                foreach ($sales as $sale) {
+                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                    if ($products) {
+                        foreach ($products as $product) {
+                            if (isset($product['category_id']) && $product['category_id'] == $category->id) {
+                                $totalSales += $product['amount'] ?? 0;
+                                $totalWeight += $product['weight'] ?? 0;
+                                $count++;
+                            }
+                        }
+                    }
+                }
+                
+                $categoriesComparison->push([
+                    'branch_id' => $branch->id,
+                    'name' => $category->name,
+                    'sales' => $totalSales,
+                    'weight' => $totalWeight,
+                    'count' => $count,
+                ]);
             }
-            if (isset($filters['date_to'])) {
-                $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        // Calibers comparison - grouped by branch
+        $calibersComparison = collect();
+        foreach ($lists['branches'] as $branch) {
+            foreach ($lists['calibers'] as $caliber) {
+                $salesQuery = Sale::notReturned()
+                    ->where('caliber_id', $caliber->id)
+                    ->where('branch_id', $branch->id);
+                
+                if (isset($filters['date_from'])) {
+                    $salesQuery->whereDate('created_at', '>=', $filters['date_from']);
+                }
+                if (isset($filters['date_to'])) {
+                    $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
+                }
+                
+                $totalSales = (clone $salesQuery)->sum('total_amount');
+                $totalWeight = (clone $salesQuery)->sum('weight');
+                $count = (clone $salesQuery)->count();
+                
+                if ($count > 0) {
+                    $calibersComparison->push([
+                        'branch_id' => $branch->id,
+                        'name' => $caliber->name,
+                        'sales' => $totalSales ?? 0,
+                        'weight' => $totalWeight ?? 0,
+                        'count' => $count ?? 0,
+                    ]);
+                }
             }
-            
-            return [
-                'name' => $caliber->name,
-                'sales' => $salesQuery->sum('total_amount'),
-                'weight' => $salesQuery->sum('weight'),
-                'count' => $salesQuery->count(),
-            ];
-        });
+        }
 
         // Payment methods comparison
         $paymentMethodsComparison = collect([
@@ -392,13 +455,13 @@ class ReportController extends Controller
             $branch1Sales = Sale::notReturned()->where('branch_id', $branch1Id)
                 ->when(isset($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
                 ->when(isset($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
-                ->with(['employee', 'category', 'caliber'])
+                ->with(['employee', 'caliber'])
                 ->get();
             
             $branch2Sales = Sale::notReturned()->where('branch_id', $branch2Id)
                 ->when(isset($filters['date_from']), fn($q) => $q->whereDate('created_at', '>=', $filters['date_from']))
                 ->when(isset($filters['date_to']), fn($q) => $q->whereDate('created_at', '<=', $filters['date_to']))
-                ->with(['employee', 'category', 'caliber'])
+                ->with(['employee', 'caliber'])
                 ->get();
             
             // Get expenses for both branches
@@ -720,7 +783,7 @@ class ReportController extends Controller
         $lists = $this->getFilterLists();
         
         $salesQuery = $this->buildSalesQuery($filters);
-        $sales = $salesQuery->with(['branch', 'employee', 'category', 'caliber'])->get();
+        $sales = $salesQuery->with(['branch', 'employee', 'caliber'])->get();
 
         // Group by different criteria
         $groupedData = [
@@ -919,7 +982,10 @@ class ReportController extends Controller
                 ->appends($request->query());
         }
 
-        $data = compact('employeesData', 'filters') + $lists;
+        // Load minimum price setting from database
+        $minGramPrice = (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
+
+        $data = compact('employeesData', 'filters', 'minGramPrice') + $lists;
 
         if ($request->get('format') === 'pdf') {
             return $this->generatePDF('reports.employees', $data, 'تقرير الموظفين');
@@ -992,7 +1058,7 @@ class ReportController extends Controller
     {
         $query = Sale::notReturned();
 
-        return $this->applySalesFilters($query, $filters);
+        return $this->applySalesFilters($query, $filters)->orderBy('total_amount', 'desc');
     }
 
     /**
@@ -1012,9 +1078,10 @@ class ReportController extends Controller
             $query->where('employee_id', $filters['employee_id']);
         }
 
-        if (isset($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
-        }
+        // Note: category_id filter removed - categories are now in products JSON
+        // if (isset($filters['category_id'])) {
+        //     $query->where('category_id', $filters['category_id']);
+        // }
 
         if (isset($filters['caliber_id'])) {
             $query->where('caliber_id', $filters['caliber_id']);
@@ -1088,9 +1155,10 @@ class ReportController extends Controller
             $filters['employee_id'] = $request->get('employee') ?: $request->get('employee_id');
         }
 
-        if ($request->filled('category') || $request->filled('category_id')) {
-            $filters['category_id'] = $request->get('category') ?: $request->get('category_id');
-        }
+        // Note: category_id filter removed - categories are now in products JSON
+        // if ($request->filled('category') || $request->filled('category_id')) {
+        //     $filters['category_id'] = $request->get('category') ?: $request->get('category_id');
+        // }
 
         if ($request->filled('caliber') || $request->filled('caliber_id')) {
             $filters['caliber_id'] = $request->get('caliber') ?: $request->get('caliber_id');

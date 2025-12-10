@@ -10,10 +10,11 @@ tr    { page-break-inside: avoid; page-break-after: auto; }
 thead { display: table-header-group; }
 tfoot { display: table-footer-group; }
 @media print { 
-  @page { size: A4 landscape; margin: 15mm; }
+  @page { size: A4 landscape; margin: 12mm; }
   body { 
     font-family: 'Arial', sans-serif !important;
     background: white !important;
+    padding: 0 !important;
   }
   .topbar-custom,.app-sidebar-menu,.footer, .report-toolbar, .no-print, .card-footer { display:none !important; }
   
@@ -21,40 +22,46 @@ tfoot { display: table-footer-group; }
   .print-title { 
     display: block !important; 
     text-align: center !important; 
-    margin-bottom: 20px !important; 
-    padding: 15px 0 !important; 
-    border-bottom: 3px solid #000 !important;
-    background: #f8f9fa !important;
+    margin: 0 0 20px 0 !important; 
+    padding: 20px 15px !important; 
+    border-bottom: none !important;
+    background: #2c3e50 !important;
+    border-radius: 6px !important;
   }
   .print-title h2 { 
-    font-size: 22px !important; 
+    font-size: 26px !important; 
     font-weight: 700 !important; 
-    margin: 0 0 8px 0 !important;
-    color: #000 !important;
+    margin: 0 0 10px 0 !important;
+    color: white !important;
+    letter-spacing: 0.5px !important;
   }
   .print-title p { 
-    font-size: 12px !important; 
-    color: #555 !important; 
+    font-size: 13px !important; 
+    color: #ecf0f1 !important; 
     margin: 0 !important;
-    line-height: 1.6 !important;
+    line-height: 1.8 !important;
   }
   
   /* Cards Layout */
   .card {
     box-shadow: none !important;
-    border: 2px solid #333 !important;
-    margin-bottom: 15px !important;
+    border: 1px solid #ddd !important;
+    margin: 0 0 20px 0 !important;
     page-break-inside: avoid !important;
+    page-break-after: always !important;
     background: white !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
   }
   .card-header {
-    background: #e9ecef !important;
-    border-bottom: 2px solid #333 !important;
-    padding: 10px 15px !important;
+    background: #34495e !important;
+    border-bottom: none !important;
+    padding: 14px 20px !important;
     font-weight: 700 !important;
-    font-size: 14px !important;
-    color: #000 !important;
+    font-size: 16px !important;
+    color: white !important;
     text-align: center !important;
+    letter-spacing: 0.3px !important;
   }
   .card-body {
     padding: 0 !important;
@@ -64,16 +71,13 @@ tfoot { display: table-footer-group; }
   .container-fluid { 
     max-width: 100% !important; 
     width: 100% !important; 
-    padding: 0 10px !important; 
+    padding: 0 !important; 
   }
   .row { 
     margin: 0 !important;
-    display: block !important;
   }
   .col-lg-6 { 
-    width: 100% !important; 
-    max-width: 100% !important; 
-    flex: none !important;
+    padding: 0 8px !important;
     margin-bottom: 15px !important;
   }
   
@@ -83,52 +87,53 @@ tfoot { display: table-footer-group; }
   }
   .table { 
     width: 100% !important; 
-    font-size: 10px !important; 
-    table-layout: fixed !important; 
+    font-size: 11px !important; 
     border-collapse: collapse !important;
     margin: 0 !important;
   }
   .table th, .table td { 
-    padding: 6px 8px !important; 
-    white-space: nowrap !important; 
-    border: 1px solid #333 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    padding: 8px 10px !important; 
+    border: 1px solid #ddd !important;
+    text-align: center !important;
   }
   .table th { 
-    background: #d1d1d1 !important;
+    background: #34495e !important;
     font-weight: 700 !important;
-    color: #000 !important;
-    text-align: center !important;
-    font-size: 11px !important;
+    color: white !important;
+    font-size: 12px !important;
   }
   .table td {
     background: white !important;
-    color: #000 !important;
+    color: #2c3e50 !important;
   }
-  .table tbody tr:nth-child(even) {
-    background: #f9f9f9 !important;
+  .table tbody tr:nth-child(even) td {
+    background: #f8f9fa !important;
   }
   
   /* Badges & Text */
   .badge { 
-    border: 1px solid #000 !important; 
-    padding: 2px 6px !important; 
-    font-size: 9px !important;
-    background: white !important;
-    color: #000 !important;
+    border: 1px solid #2c3e50 !important; 
+    padding: 3px 8px !important; 
+    font-size: 10px !important;
+    background: #ecf0f1 !important;
+    color: #2c3e50 !important;
+    border-radius: 3px !important;
   }
-  .text-danger { color: #000 !important; font-weight: 700 !important; }
-  .text-success { color: #000 !important; font-weight: 700 !important; }
-  .text-warning { color: #000 !important; font-weight: 700 !important; }
-  .text-info { color: #000 !important; }
-  .text-muted { color: #666 !important; }
+  .text-danger { 
+    color: #c0392b !important; 
+    font-weight: 600 !important; 
+    text-decoration: underline !important;
+  }
+  .text-success { color: #27ae60 !important; font-weight: 600 !important; }
+  .text-warning { color: #f39c12 !important; font-weight: 600 !important; }
+  .text-info { color: #3498db !important; font-weight: 600 !important; }
+  .text-muted { color: #7f8c8d !important; }
   .fw-bold { font-weight: 700 !important; }
   
   /* Remove pagination */
   .pagination { display: none !important; }
   
   /* Better spacing */
-  .mb-4 { margin-bottom: 15px !important; }
+  .mb-4 { margin-bottom: 20px !important; }
 }
 </style>

@@ -45,13 +45,13 @@
                 <div class="col-6 col-md-3">
                     <div class="metric-card h-100">
                         <div class="d-flex justify-content-between align-items-center mb-1"><span class="text-muted small">الوزن</span><span class="metric-icon bg-primary-subtle text-primary"><i class="mdi mdi-scale"></i></span></div>
-                        <div class="value-lg">{{ number_format($sale->weight,2) }} <small class="fw-normal text-muted">جم</small></div>
+                        <div class="value-lg">{{ number_format($sale->weight,2) }}</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="metric-card h-100">
                         <div class="d-flex justify-content-between align-items-center mb-1"><span class="text-muted small">المبلغ</span><span class="metric-icon bg-success-subtle text-success"><i class="mdi mdi-cash"></i></span></div>
-                        <div class="value-lg text-mono" dir="ltr">{{ number_format($sale->total_amount,0,',','.') }} <small class="text-muted">ريال</small></div>
+                        <div class="value-lg text-mono" dir="ltr">{{ number_format($sale->total_amount,2) }}</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
@@ -81,7 +81,7 @@
                                     <th>#</th>
                                     <th>الفئة</th>
                                     <th>العيار</th>
-                                    <th>الوزن (جم)</th>
+                                    <th>الوزن</th>
                                     <th>المبلغ</th>
                                     <th>الضريبة</th>
                                     <th>الصافي</th>
@@ -94,7 +94,7 @@
                                     <td>{{ $product['category_name'] ?? '' }}</td>
                                     <td>{{ $product['caliber_name'] ?? '' }}</td>
                                     <td>{{ number_format($product['weight'], 3) }}</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($product['amount'], 0, ',', '.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['amount'], 2) }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($product['tax_amount'], 0, ',', '.') }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($product['net_amount'], 0, ',', '.') }}</td>
                                 </tr>
@@ -102,7 +102,7 @@
                                 <tr class="table-secondary fw-semibold">
                                     <td colspan="3" class="text-end">المجموع:</td>
                                     <td>{{ number_format($sale->weight, 3) }}</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount, 0, ',', '.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount, 2) }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($sale->tax_amount, 0, ',', '.') }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($sale->net_amount, 0, ',', '.') }}</td>
                                 </tr>
@@ -139,12 +139,6 @@
                                     <td class="text-muted">الموظف</td>
                                     <td>{{ $sale->employee->name }}</td>
                                 </tr>
-                                @if($sale->category)
-                                <tr>
-                                    <td class="text-muted">الفئة</td>
-                                    <td>{{ $sale->category->name }}</td>
-                                </tr>
-                                @endif
                                 @if($sale->caliber)
                                 <tr>
                                     <td class="text-muted">العيار</td>
@@ -152,12 +146,12 @@
                                 </tr>
                                 @endif
                                 <tr>
-                                    <td class="text-muted">الوزن (جم)</td>
+                                    <td class="text-muted">الوزن</td>
                                     <td>{{ number_format($sale->weight,2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">المبلغ</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount,0,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount,2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">طريقة الدفع</td>
@@ -181,29 +175,29 @@
                                     <td class="text-muted ps-4">
                                         <i class="mdi mdi-cash text-success me-1"></i>المبلغ النقدي
                                     </td>
-                                    <td class="text-mono fw-semibold text-success" dir="ltr">{{ number_format($sale->cash_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-semibold text-success" dir="ltr">{{ number_format($sale->cash_amount,2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted ps-4">
                                         <i class="mdi mdi-credit-card-outline text-info me-1"></i>مبلغ الشبكة
                                     </td>
-                                    <td class="text-mono fw-semibold text-info" dir="ltr">{{ number_format($sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-semibold text-info" dir="ltr">{{ number_format($sale->network_amount,2) }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted ps-4">
                                         <i class="mdi mdi-calculator me-1"></i>المجموع
                                     </td>
-                                    <td class="text-mono fw-bold" dir="ltr">{{ number_format($sale->cash_amount + $sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-bold" dir="ltr">{{ number_format($sale->cash_amount + $sale->network_amount,2) }}</td>
                                 </tr>
                                 @elseif($sale->payment_method === 'cash')
                                 <tr>
                                     <td class="text-muted">المبلغ النقدي</td>
-                                    <td class="text-mono fw-semibold text-success" dir="ltr">{{ number_format($sale->cash_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-semibold text-success" dir="ltr">{{ number_format($sale->cash_amount,2) }}</td>
                                 </tr>
                                 @else
                                 <tr>
                                     <td class="text-muted">مبلغ الشبكة</td>
-                                    <td class="text-mono fw-semibold text-info" dir="ltr">{{ number_format($sale->network_amount,2,',','.') }} <small class="text-muted">ريال</small></td>
+                                    <td class="text-mono fw-semibold text-info" dir="ltr">{{ number_format($sale->network_amount,2) }}</td>
                                 </tr>
                                 @endif
                                 <tr>

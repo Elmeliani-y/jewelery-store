@@ -75,6 +75,7 @@
                                     <th scope="col">الفرع</th>
                                     <th scope="col">الموظف</th>
                                     <th scope="col">الوزن (جم)</th>
+                                    <th scope="col">سعر الجرام</th>
                                     <th scope="col">المبلغ</th>
                                     <th scope="col">التاريخ</th>
                                     <th scope="col" class="text-center">الإجراءات</th>
@@ -89,6 +90,18 @@
                                     <td class="text-muted">{{ $sale->branch->name }}</td>
                                     <td class="text-muted">{{ $sale->employee->name }}</td>
                                     <td class="text-muted">{{ number_format($sale->weight, 2) }}</td>
+                                    <td dir="ltr">
+                                        @php
+                                            $pricePerGram = $sale->weight > 0 ? $sale->total_amount / $sale->weight : 0;
+                                            $isLowPrice = $minGramPrice > 0 && $pricePerGram < $minGramPrice;
+                                        @endphp
+                                        <span class="fw-semibold {{ $isLowPrice ? 'text-danger' : 'text-dark' }}">
+                                            {{ number_format($pricePerGram, 2) }}
+                                            @if($isLowPrice)
+                                                <i class="mdi mdi-alert-circle-outline" data-bs-toggle="tooltip" title="أقل من الحد الأدنى ({{ number_format($minGramPrice, 2) }})"></i>
+                                            @endif
+                                        </span>
+                                    </td>
                                     <td dir="ltr">
                                         <span class="fw-semibold text-dark">{{ number_format($sale->total_amount, 0, ',', '.') }} <small class="text-muted">ريال</small></span>
                                     </td>

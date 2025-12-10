@@ -26,7 +26,7 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
-        $sales = Sale::with(['branch', 'employee', 'category', 'caliber'])
+        $sales = Sale::with(['branch', 'employee', 'caliber'])
             ->notReturned()
             ->latest()
             ->paginate(15);
@@ -84,7 +84,7 @@ class SaleController extends Controller
      */
     public function show(Sale $sale)
     {
-        return response()->json($sale->load(['branch', 'employee', 'category', 'caliber']));
+        return response()->json($sale->load(['branch', 'employee', 'caliber']));
     }
 
     /**

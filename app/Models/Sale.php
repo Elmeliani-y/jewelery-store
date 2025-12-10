@@ -15,7 +15,6 @@ class Sale extends Model
         'products',
         'branch_id',
         'employee_id',
-        'category_id',
         'caliber_id',
         'weight',
         'total_amount',
@@ -58,14 +57,6 @@ class Sale extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
-    }
-
-    /**
-     * Get the category of the sale.
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     /**
@@ -172,14 +163,7 @@ class Sale extends Model
      */
     public function isBelowMinimumPrice()
     {
-        $settingsPath = storage_path('app/private/settings.json');
-        if (file_exists($settingsPath)) {
-            $settings = json_decode(file_get_contents($settingsPath), true);
-            $minPrice = (float)($settings['min_invoice_gram_avg'] ?? 0);
-        } else {
-            $minPrice = (float)config('sales.min_invoice_gram_avg', 0);
-        }
-
+        $minPrice = (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 0));
         return $minPrice > 0 && $this->price_per_gram < $minPrice;
     }
 }

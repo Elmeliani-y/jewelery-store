@@ -84,7 +84,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">الوزن الكلي</h6>
-                            <h4 class="mb-0">{{ number_format($totalWeight, 3) }} <small>جرام</small></h4>
+                            <h4 class="mb-0">{{ number_format($totalWeight, 2) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">إجمالي المبيعات</h6>
-                            <h4 class="mb-0">{{ number_format($totalAmount, 2) }} <small>ريال</small></h4>
+                            <h4 class="mb-0">{{ number_format($totalAmount, 2) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">كاش فقط</h6>
-                            <h4 class="mb-0">{{ number_format($cashOnlyTotal, 2) }} <small>ريال</small></h4>
+                            <h4 class="mb-0">{{ number_format($cashOnlyTotal, 2) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">شبكة فقط</h6>
-                            <h4 class="mb-0">{{ number_format($networkOnlyTotal, 2) }} <small>ریال</small></h4>
+                            <h4 class="mb-0">{{ number_format($networkOnlyTotal, 2) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">متوسط سعر الجرام</h6>
-                            <h4 class="mb-0">{{ number_format($averageRate, 2) }} <small>ريال</small></h4>
+                            <h4 class="mb-0">{{ number_format($averageRate, 2) }}</h4>
                         </div>
                     </div>
                 </div>
@@ -240,9 +240,9 @@
                                                     {{ $firstProduct['caliber_name'] ?? 'غير محدد' }}
                                                 </span>
                                             </td>
-                                            <td class="fw-semibold">{{ number_format($sale->weight, 3) }} جم</td>
-                                            <td class="fw-semibold text-success">{{ number_format($sale->total_amount, 2) }} ر.س</td>
-                                            <td>{{ number_format($sale->weight > 0 ? $sale->total_amount / $sale->weight : 0, 2) }} ر.س</td>
+                                            <td class="fw-semibold">{{ number_format($sale->weight, 2) }}</td>
+                                            <td class="fw-semibold text-success">{{ number_format($sale->total_amount, 2) }}</td>
+                                            <td>{{ number_format($sale->weight > 0 ? $sale->total_amount / $sale->weight : 0, 2) }}</td>
                                             <td>
                                                 @if($sale->customer_received)
                                                     <span class="badge bg-success-subtle text-success badge-received">
@@ -258,9 +258,11 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex gap-1">
+                                                    @if(!auth()->user()->isBranch())
                                                     <a href="{{ route('sales.edit', $sale) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
                                                         <iconify-icon icon="solar:pen-bold"></iconify-icon>
                                                     </a>
+                                                    @endif
                                                     <a href="{{ route('sales.show', $sale) }}" class="btn btn-sm btn-info edit-btn" title="عرض">
                                                         <iconify-icon icon="solar:eye-bold"></iconify-icon>
                                                     </a>

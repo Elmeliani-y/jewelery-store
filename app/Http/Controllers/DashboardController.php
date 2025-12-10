@@ -185,20 +185,35 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Sales by category - skip sales without category (multi-product sales)
-        $salesByCategory = Sale::notReturned()
-            ->with('category')
-            ->whereNotNull('category_id')
-            ->selectRaw('category_id, SUM(total_amount) as amount, COUNT(*) as count')
-            ->groupBy('category_id')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'category' => $item->category?->name ?? 'غير محدد',
-                    'amount' => $item->amount,
-                    'count' => $item->count,
-                ];
-            });
+        // Sales by category - from products JSON
+        $salesByCategory = collect();
+        $categories = \App\Models\Category::all();
+        
+        foreach ($categories as $category) {
+            $sales = Sale::notReturned()->whereNotNull('products')->get();
+            $totalAmount = 0;
+            $count = 0;
+            
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        if (isset($product['category_id']) && $product['category_id'] == $category->id) {
+                            $totalAmount += $product['amount'] ?? 0;
+                            $count++;
+                        }
+                    }
+                }
+            }
+            
+            if ($count > 0) {
+                $salesByCategory->push([
+                    'category' => $category->name,
+                    'amount' => $totalAmount,
+                    'count' => $count,
+                ]);
+            }
+        }
 
         // Sales by branch
         $salesByBranch = Sale::notReturned()

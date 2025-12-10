@@ -115,13 +115,13 @@
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between">
                                             <small class="text-muted">المبيعات:</small>
-                                            <strong>{{ number_format($twoBranchComparison['branch1']['sales'], 0) }}</strong>
+                                            <strong>{{ number_format($twoBranchComparison['branch1']['sales'], 2) }}</strong>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between">
                                             <small class="text-muted">المصروفات:</small>
-                                            <strong>{{ number_format($twoBranchComparison['branch1']['expenses'], 0) }}</strong>
+                                            <strong>{{ number_format($twoBranchComparison['branch1']['expenses'], 2) }}</strong>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -139,7 +139,7 @@
                                     <hr>
                                     <div class="d-flex justify-content-between">
                                         <strong class="text-success">الربح:</strong>
-                                        <strong class="text-success">{{ number_format($twoBranchComparison['branch1']['profit'], 0) }}</strong>
+                                        <strong class="text-success">{{ number_format($twoBranchComparison['branch1']['profit'], 2) }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -174,13 +174,13 @@
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between">
                                             <small class="text-muted">المبيعات:</small>
-                                            <strong>{{ number_format($twoBranchComparison['branch2']['sales'], 0) }}</strong>
+                                            <strong>{{ number_format($twoBranchComparison['branch2']['sales'], 2) }}</strong>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between">
                                             <small class="text-muted">المصروفات:</small>
-                                            <strong>{{ number_format($twoBranchComparison['branch2']['expenses'], 0) }}</strong>
+                                            <strong>{{ number_format($twoBranchComparison['branch2']['expenses'], 2) }}</strong>
                                         </div>
                                     </div>
                                     <div class="mb-3">
@@ -198,7 +198,7 @@
                                     <hr>
                                     <div class="d-flex justify-content-between">
                                         <strong class="text-success">الربح:</strong>
-                                        <strong class="text-success">{{ number_format($twoBranchComparison['branch2']['profit'], 0) }}</strong>
+                                        <strong class="text-success">{{ number_format($twoBranchComparison['branch2']['profit'], 2) }}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -292,8 +292,8 @@
     <!-- Branch-wise Grouped Data and Charts -->
     @foreach($branchesComparison as $index => $branch)
     @php
-        $branchId = $branch['branch_id'] ?? 0;
-        $branchEmployees = $employeesComparison->where('branch_id', $branchId);
+        $branchId = $branch['id'] ?? 0;
+        $branchEmployees = $employeesComparison->where('branch_id', $branchId)->sortByDesc('sales');
         $branchCategories = $categoriesComparison->where('branch_id', $branchId);
         $branchCalibers = $calibersComparison->where('branch_id', $branchId);
     @endphp
@@ -309,7 +309,7 @@
                 <div class="card border-success h-100">
                     <div class="card-body text-center p-2">
                         <small class="text-muted d-block">المبيعات</small>
-                        <div class="fs-5 fw-bold text-success">{{ number_format($branch['sales'] ?? 0, 0) }} د</div>
+                        <div class="fs-5 fw-bold text-success">{{ number_format($branch['sales'] ?? 0, 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -317,7 +317,7 @@
                 <div class="card border-danger h-100">
                     <div class="card-body text-center p-2">
                         <small class="text-muted d-block">المصروفات</small>
-                        <div class="fs-5 fw-bold text-danger">{{ number_format($branch['expenses'] ?? 0, 0) }} د</div>
+                        <div class="fs-5 fw-bold text-danger">{{ number_format($branch['expenses'] ?? 0, 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -325,7 +325,7 @@
                 <div class="card border-secondary h-100">
                     <div class="card-body text-center p-2">
                         <small class="text-muted d-block">الوزن</small>
-                        <div class="fs-5 fw-bold">{{ number_format($branch['weight'] ?? 0, 2) }} جرام</div>
+                        <div class="fs-5 fw-bold">{{ number_format($branch['weight'] ?? 0, 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -343,9 +343,9 @@
                         <small class="text-muted d-block">معدل سعر الجرام</small>
                         <div class="fs-5 fw-bold text-warning">
                             @if(($branch['weight'] ?? 0) > 0 && ($branch['sales'] ?? 0) > 0)
-                                {{ number_format($branch['sales'] / $branch['weight'], 2) }} د/جرام
+                                {{ number_format($branch['sales'] / $branch['weight'], 2) }}
                             @else
-                                0.00 د/جرام
+                                0.00
                             @endif
                         </div>
                     </div>
@@ -357,9 +357,9 @@
                         <small class="text-muted d-block">معدل الجرام للموظف</small>
                         <div class="fs-5 fw-bold text-info">
                             @if($branchEmployees->count() > 0 && ($branch['weight'] ?? 0) > 0)
-                                {{ number_format($branch['weight'] / $branchEmployees->count(), 2) }} جرام
+                                {{ number_format($branch['weight'] / $branchEmployees->count(), 2) }}
                             @else
-                                0.00 جرام
+                                0.00
                             @endif
                         </div>
                     </div>
@@ -369,7 +369,7 @@
                 <div class="card border-primary h-100">
                     <div class="card-body text-center p-2">
                         <small class="text-muted d-block">الربح</small>
-                        <div class="fs-5 fw-bold text-primary">{{ number_format($branch['profit'] ?? 0, 0) }} د</div>
+                        <div class="fs-5 fw-bold text-primary">{{ number_format($branch['profit'] ?? 0, 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -377,7 +377,6 @@
 
         <!-- Branch Charts -->
         <div class="row g-3">
-            @if($branch['sales'] > 0)
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-success text-white">
@@ -390,8 +389,6 @@
                     </div>
                 </div>
             </div>
-            @endif
-            @if($branch['expenses'] > 0)
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-danger text-white">
@@ -404,8 +401,6 @@
                     </div>
                 </div>
             </div>
-            @endif
-            @if($branchEmployees->count() > 0)
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-info text-white">
@@ -423,28 +418,30 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($branchEmployees->take(10) as $employee)
+                                    @forelse($branchEmployees->take(10) as $employee)
                                     <tr>
                                         <td>{{ $employee['name'] }}</td>
-                                        <td class="text-end">{{ number_format($employee['sales'], 0) }} د</td>
-                                        <td class="text-end">{{ number_format($employee['weight'] ?? 0, 2) }} جرام</td>
+                                        <td class="text-end">{{ number_format($employee['sales'], 2) }}</td>
+                                        <td class="text-end">{{ number_format($employee['weight'] ?? 0, 2) }}</td>
                                         <td class="text-end text-warning fw-bold">
                                             @if(($employee['weight'] ?? 0) > 0)
-                                                {{ number_format($employee['sales'] / $employee['weight'], 2) }} د/جرام
+                                                {{ number_format($employee['sales'] / $employee['weight'], 2) }}
                                             @else
                                                 -
                                             @endif
                                         </td>
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">لا توجد بيانات</td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            @endif
-            @if($branchCategories->count() > 0)
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -463,28 +460,31 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($branchCategories as $category)
+                                    @forelse($branchCategories as $category)
                                     <tr>
                                         <td>{{ $category['name'] }}</td>
-                                        <td class="text-end">{{ number_format($category['sales'] ?? 0, 0) }} د</td>
-                                        <td class="text-end">{{ number_format($category['weight'] ?? 0, 2) }} جرام</td>
+                                        <td class="text-end">{{ number_format($category['sales'] ?? 0, 2) }}</td>
+                                        <td class="text-end">{{ number_format($category['weight'] ?? 0, 2) }}</td>
                                         <td class="text-end">{{ $category['count'] ?? 0 }}</td>
                                         <td class="text-end text-warning fw-bold">
                                             @if(($category['weight'] ?? 0) > 0 && ($category['sales'] ?? 0) > 0)
-                                                {{ number_format($category['sales'] / $category['weight'], 2) }} د/جرام
+                                                {{ number_format($category['sales'] / $category['weight'], 2) }}
                                             @else
                                                 -
                                             @endif
                                         </td>
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">لا توجد بيانات</td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            @endif
         </div>
         </div><!-- End branchContent -->
     </fieldset>
@@ -549,14 +549,14 @@
         
         // Branch Sales Chart (single bar showing total sales)
         const salesCanvas = document.getElementById('branchSalesChart' + index);
-        if (salesCanvas && branch.sales > 0) {
+        if (salesCanvas) {
             new Chart(salesCanvas, {
                 type: 'bar',
                 data: {
                     labels: ['المبيعات'],
                     datasets: [{
                         label: 'المبيعات',
-                        data: [branch.sales],
+                        data: [branch.sales || 0],
                         backgroundColor: colors.success,
                         borderRadius: 6,
                     }]
@@ -569,7 +569,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return 'المبيعات: ' + context.parsed.y.toLocaleString() + ' د';
+                                    return 'المبيعات: ' + context.parsed.y.toLocaleString();
                                 }
                             }
                         }
@@ -591,14 +591,14 @@
 
         // Branch Expenses Chart (single bar showing total expenses)
         const expensesCanvas = document.getElementById('branchExpensesChart' + index);
-        if (expensesCanvas && branch.expenses > 0) {
+        if (expensesCanvas) {
             new Chart(expensesCanvas, {
                 type: 'bar',
                 data: {
                     labels: ['المصروفات'],
                     datasets: [{
                         label: 'المصروفات',
-                        data: [branch.expenses],
+                        data: [branch.expenses || 0],
                         backgroundColor: colors.danger,
                         borderRadius: 6,
                     }]
@@ -611,7 +611,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return 'المصروفات: ' + context.parsed.y.toLocaleString() + ' د';
+                                    return 'المصروفات: ' + context.parsed.y.toLocaleString();
                                 }
                             }
                         }
@@ -715,7 +715,7 @@
             labels: [branch1Data.name, branch2Data.name],
             datasets: [
                 {
-                    label: 'الوزن (جرام)',
+                    label: 'الوزن',
                     data: [branch1Data.weight, branch2Data.weight],
                     backgroundColor: colors.warning,
                     borderRadius: 5,
@@ -747,7 +747,7 @@
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'الوزن (جرام)'
+                        text: 'الوزن'
                     }
                 },
                 y1: {
@@ -779,7 +779,7 @@
                 ...branch2Employees.map(emp => emp.name + ' (' + branch2Data.name + ')')
             ],
             datasets: [{
-                label: 'مبيعات الموظف (دينار)',
+                label: 'مبيعات الموظف',
                 data: [
                     ...branch1Employees.map(emp => emp.sales),
                     ...branch2Employees.map(emp => emp.sales)
@@ -803,8 +803,8 @@
                             const allEmployees = [...branch1Employees, ...branch2Employees];
                             const emp = allEmployees[context.dataIndex];
                             return [
-                                'الوزن: ' + emp.weight.toFixed(2) + ' جرام',
-                                'سعر الجرام: ' + emp.price_per_gram.toLocaleString() + ' دينار',
+                                'الوزن: ' + emp.weight.toFixed(2),
+                                'سعر الجرام: ' + emp.price_per_gram.toLocaleString(),
                                 'عدد المبيعات: ' + emp.count
                             ];
                         }
@@ -816,7 +816,7 @@
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'المبيعات (دينار)'
+                        text: 'المبيعات'
                     },
                     ticks: {
                         callback: function(value) {
@@ -828,7 +828,149 @@
         }
     });
 
-    // Branches Price Per Gram Chart
+    // Categories Comparison Chart
+    const branch1Categories = categoriesData.filter(cat => cat.branch_id == branch1Data.id);
+    const branch2Categories = categoriesData.filter(cat => cat.branch_id == branch2Data.id);
+    
+    // Get unique category names
+    const categoryNames = [...new Set([...branch1Categories.map(c => c.name), ...branch2Categories.map(c => c.name)])];
+    
+    new Chart(document.getElementById('categoriesComparisonChart'), {
+        type: 'bar',
+        data: {
+            labels: categoryNames,
+            datasets: [
+                {
+                    label: branch1Data.name,
+                    data: categoryNames.map(name => {
+                        const cat = branch1Categories.find(c => c.name === name);
+                        return cat ? cat.sales : 0;
+                    }),
+                    backgroundColor: colors.primary,
+                    borderRadius: 5
+                },
+                {
+                    label: branch2Data.name,
+                    data: categoryNames.map(name => {
+                        const cat = branch2Categories.find(c => c.name === name);
+                        return cat ? cat.sales : 0;
+                    }),
+                    backgroundColor: colors.warning,
+                    borderRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const dataIndex = context.dataIndex;
+                            const datasetIndex = context.datasetIndex;
+                            const categories = datasetIndex === 0 ? branch1Categories : branch2Categories;
+                            const category = categories.find(c => c.name === categoryNames[dataIndex]);
+                            if (category) {
+                                return [
+                                    'الوزن: ' + (category.weight || 0).toFixed(2),
+                                    'عدد المبيعات: ' + (category.count || 0)
+                                ];
+                            }
+                            return '';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Calibers Comparison Chart
+    const branch1Calibers = @json($calibersComparison->where('branch_id', $branch1Id)->values());
+    const branch2Calibers = @json($calibersComparison->where('branch_id', $branch2Id)->values());
+    
+    // Get unique caliber names
+    const caliberNames = [...new Set([...branch1Calibers.map(c => c.name), ...branch2Calibers.map(c => c.name)])];
+    
+    new Chart(document.getElementById('calibersComparisonChart'), {
+        type: 'bar',
+        data: {
+            labels: caliberNames,
+            datasets: [
+                {
+                    label: branch1Data.name,
+                    data: caliberNames.map(name => {
+                        const cal = branch1Calibers.find(c => c.name === name);
+                        return cal ? cal.sales : 0;
+                    }),
+                    backgroundColor: colors.primary,
+                    borderRadius: 5
+                },
+                {
+                    label: branch2Data.name,
+                    data: caliberNames.map(name => {
+                        const cal = branch2Calibers.find(c => c.name === name);
+                        return cal ? cal.sales : 0;
+                    }),
+                    backgroundColor: colors.warning,
+                    borderRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const dataIndex = context.dataIndex;
+                            const datasetIndex = context.datasetIndex;
+                            const calibers = datasetIndex === 0 ? branch1Calibers : branch2Calibers;
+                            const caliber = calibers.find(c => c.name === caliberNames[dataIndex]);
+                            if (caliber) {
+                                return [
+                                    'الوزن: ' + (caliber.weight || 0).toFixed(2),
+                                    'عدد المبيعات: ' + (caliber.count || 0)
+                                ];
+                            }
+                            return '';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Price Per Gram Chart
     const branch1PricePerGram = branch1Data.weight > 0 
         ? branch1Data.sales / branch1Data.weight 
         : 0;
@@ -836,15 +978,12 @@
         ? branch2Data.sales / branch2Data.weight 
         : 0;
     
-    console.log('Branch 1:', branch1Data.name, 'Price per gram:', branch1PricePerGram);
-    console.log('Branch 2:', branch2Data.name, 'Price per gram:', branch2PricePerGram);
-    
-    new Chart(document.getElementById('branchesPricePerGramChart'), {
+    new Chart(document.getElementById('pricePerGramChart'), {
         type: 'bar',
         data: {
             labels: [branch1Data.name, branch2Data.name],
             datasets: [{
-                label: 'سعر الجرام (دينار)',
+                label: 'سعر الجرام',
                 data: [branch1PricePerGram, branch2PricePerGram],
                 backgroundColor: [colors.primary, colors.warning],
                 borderRadius: 5
@@ -860,8 +999,8 @@
                         afterLabel: function(context) {
                             const branchData = context.dataIndex === 0 ? branch1Data : branch2Data;
                             return [
-                                'إجمالي المبيعات: ' + branchData.sales.toLocaleString() + ' دينار',
-                                'إجمالي الوزن: ' + branchData.weight.toFixed(2) + ' جرام',
+                                'إجمالي المبيعات: ' + branchData.sales.toLocaleString(),
+                                'إجمالي الوزن: ' + branchData.weight.toFixed(2),
                                 'عدد المبيعات: ' + branchData.count
                             ];
                         }
@@ -873,7 +1012,57 @@
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'سعر الجرام (دينار)'
+                        text: 'سعر الجرام'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Branches Price Per Gram Chart
+    console.log('Branch 1:', branch1Data.name, 'Price per gram:', branch1PricePerGram);
+    console.log('Branch 2:', branch2Data.name, 'Price per gram:', branch2PricePerGram);
+    
+    new Chart(document.getElementById('branchesPricePerGramChart'), {
+        type: 'bar',
+        data: {
+            labels: [branch1Data.name, branch2Data.name],
+            datasets: [{
+                label: 'سعر الجرام',
+                data: [branch1PricePerGram, branch2PricePerGram],
+                backgroundColor: [colors.primary, colors.warning],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function(context) {
+                            const branchData = context.dataIndex === 0 ? branch1Data : branch2Data;
+                            return [
+                                'إجمالي المبيعات: ' + branchData.sales.toLocaleString(),
+                                'إجمالي الوزن: ' + branchData.weight.toFixed(2),
+                                'عدد المبيعات: ' + branchData.count
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'سعر الجرام'
                     },
                     ticks: {
                         callback: function(value) {

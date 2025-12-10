@@ -22,14 +22,6 @@ class Category extends Model
     ];
 
     /**
-     * Get the sales for the category.
-     */
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sale::class);
-    }
-
-    /**
      * Get the default caliber for the category.
      */
     public function defaultCaliber()
