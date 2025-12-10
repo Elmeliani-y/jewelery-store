@@ -163,10 +163,32 @@ class DashboardController extends Controller
     {
         // Daily sales chart
         $dailySales = Sale::notReturned()
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as amount, SUM(weight) as weight')
+            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as amount')
             ->groupBy('date')
             ->orderBy('date')
-            ->get();
+            ->get()
+            ->map(function ($sale) {
+                // Sum weights from products JSON for each day
+                $salesForDay = Sale::notReturned()
+                    ->whereDate('created_at', $sale->date)
+                    ->get();
+                $weight = 0;
+                foreach ($salesForDay as $s) {
+                    $products = is_array($s->products) ? $s->products : json_decode($s->products, true);
+                    if ($products) {
+                        foreach ($products as $product) {
+                            if (isset($product['weight'])) {
+                                $weight += (float)$product['weight'];
+                            }
+                        }
+                    }
+                }
+                return [
+                    'date' => $sale->date,
+                    'amount' => $sale->amount,
+                    'weight' => $weight,
+                ];
+            });
 
         // Monthly revenue data (last 12 months)
         $monthlyRevenue = [];
