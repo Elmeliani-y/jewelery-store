@@ -8,6 +8,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Caliber extends Model
 {
+    /**
+     * Get the total number of products sold for this caliber (from products array in all sales).
+     */
+    public function getProductsSoldCountAttribute()
+    {
+        $count = 0;
+        $sales = \App\Models\Sale::notReturned()->get();
+        foreach ($sales as $sale) {
+            $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+            if ($products) {
+                foreach ($products as $product) {
+                    if (isset($product['caliber_id']) && $product['caliber_id'] == $this->id) {
+                        $count++;
+                    }
+                }
+            }
+        }
+        return $count;
+    }
     use HasFactory;
 
     protected $fillable = [

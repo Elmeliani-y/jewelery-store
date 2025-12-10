@@ -126,8 +126,13 @@ class JewelrySystemSeeder extends Seeder
             ];
 
             foreach ($employeeNames as $index => $empData) {
+                $email = 'employee_' . $branch->id . '_' . $index . '@example.com';
                 Employee::firstOrCreate(
-                    ['name' => $empData['name'], 'branch_id' => $branch->id],
+                    [
+                        'name' => $empData['name'],
+                        'branch_id' => $branch->id,
+                        'email' => $email
+                    ],
                     [
                         'phone' => '012' . rand(10000000, 99999999),
                         'salary' => $empData['salary'],

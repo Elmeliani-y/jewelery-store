@@ -63,6 +63,21 @@ class FakeSalesExpensesSeeder extends Seeder
                     $networkAmount = $totalAmount / 2;
                 }
                 
+                // Create a products array for this sale
+                $products = [];
+                $numProducts = rand(1, 3);
+                for ($p = 0; $p < $numProducts; $p++) {
+                    $productCaliber = $calibers->random();
+                    $productWeight = rand(5, 200) / 10;
+                    $products[] = [
+                        'name' => $category->name,
+                        'category_id' => $category->id,
+                        'caliber_id' => $productCaliber->id,
+                        'weight' => $productWeight,
+                        'amount' => round($productWeight * ($totalAmount / $weight), 2),
+                    ];
+                }
+
                 Sale::create([
                     'branch_id' => $branch->id,
                     'employee_id' => $employee->id,
@@ -81,6 +96,7 @@ class FakeSalesExpensesSeeder extends Seeder
                     'notes' => rand(0, 3) == 0 ? 'عملية بيع - ' . $this->getRandomName() : null,
                     'created_at' => $date->setTime(rand(9, 20), rand(0, 59)),
                     'updated_at' => $date->setTime(rand(9, 20), rand(0, 59)),
+                    'products' => json_encode($products),
                 ]);
             }
         }

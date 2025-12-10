@@ -1193,6 +1193,115 @@ class ReportController extends Controller
     }
 
     /**
+     * Kasr Report - تقرير الكسر (Input Form)
+     */
+    public function kasr(Request $request)
+    {
+        $branches = Branch::active()->get();
+        $filters = [
+            'branch_id' => $request->get('branch_id'),
+            'date_from' => $request->get('date_from', date('Y-m-01')),
+            'date_to' => $request->get('date_to', date('Y-m-d')),
+        ];
+
+        // Auto-load expenses and salaries from database
+        $expenses = 0;
+        $salaries = 0;
+        
+        if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
+            // Get all expenses (الأجور) - excluding salary type
+            $salaryExpenseType = ExpenseType::where('name', 'like', '%رواتب%')->first();
+            
+            $expensesQuery = Expense::where('branch_id', $filters['branch_id'])
+                ->whereDate('expense_date', '>=', $filters['date_from'])
+                ->whereDate('expense_date', '<=', $filters['date_to']);
+            
+            if ($salaryExpenseType) {
+                // Expenses excluding salaries
+                $expenses = (clone $expensesQuery)->where('expense_type_id', '!=', $salaryExpenseType->id)->sum('amount');
+                // Salaries only
+                $salaries = (clone $expensesQuery)->where('expense_type_id', $salaryExpenseType->id)->sum('amount');
+            } else {
+                // All expenses if no salary type found
+                $expenses = $expensesQuery->sum('amount');
+            }
+        }
+
+        // Get calibers
+        $calibers = Caliber::active()->orderBy('id')->get();
+        $weights = [];
+        // Map caliber names to IDs for flexible matching
+        $caliberNameToId = [];
+        foreach ($calibers as $caliber) {
+            $weights[$caliber->id] = 0;
+            $caliberNameToId[trim($caliber->name)] = $caliber->id;
+        }
+        if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
+            $sales = \App\Models\Sale::notReturned()
+                ->where('branch_id', $filters['branch_id'])
+                ->whereDate('created_at', '>=', $filters['date_from'])
+                ->whereDate('created_at', '<=', $filters['date_to'])
+                ->get();
+            // Debug: Log sales and products
+            \Log::info('KASR SALES', ['sales' => $sales->toArray()]);
+            foreach ($sales as $sale) {
+                $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+                \Log::info('KASR PRODUCTS', ['sale_id' => $sale->id, 'products' => $products]);
+                if ($products) {
+                    foreach ($products as $product) {
+                        // Try to match by caliber_name if caliber_id does not exist in weights
+                        $cid = isset($product['caliber_id']) ? (int)$product['caliber_id'] : null;
+                        $cname = isset($product['caliber_name']) ? trim($product['caliber_name']) : null;
+                        $targetId = null;
+                        if ($cid && isset($weights[$cid])) {
+                            $targetId = $cid;
+                        } elseif ($cname && isset($caliberNameToId[$cname])) {
+                            $targetId = $caliberNameToId[$cname];
+                        }
+                        if ($targetId && isset($product['weight'])) {
+                            $weights[$targetId] += (float)$product['weight'];
+                        }
+                    }
+                }
+            }
+        }
+
+        $prices = [];
+        foreach ($calibers as $caliber) {
+            $prices[$caliber->id] = (float) $request->get('price_' . $caliber->id, 0);
+        }
+        $reportCalibers = [];
+        $totalAmount = 0;
+        $totalWeight = 0;
+        foreach ($calibers as $caliber) {
+            $weight = $weights[$caliber->id];
+            $price = $prices[$caliber->id];
+            $amount = $weight * $price;
+            $reportCalibers[] = [
+                'name' => $caliber->name,
+                'weight' => $weight,
+                'price_per_gram' => $price,
+                'amount' => $amount,
+            ];
+            $totalAmount += $amount;
+            $totalWeight += $weight;
+        }
+        $reportData = [
+            'calibers' => $reportCalibers,
+            'total_amount' => $totalAmount,
+            'total_weight' => $totalWeight,
+            'avg_price_per_gram' => $totalWeight > 0 ? $totalAmount / $totalWeight : 0,
+            'expenses' => $expenses,
+            'salaries' => $salaries,
+            'total_expenses' => $expenses + $salaries,
+            'profit' => $totalAmount - $expenses,
+            'net_profit' => $totalAmount - ($expenses + $salaries),
+        ];
+        $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
+        return view('reports.kasr', compact('branches', 'filters', 'reportData', 'selectedBranch', 'expenses', 'salaries', 'weights', 'calibers'));
+    }
+
+    /**
      * Generate PDF report.
      */
     private function generatePDF($view, $data, $filename)

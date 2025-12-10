@@ -41,6 +41,23 @@
         'filters' => $filters ?? []
     ])
 
+    <!-- Quick Links to Other Reports -->
+    <div class="card mb-3 no-print" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: none;">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <a href="{{ route('reports.kasr') }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
+                    <i class="mdi mdi-chart-box me-1"></i> تقرير الكسر
+                </a>
+                <a href="{{ route('reports.comparative', request()->query()) }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
+                    <i class="mdi mdi-chart-line me-1"></i> التقرير المقارن
+                </a>
+                <a href="{{ route('reports.speed', request()->query()) }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
+                    <i class="mdi mdi-speedometer me-1"></i> تقرير السرعة
+                </a>
+            </div>
+        </div>
+    </div>
+
     <form method="GET" action="{{ route('reports.all') }}" class="card mb-4 no-print" id="filterForm">
         <div class="card-body">
             <div class="row g-3">

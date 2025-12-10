@@ -122,7 +122,7 @@
                         <div class="border-top pt-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <small class="text-muted">عدد المبيعات:</small>
-                                <strong>{{ $caliber->sales()->count() }}</strong>
+                                <strong>{{ $caliber->products_sold_count }}</strong>
                             </div>
                         </div>
 

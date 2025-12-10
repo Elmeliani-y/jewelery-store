@@ -278,16 +278,47 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Top categories by sales
-        $topCategories = Sale::notReturned()
+        // Top categories by sales - parse from products JSON
+        $sales = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-            ->with('category')
-            ->selectRaw('category_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
-            ->groupBy('category_id')
-            ->orderBy('amount', 'desc')
-            ->limit(5)
             ->get();
+
+        $categoryData = [];
+        foreach ($sales as $sale) {
+            $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+            if (is_array($products)) {
+                foreach ($products as $product) {
+                    $categoryId = $product['category_id'] ?? null;
+                    if ($categoryId) {
+                        if (!isset($categoryData[$categoryId])) {
+                            $categoryData[$categoryId] = [
+                                'category_id' => $categoryId,
+                                'category_name' => $product['category_name'] ?? '',
+                                'amount' => 0,
+                                'weight' => 0,
+                                'count' => 0,
+                            ];
+                        }
+                        $categoryData[$categoryId]['amount'] += $product['amount'] ?? 0;
+                        $categoryData[$categoryId]['weight'] += $product['weight'] ?? 0;
+                        $categoryData[$categoryId]['count']++;
+                    }
+                }
+            }
+        }
+
+        // Sort by amount and take top 5
+        usort($categoryData, fn($a, $b) => $b['amount'] <=> $a['amount']);
+        $topCategories = collect(array_slice($categoryData, 0, 5))->map(function($item) {
+            return (object) [
+                'category_id' => $item['category_id'],
+                'category' => Category::find($item['category_id']),
+                'amount' => $item['amount'],
+                'weight' => $item['weight'],
+                'count' => $item['count'],
+            ];
+        });
 
         // Top calibers by sales
         $topCalibers = Sale::notReturned()

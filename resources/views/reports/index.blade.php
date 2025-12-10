@@ -211,6 +211,23 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="card report-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">تقرير الكسر</h6>
+                        <iconify-icon icon="solar:calculator-bold-duotone" class="text-info fs-4"></iconify-icon>
+                    </div>
+                    <p class="text-muted small mt-2">تقرير مفصل للعيارات والأجور والرواتب حسب الفرع</p>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-info btn-sm text-white" href="{{ route('reports.kasr') }}">
+                            <i class="mdi mdi-chart-box me-1"></i> عرض
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
