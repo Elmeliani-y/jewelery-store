@@ -155,8 +155,16 @@ class Sale extends Model
      */
     public function getPricePerGramAttribute()
     {
-        // Removed direct weight usage; use products array for calculations in controllers
-        return null;
+        $products = is_string($this->products) ? json_decode($this->products, true) : $this->products;
+        $weight = 0;
+        $netAmount = 0;
+        if ($products) {
+            foreach ($products as $product) {
+                $weight += isset($product['weight']) ? (float)$product['weight'] : 0;
+                $netAmount += isset($product['net_amount']) ? (float)$product['net_amount'] : 0;
+            }
+        }
+        return $weight > 0 ? $netAmount / $weight : 0;
     }
 
     /**

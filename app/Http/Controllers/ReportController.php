@@ -159,6 +159,7 @@ class ReportController extends Controller
             if (isset($filters['date_to'])) {
                 $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
             }
+            $sales = $salesQuery->get();
             $netAmount = $salesQuery->sum('net_amount');
             return [
                 'employee' => $employee,
