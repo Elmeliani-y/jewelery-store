@@ -27,6 +27,7 @@ class SettingController extends Controller
             'min_invoice_gram_avg' => 'required|numeric|min:0',
             'enable_delete_modal' => 'nullable',
             'show_tax_in_totals' => 'nullable',
+            'logo_path' => 'nullable|string',
         ]);
 
         // Normalize booleans from checkboxes
@@ -40,15 +41,20 @@ class SettingController extends Controller
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos', 'public');
             $validated['logo_path'] = 'storage/' . $path;
-            unset($validated['logo']);
+        } else {
+            // If no new logo uploaded, keep the old one from DB (not from request)
+            $validated['logo_path'] = Setting::get('logo_path');
         }
+        unset($validated['logo']);
 
         // Save each setting to database
         foreach ($validated as $key => $value) {
             Setting::set($key, is_bool($value) ? ($value ? '1' : '0') : $value);
         }
 
-        return redirect()->route('settings.index')->with('success', 'تم حفظ إعدادات النظام بنجاح');
+        // Always reload settings from DB after save
+        $settings = $this->readSettings();
+        return redirect()->route('settings.index')->with(['success' => 'تم حفظ إعدادات النظام بنجاح', 'settings' => $settings]);
     }
 
     private function readSettings(): array

@@ -246,61 +246,91 @@
 </script>
 
     @if(isset($reportData))
-    <!-- Report Results -->
+    <!-- Enhanced Report Results -->
     <div class="kasr-receipt mt-3">
         <div class="text-center mb-2">
-            <h4>تقرير الكسر</h4>
-            <div class="muted">من {{ $filters['date_from'] }} إلى {{ $filters['date_to'] }}</div>
+            <h4>تقرير شامل</h4>
         </div>
-        <hr class="sep">
         <div class="row-line">
             <span class="label">الفرع:</span>
             <span class="value">{{ $selectedBranch->name ?? '-' }}</span>
         </div>
+        <!-- Removed empty category and invoice number fields for cleaner output -->
         <div class="row-line">
-            <span class="label">إجمالي الوزن:</span>
-            <span class="value">{{ number_format($reportData['total_weight'], 2) }}</span>
-        </div>
-        <div class="row-line">
-            <span class="label">متوسط سعر الجرام:</span>
-            <span class="value">{{ number_format($reportData['avg_price_per_gram'], 2) }}</span>
+            <span class="label">التاريخ:</span>
+            <span class="value">{{ $filters['date_from'] ?? '-' }} إلى {{ $filters['date_to'] ?? '-' }}</span>
         </div>
         <hr class="sep">
+        <!-- Removed empty filter fields for cleaner output -->
+        <hr class="sep">
         <div class="row-line">
-            <span class="label">المبلغ الإجمالي:</span>
-            <span class="value">{{ number_format($reportData['total_amount'], 2) }}</span>
-        </div>
-        <div class="row-line">
-            <span class="label">الأجور (المصروفات):</span>
-            <span class="value">{{ number_format($reportData['expenses'], 2) }}</span>
+            <span class="label">الأجور:</span>
+            <span class="value">{{ number_format($reportData['expenses'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">الرواتب:</span>
-            <span class="value">{{ number_format($reportData['salaries'], 2) }}</span>
+            <span class="value">{{ number_format($reportData['salaries'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
-            <span class="label">سعر الفائدة (%):</span>
-            <span class="value">{{ number_format($reportData['interest_rate'], 2) }}</span>
+            <span class="label">سعر الفائدة:</span>
+            <span class="value">{{ number_format($reportData['interest_rate'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">قيمة الفائدة:</span>
-            <span class="value">{{ number_format($reportData['interest_amount'], 2) }}</span>
+            <span class="value">{{ number_format($reportData['interest_amount'] ?? 0, 2) }}</span>
         </div>
         <hr class="sep">
         <div class="row-line">
-            <span class="label">إجمالي المصروفات/رواتب/فائدة:</span>
-            <span class="danger">{{ number_format($reportData['total_expenses'], 2) }}</span>
+            <span class="label">مجموع المبيعات:</span>
+            <span class="value">{{ number_format($reportData['total_sales'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
+            <span class="label">مجموع المرتجعات:</span>
+            <span class="value">{{ number_format($reportData['total_returns'] ?? 0, 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">مجموع الضريبة:</span>
+            <span class="value">{{ number_format($reportData['total_tax'] ?? 0, 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">مجموع الوزن:</span>
+            <span class="value">{{ number_format($reportData['total_weight'] ?? 0, 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">معدل الجرام:</span>
+            <span class="value">{{ number_format($reportData['avg_price_per_gram'] ?? 0, 2) }}</span>
+        </div>
+        <hr class="sep">
+        @if(isset($reportData['calibers']) && is_array($reportData['calibers']))
+            @foreach($reportData['calibers'] as $caliber)
+                <div class="row-line">
+                    <span class="label">{{ $caliber['name'] }}:</span>
+                    <span class="value">{{ number_format($caliber['amount'], 2) }}</span>
+                </div>
+                <div class="row-line">
+                    <span class="label">ذهب {{ $caliber['name'] }}:</span>
+                    <span class="value">{{ number_format($caliber['weight'], 2) }}</span>
+                </div>
+                <div class="row-line">
+                    <span class="label">معدل الجرام:</span>
+                    <span class="value">{{ number_format($caliber['price_per_gram'], 2) }}</span>
+                </div>
+            @endforeach
+        @endif
+        <hr class="sep">
+        <div class="row-line">
             <span class="label">الربح قبل الرواتب والفائدة:</span>
-            <span class="value">{{ number_format($reportData['profit'], 2) }}</span>
+            <span class="value">{{ number_format($reportData['profit'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">صافي الربح:</span>
-            <span class="highlight">{{ number_format($reportData['net_profit'], 2) }}</span>
+            <span class="highlight">{{ number_format($reportData['net_profit'] ?? 0, 2) }}</span>
         </div>
-        <hr class="sep">
-        <div class="muted text-center">تم التحديث بتاريخ {{ date('l, F d, Y') }}</div>
+        <div class="row-line">
+            <span class="label">جوال:</span>
+            <span class="value">{{ number_format($reportData['mobile'] ?? 0, 2) }}</span>
+        </div>
+        <div class="muted text-center mt-2">{{ \Carbon\Carbon::now()->format('l, F d, Y') }}</div>
     </div>
     @endif
 </div>

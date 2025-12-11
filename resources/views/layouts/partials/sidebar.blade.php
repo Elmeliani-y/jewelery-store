@@ -5,22 +5,18 @@
         <!--- Sidemenu -->
         <div id="sidebar-menu">
 
-            <div class="logo-box">
-                <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo logo-light">
-                    <span class="logo-sm">
-                        <img src="/images/logo-sm.png" alt="" height="22">
-                    </span>
-                    <span class="logo-lg">
-                        <img src="/images/logo-light.png" alt="" height="24">
-                    </span>
-                </a>
-                <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo logo-dark">
-                    <span class="logo-sm">
-                        <img src="/images/logo-sm.png" alt="" height="22">
-                    </span>
-                    <span class="logo-lg">
-                        <img src="/images/logo-dark.png" alt="" height="24">
-                    </span>
+            <div class="logo-box text-center py-2">
+                @php
+                    $settings = \App\Models\Setting::all()->pluck('value', 'key');
+                    $logoPath = !empty($settings['logo_path']) ? public_path($settings['logo_path']) : null;
+                    $showCustomLogo = $logoPath && file_exists($logoPath);
+                @endphp
+                <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo">
+                    @if($showCustomLogo)
+                        <img src="{{ asset($settings['logo_path']) }}" alt="Logo" style="height:64px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
+                    @else
+                        <img src="/images/logo-light.png" alt="Logo" style="height:48px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
+                    @endif
                 </a>
             </div>
 
