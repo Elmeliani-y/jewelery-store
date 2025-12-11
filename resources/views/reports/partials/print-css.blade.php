@@ -160,5 +160,19 @@ tfoot { display: table-footer-group; }
     display: block !important;
     overflow: visible !important;
   }
+
+  /* Force each chart/table to print on its own page */
+  canvas,
+  .table-responsive,
+  table {
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+  }
+  /* Avoid extra trailing blank page */
+  canvas:last-of-type,
+  .table-responsive:last-of-type,
+  table:last-of-type {
+    page-break-after: auto !important;
+  }
 }
 </style>
