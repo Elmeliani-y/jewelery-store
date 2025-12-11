@@ -8,6 +8,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sale extends Model
 {
+    /**
+     * Get total weight from products array.
+     */
+    public function getWeightAttribute()
+    {
+        $products = is_string($this->products) ? json_decode($this->products, true) : $this->products;
+        $weight = 0;
+        if ($products) {
+            foreach ($products as $product) {
+                $weight += isset($product['weight']) ? (float)$product['weight'] : 0;
+            }
+        }
+        return $weight;
+    }
     use HasFactory;
 
     protected $fillable = [
