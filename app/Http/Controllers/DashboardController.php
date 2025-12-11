@@ -400,16 +400,51 @@ class DashboardController extends Controller
             ];
         });
 
-        // Top calibers by sales
-        $topCalibers = Sale::notReturned()
+        // Top calibers by sales - aggregate from products JSON
+        $sales = Sale::notReturned()
             ->inDateRange($startDate, $endDate)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-            ->with('caliber')
-            ->selectRaw('caliber_id, SUM(total_amount) as amount, SUM(weight) as weight, COUNT(*) as count')
-            ->groupBy('caliber_id')
-            ->orderBy('amount', 'desc')
-            ->limit(5)
             ->get();
+
+        $caliberData = [];
+        foreach ($sales as $sale) {
+            $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+            if (is_array($products)) {
+                foreach ($products as $product) {
+                    $caliberId = $product['caliber_id'] ?? null;
+                    if ($caliberId) {
+                        if (!isset($caliberData[$caliberId])) {
+                            $caliberData[$caliberId] = [
+                                'caliber_id' => $caliberId,
+                                'amount' => 0,
+                                'weight' => 0,
+                                'count' => 0,
+                                'caliber' => null,
+                            ];
+                        }
+                        $caliberData[$caliberId]['amount'] += $product['amount'] ?? 0;
+                        $caliberData[$caliberId]['weight'] += $product['weight'] ?? 0;
+                        $caliberData[$caliberId]['count']++;
+                    }
+                }
+            }
+        }
+        // Attach caliber model
+        foreach ($caliberData as $caliberId => &$data) {
+            $data['caliber'] = \App\Models\Caliber::find($caliberId);
+        }
+        unset($data);
+        // Sort by amount and take top 5
+        usort($caliberData, fn($a, $b) => $b['amount'] <=> $a['amount']);
+        $topCalibers = collect(array_slice($caliberData, 0, 5))->map(function($item) {
+            return (object) [
+                'caliber_id' => $item['caliber_id'],
+                'caliber' => $item['caliber'],
+                'amount' => $item['amount'],
+                'weight' => $item['weight'],
+                'count' => $item['count'],
+            ];
+        });
 
         return [
             'branches' => $topBranches,
