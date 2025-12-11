@@ -399,40 +399,30 @@ if(typeof dailySalesData !== 'undefined' && dailySalesData.length > 0) {
 }
 
 // Revenue Statistics - Sales vs Expenses (12 months)
-if(typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length > 0) {
+if(typeof monthlyRevenueData !== 'undefined') {
+    // If empty, fill with 12 months of zeros for both sales and expenses
+    let data = monthlyRevenueData;
+    if (!Array.isArray(data) || data.length === 0) {
+        // Generate last 12 months labels
+        let months = [];
+        let now = new Date();
+        for (let i = 11; i >= 0; i--) {
+            let d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push(d.toLocaleString('ar-EG', { month: 'short', year: 'numeric' }));
+        }
+        data = months.map(m => ({ month: m, sales: 0, expenses: 0 }));
+    }
     var revenueOptions = {
         series: [
-            {
-                name: 'المبيعات',
-                type: 'line',
-                data: monthlyRevenueData.map(item => item.sales)
-            },
-            {
-                name: 'المصروفات',
-                type: 'line',
-                data: monthlyRevenueData.map(item => item.expenses)
-            }
+            { name: 'المبيعات', type: 'line', data: data.map(item => item.sales) },
+            { name: 'المصروفات', type: 'line', data: data.map(item => item.expenses) }
         ],
-        chart: {
-            type: 'line',
-            height: 200,
-            toolbar: { show: false }
-        },
-        grid: {
-            borderColor: '#f1f1f1',
-            strokeDashArray: 3
-        },
+        chart: { type: 'line', height: 200, toolbar: { show: false } },
+        grid: { borderColor: '#f1f1f1', strokeDashArray: 3 },
         colors: ["#27ebb0", "#E77636"],
-        stroke: {
-            width: 3,
-            curve: 'smooth'
-        },
+        stroke: { width: 3, curve: 'smooth' },
         dataLabels: { enabled: false },
-        legend: { 
-            show: true,
-            position: 'top',
-            horizontalAlign: 'right'
-        },
+        legend: { show: true, position: 'top', horizontalAlign: 'right' },
         markers: {
             size: 6,
             colors: ["#27ebb0", "#E77636"],
@@ -449,12 +439,8 @@ if(typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length > 0) {
             }
         },
         xaxis: {
-            categories: monthlyRevenueData.map(item => item.month),
-            labels: {
-                style: { colors: '#9aa0ac' },
-                rotate: -45,
-                rotateAlways: false
-            }
+            categories: data.map(item => item.month),
+            labels: { style: { colors: '#9aa0ac' }, rotate: -45, rotateAlways: false }
         },
         tooltip: {
             shared: true,
