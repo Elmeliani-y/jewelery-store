@@ -611,38 +611,32 @@ class ReportController extends Controller
         $format = $request->get('format');
         $perPage = (int) $request->get('per_page', 25);
         
-        $categoriesQuery = Category::active()
-            ->withCount(['sales' => function ($query) use ($filters) {
-                $this->applySalesFilters($query, $filters);
-                $query->where('is_returned', false);
-            }])
-            ->with(['sales' => function ($query) use ($filters) {
-                $this->applySalesFilters($query, $filters);
-                $query->where('is_returned', false);
-            }]);
+        $categories = Category::active()->orderBy('name')->get();
+        $sales = $this->buildSalesQuery($filters)->where('is_returned', false)->get();
 
-        if ($format) {
-            $categoriesData = $categoriesQuery->get()->map(function ($category) {
-                return [
-                    'category' => $category,
-                    'total_amount' => $category->sales->sum('total_amount'),
-                    'total_weight' => $category->sales->sum('weight'),
-                    'sales_count' => $category->sales_count,
-                ];
-            });
-        } else {
-            $categoriesData = $categoriesQuery
-                ->paginate($perPage)
-                ->through(function ($category) {
-                    return [
-                        'category' => $category,
-                        'total_amount' => $category->sales->sum('total_amount'),
-                        'total_weight' => $category->sales->sum('weight'),
-                        'sales_count' => $category->sales_count,
-                    ];
-                })
-                ->appends($request->query());
-        }
+        $categoriesData = $categories->map(function ($category) use ($sales) {
+            $totalAmount = 0;
+            $totalWeight = 0;
+            $salesCount = 0;
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        if (($product['category_id'] ?? null) == $category->id) {
+                            $totalAmount += $product['amount'] ?? 0;
+                            $totalWeight += $product['weight'] ?? 0;
+                            $salesCount++;
+                        }
+                    }
+                }
+            }
+            return [
+                'category' => $category,
+                'total_amount' => $totalAmount,
+                'total_weight' => $totalWeight,
+                'sales_count' => $salesCount,
+            ];
+        });
 
         $data = compact('categoriesData', 'filters') + $lists;
 

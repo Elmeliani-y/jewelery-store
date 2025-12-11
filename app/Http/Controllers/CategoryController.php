@@ -13,7 +13,32 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::with('defaultCaliber')->withCount('sales')->orderBy('name')->paginate(15);
+        $categories = Category::with('defaultCaliber')->orderBy('name')->get();
+        // Aggregate sales count per category using products array in sales
+        $sales = \App\Models\Sale::notReturned()->get();
+        $categorySalesCount = [];
+        foreach ($categories as $category) {
+            $count = 0;
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        if (($product['category_id'] ?? null) == $category->id) {
+                            $count++;
+                        }
+                    }
+                }
+            }
+            $category->sales_count = $count;
+        }
+        // Paginate manually since we used get()
+        $perPage = 15;
+        $page = request()->get('page', 1);
+        $paged = $categories->forPage($page, $perPage);
+        $categories = new \Illuminate\Pagination\LengthAwarePaginator($paged, $categories->count(), $perPage, $page, [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]);
         return view('categories.index', compact('categories'));
     }
 

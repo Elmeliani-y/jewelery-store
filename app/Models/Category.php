@@ -20,6 +20,7 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
 
+
     /**
      * Get the default caliber for the category.
      */
