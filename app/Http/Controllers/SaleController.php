@@ -565,7 +565,14 @@ class SaleController extends Controller
         $sales = $query->get();
 
         // Calculate totals
-        $totalWeight = $sales->sum('weight');
+        $totalWeight = $sales->reduce(function($carry, $sale) {
+            if (is_array($sale->products)) {
+                foreach ($sale->products as $product) {
+                    $carry += isset($product['weight']) ? (float)$product['weight'] : 0;
+                }
+            }
+            return $carry;
+        }, 0);
         $totalAmount = $sales->sum('total_amount');
         $averageRate = $totalWeight > 0 ? $totalAmount / $totalWeight : 0;
 

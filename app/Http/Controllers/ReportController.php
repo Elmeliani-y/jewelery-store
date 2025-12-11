@@ -163,7 +163,14 @@ class ReportController extends Controller
             return [
                 'employee' => $employee,
                 'total_sales' => $salesQuery->sum('total_amount'),
-                'total_weight' => $salesQuery->sum('weight'),
+                'total_weight' => $sales->reduce(function($carry, $sale) {
+                    if (is_array($sale->products)) {
+                        foreach ($sale->products as $product) {
+                            $carry += isset($product['weight']) ? (float)$product['weight'] : 0;
+                        }
+                    }
+                    return $carry;
+                }, 0),
                 'sales_count' => $salesQuery->count(),
                 'net_profit' => $netAmount,
             ];
@@ -596,7 +603,14 @@ class ReportController extends Controller
                     return [
                         'caliber' => $caliber,
                         'total_amount' => $caliber->sales->sum('total_amount'),
-                        'total_weight' => $caliber->sales->sum('weight'),
+                        'total_weight' => $caliber->sales->reduce(function($carry, $sale) {
+                            if (is_array($sale->products)) {
+                                foreach ($sale->products as $product) {
+                                    $carry += isset($product['weight']) ? (float)$product['weight'] : 0;
+                                }
+                            }
+                            return $carry;
+                        }, 0),
                         'total_tax' => $caliber->sales->sum('tax_amount'),
                         'net_amount' => $caliber->sales->sum('net_amount'),
                         'sales_count' => $caliber->sales_count,
@@ -695,7 +709,14 @@ class ReportController extends Controller
                 return [
                     'employee' => $employee,
                     'total_sales' => $employee->sales->sum('total_amount'),
-                    'total_weight' => $employee->sales->sum('weight'),
+                    'total_weight' => $employee->sales->reduce(function($carry, $sale) {
+                        if (is_array($sale->products)) {
+                            foreach ($sale->products as $product) {
+                                $carry += isset($product['weight']) ? (float)$product['weight'] : 0;
+                            }
+                        }
+                        return $carry;
+                    }, 0),
                     'sales_count' => $employee->sales->count(),
                     'net_profit' => $employee->sales->sum('net_amount') - $employee->salary,
                 ];
