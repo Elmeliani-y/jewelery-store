@@ -116,7 +116,15 @@ class ReportController extends Controller
             }
             $totalSales = $salesQuery->sum('total_amount');
             $totalNetSales = $salesQuery->sum('net_amount');
-            $totalWeight = $salesQuery->sum('weight');
+            $sales = $salesQuery->get();
+            $totalWeight = 0;
+            foreach ($sales as $sale) {
+                if (is_array($sale->products)) {
+                    foreach ($sale->products as $product) {
+                        $totalWeight += isset($product['weight']) ? (float)$product['weight'] : 0;
+                    }
+                }
+            }
             $salesCount = $salesQuery->count();
             $totalExpenses = $expensesQuery->sum('amount');
             $expensesCount = $expensesQuery->count();
@@ -482,7 +490,7 @@ class ReportController extends Controller
             'total_sales' => (clone $salesQuery)->sum('total_amount'),
             'total_net_sales' => (clone $salesQuery)->sum('net_amount'),
             'total_tax' => (clone $salesQuery)->sum('tax_amount'),
-            'total_weight' => (clone $salesQuery)->sum('weight'),
+            // ...existing code...
             'total_expenses' => (clone $expensesQuery)->sum('amount'),
             'net_profit' => (clone $salesQuery)->sum('net_amount') - (clone $expensesQuery)->sum('amount'),
             'sales_count' => (clone $salesQuery)->count(),
@@ -530,7 +538,7 @@ class ReportController extends Controller
         $summary = [
             'total_sales' => $sales->sum('total_amount'),
             'total_net_sales' => $sales->sum('net_amount'),
-            'total_weight' => $sales->sum('weight'),
+            // ...existing code...
             'sales_count' => $sales->count(),
         ];
 
@@ -575,7 +583,7 @@ class ReportController extends Controller
                 return [
                     'caliber' => $caliber,
                     'total_amount' => $caliber->sales->sum('total_amount'),
-                    'total_weight' => $caliber->sales->sum('weight'),
+                    // ...existing code...
                     'total_tax' => $caliber->sales->sum('tax_amount'),
                     'net_amount' => $caliber->sales->sum('net_amount'),
                     'sales_count' => $caliber->sales_count,

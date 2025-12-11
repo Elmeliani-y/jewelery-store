@@ -16,7 +16,7 @@ class Sale extends Model
         'branch_id',
         'employee_id',
         'caliber_id',
-        'weight',
+        // ...existing code...
         'total_amount',
         'cash_amount',
         'network_amount',
@@ -32,7 +32,7 @@ class Sale extends Model
 
     protected $casts = [
         'products' => 'array',
-        'weight' => 'decimal:3',
+        // ...existing code...
         'total_amount' => 'decimal:2',
         'cash_amount' => 'decimal:2',
         'network_amount' => 'decimal:2',
@@ -155,7 +155,8 @@ class Sale extends Model
      */
     public function getPricePerGramAttribute()
     {
-        return $this->weight > 0 ? $this->total_amount / $this->weight : 0;
+        // Removed direct weight usage; use products array for calculations in controllers
+        return null;
     }
 
     /**
