@@ -96,6 +96,10 @@
                                     المنتجات
                                     <!-- <span class="badge bg-warning text-dark ms-2">الحد الأدنى لسعر الجرام: {{ (float)($settings['min_invoice_gram_avg'] ?? config('sales.min_invoice_gram_avg', 2.0)) }} ريال</span> -->
                                 </h5>
+                                <button type="button" class="btn btn-success" id="add-product">
+                                    <iconify-icon icon="solar:add-square-bold-duotone" class="me-1"></iconify-icon>
+                                    إضافة منتج
+                                </button>
                             </div>
                             <div id="products-container">
                                 <!-- Product Item Template will be inserted here -->
@@ -558,31 +562,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add first product on page load
     addProduct();
-
-    // Auto-add a new product row when the last row is filled
-    function isProductFilled(productItem) {
-        return productItem.find('.product-category').val() &&
-               productItem.find('.product-caliber').val() &&
-               productItem.find('.product-weight').val() &&
-               productItem.find('.product-amount').val();
-    }
-
-    function autoAddProductOnFilled() {
-        $('#products-container').on('change input', '.product-category, .product-caliber, .product-weight, .product-amount', function() {
-            const items = $('.product-item');
-            const lastItem = items.last();
-            if (isProductFilled(lastItem)) {
-                // Only add if all previous are filled and no empty row exists
-                // Prevents adding multiple empty rows
-                if (items.filter(function(){
-                    return !isProductFilled($(this));
-                }).length === 0) {
-                    addProduct();
-                }
-            }
-        });
-    }
-    autoAddProductOnFilled();
 
     // Get employees by branch
     $('#branch_id').change(function() {
