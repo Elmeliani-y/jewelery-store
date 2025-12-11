@@ -16,6 +16,7 @@
                         <img src="/images/users/avatar-1.png" alt="user-image" class="rounded-circle" />
                         <span class="ms-2 d-none d-md-inline-block">{{ auth()->user()->username }}</span>
                     </a>
+                    
                     <div class="dropdown-menu dropdown-menu-end profile-dropdown">
                         <!-- item-->
                         <div class="dropdown-header noti-title">
