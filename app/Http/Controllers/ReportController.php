@@ -337,9 +337,26 @@ class ReportController extends Controller
             SUM(amount) as total
         ')->first();
 
+        // Calculate total weight from products JSON
+        $salesForWeight = \App\Models\Sale::notReturned()
+            ->whereDate('created_at', $date);
+        if ($branchId) {
+            $salesForWeight->where('branch_id', $branchId);
+        }
+        $salesForWeight = $salesForWeight->get();
+        $totalWeight = 0;
+        foreach ($salesForWeight as $sale) {
+            $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+            if ($products) {
+                foreach ($products as $product) {
+                    $totalWeight += isset($product['weight']) ? (float)$product['weight'] : 0;
+                }
+            }
+        }
+
         // Calculate derived metrics
         $profit = ($salesStats->net ?? 0) - ($expensesStats->total ?? 0);
-        $pricePerGram = 0; // No weight column in sales, so set to 0 or handle differently if needed
+        $pricePerGram = ($totalWeight > 0) ? (($salesStats->total ?? 0) / $totalWeight) : 0;
 
         // Top 5 employees (fast query)
         $topEmployeesRaw = DB::table('sales')
@@ -440,7 +457,7 @@ class ReportController extends Controller
             'sales_total' => $salesStats->total ?? 0,
             'sales_net' => $salesStats->net ?? 0,
             'sales_tax' => $salesStats->tax ?? 0,
-            'sales_weight' => $salesStats->weight ?? 0,
+            'sales_weight' => $totalWeight,
             'cash_amount' => $salesStats->cash ?? 0,
             'network_amount' => $salesStats->network ?? 0,
             'expenses_count' => $expensesStats->count ?? 0,
