@@ -36,6 +36,11 @@
             @if($sale->products && count($sale->products) > 0)
             <span class="badge bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i> {{ count($sale->products) }} منتج</span>
             @endif
+            @if($sale->is_returned)
+            <span class="badge bg-danger"><i class="mdi mdi-backup-restore me-1"></i> مرتجع</span>
+            @else
+            <span class="badge bg-secondary"><i class="mdi mdi-cash me-1"></i> عملية بيع</span>
+            @endif
         </div>
     </div>
 
@@ -257,13 +262,19 @@
                     <h6 class="mb-0">إجراءات</h6>
                 </div>
                 <div class="card-body d-flex flex-wrap gap-2">
-                    <a href="{{ route('sales.edit', $sale) }}" class="btn btn-warning btn-sm"><i class="mdi mdi-pencil-outline me-1"></i> تعديل</a>
-                    <a href="{{ route('sales.index') }}" class="btn btn-secondary btn-sm"><i class="mdi mdi-arrow-left me-1"></i> رجوع للقائمة</a>
-                                        <button type="button" class="btn btn-danger btn-sm btn-delete-sale" 
-                                                        data-url="{{ route('sales.destroy', $sale) }}"
-                                                        data-invoice="{{ $sale->invoice_number }}">
-                                                <i class="mdi mdi-delete-outline me-1"></i> حذف
-                                        </button>
+                    @if(!auth()->user()->isBranch())
+                        <a href="{{ route('sales.edit', $sale) }}" class="btn btn-warning btn-sm"><i class="mdi mdi-pencil-outline me-1"></i> تعديل</a>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete-sale" 
+                            data-url="{{ route('sales.destroy', $sale) }}"
+                            data-invoice="{{ $sale->invoice_number }}">
+                            <i class="mdi mdi-delete-outline me-1"></i> حذف
+                        </button>
+                    @endif
+                    @if(auth()->user()->isBranch())
+                        <a href="{{ url('/branch/daily-sales') }}" class="btn btn-secondary btn-sm"><i class="mdi mdi-arrow-left me-1"></i> رجوع للقائمة اليومية</a>
+                    @else
+                        <a href="{{ route('sales.index') }}" class="btn btn-secondary btn-sm"><i class="mdi mdi-arrow-left me-1"></i> رجوع للقائمة</a>
+                    @endif
                 </div>
             </div>
         </div>

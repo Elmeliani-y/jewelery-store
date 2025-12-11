@@ -24,6 +24,7 @@ class SaleController extends Controller
         }
 
         $query = Sale::with(['branch', 'employee', 'caliber'])
+            ->where('is_returned', false)
             ->orderBy('created_at', 'desc');
 
         // Apply filters
@@ -227,6 +228,8 @@ class SaleController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'tax_amount' => $totalTax,
                 'net_amount' => $totalNet,
+                'is_returned' => $request->has('is_returned'),
+                'returned_at' => $request->has('is_returned') ? now() : null,
             ];
 
             $sale = Sale::create($saleData);
@@ -463,19 +466,35 @@ class SaleController extends Controller
     public function returnSale(Sale $sale)
     {
         if ($sale->is_returned) {
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('sales.index')
                 ->with('error', 'هذه الفاتورة مسترجعة بالفعل');
         }
 
         try {
             $sale->returnSale();
 
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('sales.index')
                 ->with('success', 'تم استرجاع الفاتورة بنجاح');
 
         } catch (\Exception $e) {
             return back()->with('error', 'حدث خطأ في استرجاع الفاتورة: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Restore a returned sale as a normal sale.
+     */
+    public function unreturnSale(Sale $sale)
+    {
+        if (!$sale->is_returned) {
+            return redirect()->route('sales.show', $sale)
+                ->with('error', 'هذه الفاتورة ليست مرتجعاً');
+        }
+        $sale->update([
+            'is_returned' => false,
+            'returned_at' => null,
+        ]);
+        return redirect()->route('sales.index')->with('success', 'تمت إعادة الفاتورة إلى قائمة المبيعات بنجاح');
     }
 
     /**
@@ -510,10 +529,10 @@ class SaleController extends Controller
      */
     public function destroy(Sale $sale)
     {
-        // Allow only same-branch deletion for branch users
+        // Block all branch users from deleting sales
         $user = auth()->user();
-        if ($user->isBranch() && $sale->branch_id != $user->branch_id) {
-            abort(403, 'غير مصرح لك بحذف هذه الفاتورة');
+        if ($user->isBranch()) {
+            abort(403, 'غير مسموح لحساب الفرع بحذف المبيعات');
         }
 
         try {
@@ -534,7 +553,7 @@ class SaleController extends Controller
     {
         $user = auth()->user();
         
-        // Only branch users can access this page
+        // Only branch users can access
         if (!$user->isBranch()) {
             abort(403, 'هذه الصفحة مخصصة لحسابات الفروع فقط');
         }
@@ -588,5 +607,17 @@ class SaleController extends Controller
         $mixedTotal = $sales->where('payment_method', 'mixed')->sum('total_amount');
 
         return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate', 'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal'));
+    }
+
+    /**
+     * Show only returned sales (مرتجع) in the returns dashboard.
+     */
+    public function returns(Request $request)
+    {
+        $returns = Sale::with(['branch', 'employee', 'caliber'])
+            ->where('is_returned', true)
+            ->orderBy('returned_at', 'desc')
+            ->paginate(15);
+        return view('sales.returns', compact('returns'));
     }
 }

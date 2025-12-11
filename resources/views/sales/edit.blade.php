@@ -228,6 +228,17 @@
             </div>
         </div>
     </form>
+
+    @if(!$sale->is_returned)
+    <form action="{{ route('sales.return', $sale) }}" method="POST" class="d-inline">
+        @csrf
+        <button type="submit" class="btn btn-danger mt-3" onclick="return confirm('هل أنت متأكد من استرجاع هذه الفاتورة؟');">
+            <i class="mdi mdi-backup-restore me-1"></i> تعيين كمرتجع
+        </button>
+    </form>
+    @else
+    <div class="alert alert-danger mt-3"><i class="mdi mdi-backup-restore me-1"></i> هذه الفاتورة مرتجع</div>
+    @endif
 </div>
 @endsection
 

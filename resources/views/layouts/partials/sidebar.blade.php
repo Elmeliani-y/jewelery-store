@@ -63,6 +63,9 @@
                                     <a href="{{ route('sales.index') }}" class="tp-link">قائمة المبيعات</a>
                                 </li>
                                 <li>
+                                    <a href="{{ route('sales.returns') }}" class="tp-link">قائمة المرتجعات</a>
+                                </li>
+                                <li>
                                     <a href="{{ route('sales.create') }}" class="tp-link">تسجيل مبيعة جديدة</a>
                                 </li>
                             </ul>

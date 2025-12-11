@@ -37,9 +37,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Sales Management (original single resource)
     Route::resource('sales', SaleController::class);
     Route::post('sales/{sale}/return', [SaleController::class, 'returnSale'])->name('sales.return');
+    Route::post('sales/{sale}/unreturn', [SaleController::class, 'unreturnSale'])->name('sales.unreturn');
     Route::get('api/employees-by-branch', [SaleController::class, 'getEmployeesByBranch'])->name('api.employees-by-branch');
     Route::get('api/sales/search', [SaleController::class, 'searchByInvoice'])->name('api.sales.search');
     Route::get('branch/daily-sales', [SaleController::class, 'dailySales'])->name('branch.daily-sales');
+
+    // Returns dashboard
+    Route::get('returns', [SaleController::class, 'returns'])->name('sales.returns');
 
     // Expenses Management (original single resource)
     Route::resource('expenses', ExpenseController::class);

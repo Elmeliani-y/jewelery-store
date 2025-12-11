@@ -36,11 +36,40 @@
                 </h3>
                 <p class="mb-0 opacity-75">عرض وإدارة جميع عمليات البيع</p>
             </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        @if(auth()->user()->isBranch())
+                            <a href="{{ url('/branch/daily-sales') }}" class="btn btn-outline-primary">
+                                <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة اليومية
+                            </a>
+                        @else
+                            <a href="{{ route('sales.index') }}" class="btn btn-outline-primary">
+                                <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة
+                            </a>
+                        @endif
+                    </div>
+                <div class="d-flex justify-content-end mb-3">
+                    @if(auth()->user()->isBranch())
+                        <a href="{{ url('/branch/daily-sales') }}" class="btn btn-outline-primary">
+                            <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة اليومية
+                        </a>
+                    @else
+                        <a href="{{ route('sales.index') }}" class="btn btn-outline-primary">
+                            <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة
+                        </a>
+                    @endif
+                </div>
             <div class="col-auto">
-                <a href="{{ route('sales.create') }}" class="btn btn-light">
-                    <i class="ri-add-line me-1"></i>
-                    إضافة مبيعة جديدة
-                </a>
+                @if(auth()->user()->isBranch())
+                    <a href="{{ url('/branch/daily-sales') }}" class="btn btn-light">
+                        <i class="ri-add-line me-1"></i>
+                        إضافة مبيعة جديدة
+                    </a>
+                @else
+                    <a href="{{ route('sales.create') }}" class="btn btn-light">
+                        <i class="ri-add-line me-1"></i>
+                        إضافة مبيعة جديدة
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -113,12 +142,23 @@
                                         <a href="{{ route('sales.edit', $sale) }}" class="btn btn-icon btn-sm bg-warning-subtle" data-bs-toggle="tooltip" data-bs-original-title="تعديل">
                                             <i class="mdi mdi-pencil-outline text-warning fs-16"></i>
                                         </a>
-                                        <button type="button" class="btn btn-icon btn-sm bg-danger-subtle btn-delete-sale" 
-                                                data-url="{{ route('sales.destroy', $sale) }}" 
-                                                data-invoice="{{ $sale->invoice_number }}"
-                                                data-bs-toggle="tooltip" data-bs-original-title="حذف">
-                                            <i class="mdi mdi-delete-outline text-danger fs-16"></i>
-                                        </button>
+                                        @if(!auth()->user()->isBranch())
+                                            <button type="button" class="btn btn-icon btn-sm bg-danger-subtle btn-delete-sale" 
+                                                    data-url="{{ route('sales.destroy', $sale) }}" 
+                                                    data-invoice="{{ $sale->invoice_number }}"
+                                                    data-bs-toggle="tooltip" data-bs-original-title="حذف">
+                                                <i class="mdi mdi-delete-outline text-danger fs-16"></i>
+                                            </button>
+                                        @endif
+                                        @if(!$sale->is_returned)
+                                            @if(!auth()->user()->isBranch())
+                                                <button type="button" class="btn btn-icon btn-sm bg-secondary-subtle ms-1 btn-return-sale" data-sale-id="{{ $sale->id }}" data-url="{{ route('sales.return', $sale) }}" data-bs-toggle="tooltip" data-bs-original-title="تعيين كمرتجع">
+                                                    <i class="mdi mdi-backup-restore text-secondary fs-16"></i>
+                                                </button>
+                                            @endif
+                                        @else
+                                            <span class="badge bg-danger">مرتجع</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach
@@ -163,6 +203,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         modal.show();
                 });
         });
+
+    // Custom return modal logic
+    let returnUrl = '';
+    let returnForm = document.getElementById('returnSaleForm');
+    document.querySelectorAll('.btn-return-sale').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            returnUrl = this.getAttribute('data-url');
+            const modal = new bootstrap.Modal(document.getElementById('returnSaleModal'));
+            modal.show();
+        });
+    });
+    if (returnForm) {
+        returnForm.addEventListener('submit', function(e) {
+            this.setAttribute('action', returnUrl);
+        });
+    }
 });
 </script>
 
@@ -187,6 +243,31 @@ document.addEventListener('DOMContentLoaded', function() {
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">حذف</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return Confirmation Modal -->
+<div class="modal fade" id="returnSaleModal" tabindex="-1" aria-labelledby="returnSaleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="returnSaleModalLabel">
+                    <i class="mdi mdi-backup-restore text-secondary fs-4 me-2"></i>
+                    تأكيد الاسترجاع
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                هل أنت متأكد من تعيين هذه الفاتورة كمرتجع؟
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                <form id="returnSaleForm" method="POST" action="#">
+                    @csrf
+                    <button type="submit" class="btn btn-secondary">تأكيد</button>
                 </form>
             </div>
         </div>

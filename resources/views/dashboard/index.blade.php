@@ -138,6 +138,25 @@
             </div>
         </div>
 
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card">
+                <div class="card-body">
+                    <div class="widget-first">
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="mb-0 text-dark fs-16 fw-medium">المرتجعات</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['returned_sales_total'], 0, ',', '.') }}</h3>
+                            <div id="returned_sales" class="apex-charts"></div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning-subtle text-warning fs-13">{{ number_format($metrics['returned_sales_count'], 0, ',', '.') }} فاتورة مرتجعة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-12 col-lg-6 col-xl">
             <div class="card">
                 <div class="card-body">

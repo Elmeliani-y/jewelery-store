@@ -28,6 +28,61 @@
         font-weight: 600;
         color: #495057;
     }
+    /* Receipt-style result layout */
+    .kasr-receipt {
+        max-width: 380px;
+        margin: 0 auto;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 16px 18px;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+        font-size: 13px;
+    }
+    .kasr-receipt h4 {
+        font-size: 18px;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+    .kasr-receipt .sep {
+        border: 0;
+        border-top: 1px solid #e5e7eb;
+        margin: 6px 0;
+    }
+    .kasr-receipt .row-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        line-height: 1.3;
+    }
+    .kasr-receipt .label {
+        color: #374151;
+        font-weight: 600;
+    }
+    .kasr-receipt .value {
+        color: #111827;
+        font-weight: 600;
+    }
+    .kasr-receipt .muted {
+        color: #6b7280;
+        font-size: 12px;
+    }
+    .kasr-receipt .highlight {
+        color: #15803d;
+        font-weight: 700;
+    }
+    .kasr-receipt .danger {
+        color: #b91c1c;
+        font-weight: 700;
+    }
+    @media print {
+        .kasr-receipt {
+            box-shadow: none;
+            border: 1px solid #000;
+        }
+    }
     @media print {
         .no-print {
             display: none !important;
@@ -192,102 +247,60 @@
 
     @if(isset($reportData))
     <!-- Report Results -->
-    <div class="card">
-        <div class="card-body">
-            <!-- Report Header -->
-            <div class="text-center mb-4">
-                    <h3>نتائج تقرير الكسر</h3>
-                    @if(request()->isMethod('post') && request('calculate_report') && isset($reportData))
-                    <p class="text-muted mb-1">الفرع: <strong>{{ $selectedBranch->name }}</strong></p>
-                @endif
-                <p class="text-muted">من {{ $filters['date_from'] }} إلى {{ $filters['date_to'] }}</p>
-            </div>
-
-            <!-- Main Results Table -->
-            <div class="table-responsive">
-                <table class="kasr-table table">
-                    <thead>
-                        <tr>
-                            <th>النوع</th>
-                            <th>الوزن</th>
-                            <th>سعر الجرام</th>
-                            <th>المبلغ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($reportData['calibers'] as $caliber)
-                        <tr>
-                            <td class="caliber-label text-end">{{ $caliber['name'] }}</td>
-                            <td dir="ltr">{{ number_format($caliber['weight'], 2) }}</td>
-                            <td dir="ltr">{{ number_format($caliber['price_per_gram'], 2) }}</td>
-                            <td dir="ltr">{{ number_format($caliber['amount'], 2) }}</td>
-                        </tr>
-                        @endforeach
-                        
-                        <tr class="total-row">
-                            <td class="text-end" colspan="3">المبلغ الإجمالي</td>
-                            <td dir="ltr">{{ number_format($reportData['total_amount'], 2) }}</td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="text-end" colspan="3">الأجور (المصروفات)</td>
-                            <td dir="ltr">{{ number_format($reportData['expenses'], 2) }}</td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="text-end" colspan="3">الرواتب</td>
-                            <td dir="ltr">{{ number_format($reportData['salaries'], 2) }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end" colspan="3">سعر الفائدة (%)</td>
-                            <td dir="ltr">{{ number_format($reportData['interest_rate'], 2) }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-end" colspan="3">قيمة الفائدة</td>
-                            <td dir="ltr">{{ number_format($reportData['interest_amount'], 2) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Summary Section -->
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3 text-center">الملخص النهائي</h5>
-                            <table class="table table-sm mb-0">
-                                <tr>
-                                    <td class="text-end fw-semibold">إجمالي الوزن:</td>
-                                    <td dir="ltr" class="fw-bold">{{ number_format($reportData['total_weight'], 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-end fw-semibold">إجمالي المبلغ:</td>
-                                    <td dir="ltr" class="fw-bold">{{ number_format($reportData['total_amount'], 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-end fw-semibold">متوسط سعر الجرام:</td>
-                                    <td dir="ltr" class="fw-bold">{{ number_format($reportData['avg_price_per_gram'], 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-end fw-semibold">إجمالي المصروفات والرواتب والفائدة:</td>
-                                    <td dir="ltr" class="fw-bold text-danger">{{ number_format($reportData['total_expenses'], 2) }}</td>
-                                </tr>
-                                <tr class="table-active">
-                                    <td class="text-end fw-semibold">الربح قبل الرواتب والفائدة:</td>
-                                    <td dir="ltr" class="fw-bold text-primary">{{ number_format($reportData['profit'], 2) }}</td>
-                                </tr>
-                                <tr class="table-success">
-                                    <td class="text-end fw-semibold fs-5">صافي الربح (بعد المصروفات والرواتب والفائدة):</td>
-                                    <td dir="ltr" class="fw-bold text-success fs-5">{{ number_format($reportData['net_profit'], 2) }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+    <div class="kasr-receipt mt-3">
+        <div class="text-center mb-2">
+            <h4>تقرير الكسر</h4>
+            <div class="muted">من {{ $filters['date_from'] }} إلى {{ $filters['date_to'] }}</div>
         </div>
+        <hr class="sep">
+        <div class="row-line">
+            <span class="label">الفرع:</span>
+            <span class="value">{{ $selectedBranch->name ?? '-' }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">إجمالي الوزن:</span>
+            <span class="value">{{ number_format($reportData['total_weight'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">متوسط سعر الجرام:</span>
+            <span class="value">{{ number_format($reportData['avg_price_per_gram'], 2) }}</span>
+        </div>
+        <hr class="sep">
+        <div class="row-line">
+            <span class="label">المبلغ الإجمالي:</span>
+            <span class="value">{{ number_format($reportData['total_amount'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">الأجور (المصروفات):</span>
+            <span class="value">{{ number_format($reportData['expenses'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">الرواتب:</span>
+            <span class="value">{{ number_format($reportData['salaries'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">سعر الفائدة (%):</span>
+            <span class="value">{{ number_format($reportData['interest_rate'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">قيمة الفائدة:</span>
+            <span class="value">{{ number_format($reportData['interest_amount'], 2) }}</span>
+        </div>
+        <hr class="sep">
+        <div class="row-line">
+            <span class="label">إجمالي المصروفات/رواتب/فائدة:</span>
+            <span class="danger">{{ number_format($reportData['total_expenses'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">الربح قبل الرواتب والفائدة:</span>
+            <span class="value">{{ number_format($reportData['profit'], 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">صافي الربح:</span>
+            <span class="highlight">{{ number_format($reportData['net_profit'], 2) }}</span>
+        </div>
+        <hr class="sep">
+        <div class="muted text-center">تم التحديث بتاريخ {{ date('l, F d, Y') }}</div>
     </div>
     @endif
 </div>

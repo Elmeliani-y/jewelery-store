@@ -143,6 +143,16 @@ class DashboardController extends Controller
             return $carry + $weight;
         }, 0);
         
+        $returnedSalesQuery = Sale::query()->where('is_returned', true);
+        if ($startDate && $endDate) {
+            $returnedSalesQuery = $returnedSalesQuery->inDateRange($startDate, $endDate);
+        }
+        if ($branchId) {
+            $returnedSalesQuery = $returnedSalesQuery->where('branch_id', $branchId);
+        }
+        $totalReturnedSales = $returnedSalesQuery->sum('total_amount');
+        $returnedSalesCount = $returnedSalesQuery->count();
+
         return [
             'total_sales' => $totalSales,
             'total_net_sales' => $salesQuery->sum('net_amount'),
@@ -153,6 +163,8 @@ class DashboardController extends Controller
             'expenses_count' => $expensesQuery->count(),
             'net_profit' => $salesQuery->sum('net_amount') - $expensesQuery->sum('amount'),
             'price_per_gram' => $totalWeight > 0 ? $totalSales / $totalWeight : 0,
+            'returned_sales_count' => $returnedSalesCount,
+            'returned_sales_total' => $totalReturnedSales,
         ];
     }
 

@@ -266,6 +266,72 @@
 			</div>
 		</div>
 		@endif
+
+		{{-- Returned Sales Table --}}
+		@if(isset($returnedSales) && $returnedSales->count())
+		<div class="col-lg-6 mb-4">
+			<div class="card shadow-sm">
+				<div class="card-header bg-danger text-white">تقرير المبيعات المرتجعة</div>
+				<div class="card-body p-0">
+					<div class="table-responsive">
+						<table class="table table-sm mb-0">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>التاريخ</th>
+									<th>الفرع</th>
+									<th>الموظف</th>
+									<th>الوزن (جم)</th>
+									<th>سعر الجرام</th>
+									<th>طريقة الدفع</th>
+									<th>المبلغ</th>
+									<th>الضريبة</th>
+									<th>ملاحظات</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach($returnedSales as $sale)
+								@php
+									$pricePerGram = $sale->price_per_gram;
+									$isLow = $minGramPrice > 0 && $pricePerGram < $minGramPrice;
+								@endphp
+								<tr>
+									<td><strong>{{ $sale->id }}</strong></td>
+									<td>{{ $sale->created_at->format('Y-m-d') }}</td>
+									<td>{{ $sale->branch->name ?? '-' }}</td>
+									<td>{{ $sale->employee->name ?? '-' }}</td>
+									<td dir="ltr">{{ number_format($sale->weight, 2) }}</td>
+									<td dir="ltr">
+										<span class="{{ $isLow ? 'text-danger fw-bold' : '' }}" style="{{ $isLow ? 'color: #dc3545 !important; text-decoration: underline;' : '' }}" data-bs-toggle="tooltip" title="{{ $isLow ? 'أقل من الحد الأدنى (' . number_format($minGramPrice, 2) . ')' : '' }}">
+											{{ number_format($pricePerGram, 2) }}
+											@if($isLow)
+												<i class="mdi mdi-alert-circle-outline"></i>
+											@endif
+										</span>
+									</td>
+									<td>
+										@if($sale->payment_method == 'cash')
+											<span class="badge bg-success">نقدي</span>
+										@elseif($sale->payment_method == 'network')
+											<span class="badge bg-info">شبكة</span>
+										@elseif($sale->payment_method == 'mixed')
+											<span class="badge bg-warning">مختلط</span>
+										@else
+											-
+										@endif
+									</td>
+									<td dir="ltr"><strong>{{ number_format($sale->total_amount, 2) }}</strong></td>
+									<td dir="ltr">{{ number_format($sale->tax_amount, 2) }}</td>
+									<td>{{ $sale->notes ?: '-' }}</td>
+								</tr>
+								@endforeach
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		@endif
 		@if($showExpenses)
 		<div class="col-lg-6 mb-4">
 			<div class="card shadow-sm">
