@@ -46,9 +46,9 @@ tfoot { display: table-footer-group; }
   .card {
     box-shadow: none !important;
     border: 1px solid #ddd !important;
-    margin: 0 0 20px 0 !important;
+    margin: 0 0 16px 0 !important;
     page-break-inside: avoid !important;
-    page-break-after: always !important;
+    page-break-after: auto !important;
     background: white !important;
     border-radius: 6px !important;
     overflow: hidden !important;
@@ -135,5 +135,30 @@ tfoot { display: table-footer-group; }
   
   /* Better spacing */
   .mb-4 { margin-bottom: 20px !important; }
+  .content-page, .content { padding: 0 !important; }
+  .container-fluid { padding: 0 8px !important; }
+  
+  /* Comparative report: keep main chart full-width in print */
+  #branchesSalesExpensesChart { display: block !important; }
+  .d-print-block .card { page-break-inside: avoid !important; }
+  
+  /* Ensure charts print full size and all branches are visible */
+  .chart-container,
+  #branchesSalesExpensesChart {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 400px !important;
+    min-height: 350px !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  canvas#branchesSalesExpensesChart {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 400px !important;
+    min-height: 350px !important;
+    display: block !important;
+    overflow: visible !important;
+  }
 }
 </style>

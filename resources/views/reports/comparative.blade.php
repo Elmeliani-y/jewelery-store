@@ -290,74 +290,88 @@
     @endif
 
     @if(!$showTwoBranchComparison && count($branchesComparison) > 1)
-    <!-- Combined Sales and Expenses Chart for All Branches -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="mdi mdi-chart-bar me-1"></i> إجمالي المبيعات والمصروفات لكل فرع</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="branchesSalesExpensesChart" style="height: 350px;"></canvas>
+        <!-- Combined Sales and Expenses Chart for All Branches (screen only) -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-chart-bar me-1"></i> إجمالي المبيعات والمصروفات لكل فرع</h5>
+                            <small class="d-block text-light opacity-75">من: {{ request('from', 'البداية') }} &nbsp;|&nbsp; إلى: {{ request('to', 'النهاية') }}</small>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="branchesSalesExpensesChart" style="height: 350px;"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const branchesData = @json($branchesComparison);
-            const branchNames = branchesData.map(b => b.branch_name);
-            const salesData = branchesData.map(b => b.total_sales);
-            const expensesData = branchesData.map(b => b.total_expenses);
-            if (branchesData.length > 1) {
-                new Chart(document.getElementById('branchesSalesExpensesChart'), {
-                    type: 'bar',
-                    data: {
-                        labels: branchNames,
-                        datasets: [
-                            {
-                                label: 'المبيعات',
-                                data: salesData,
-                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
-                                borderRadius: 6,
-                            },
-                            {
-                                label: 'المصروفات',
-                                data: expensesData,
-                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
-                                borderRadius: 6,
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top' },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const branchesData = @json($branchesComparison);
+                const branchNames = branchesData.map(b => b.branch_name);
+                const salesData = branchesData.map(b => b.total_sales);
+                const expensesData = branchesData.map(b => b.total_expenses);
+                const branchCount = branchesData.length;
+
+                // Narrow bars when many branches so all columns fit on print/export
+                const barWidth = branchCount > 10 ? 0.35 : branchCount > 6 ? 0.45 : branchCount > 3 ? 0.6 : 0.75;
+                if (branchesData.length > 1) {
+                    new Chart(document.getElementById('branchesSalesExpensesChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: branchNames,
+                            datasets: [
+                                {
+                                    label: 'المبيعات',
+                                    data: salesData,
+                                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                    borderRadius: 6,
+                                },
+                                {
+                                    label: 'المصروفات',
+                                    data: expensesData,
+                                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                    borderRadius: 6,
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value.toLocaleString();
+                            },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    barPercentage: barWidth,
+                                    categoryPercentage: barWidth,
+                                    ticks: {
+                                        autoSkip: false,
+                                        maxRotation: 45,
+                                        minRotation: 45,
+                                    },
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value.toLocaleString();
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
-            }
-        });
-    </script>
+                    });
+                }
+            });
+        </script>
     <!-- Branch-wise Grouped Data and Charts -->
     @foreach($branchesComparison as $index => $branch)
     @php
