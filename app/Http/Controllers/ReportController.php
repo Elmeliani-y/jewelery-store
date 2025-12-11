@@ -328,7 +328,6 @@ class ReportController extends Controller
             SUM(total_amount) as total,
             SUM(net_amount) as net,
             SUM(tax_amount) as tax,
-            SUM(weight) as weight,
             SUM(cash_amount) as cash,
             SUM(network_amount) as network
         ')->first();
@@ -340,7 +339,7 @@ class ReportController extends Controller
 
         // Calculate derived metrics
         $profit = ($salesStats->net ?? 0) - ($expensesStats->total ?? 0);
-        $pricePerGram = ($salesStats->weight ?? 0) > 0 ? ($salesStats->total ?? 0) / $salesStats->weight : 0;
+        $pricePerGram = 0; // No weight column in sales, so set to 0 or handle differently if needed
 
         // Top 5 employees (fast query)
         $topEmployeesRaw = DB::table('sales')
