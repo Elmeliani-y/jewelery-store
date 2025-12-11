@@ -350,6 +350,7 @@ class ReportController extends Controller
             if ($products) {
                 foreach ($products as $product) {
                     $totalWeight += isset($product['weight']) ? (float)$product['weight'] : 0;
+                    
                 }
             }
         }
