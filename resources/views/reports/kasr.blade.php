@@ -62,21 +62,24 @@
                 
                 <!-- Filters Row -->
                 <div class="row g-3 mb-4 pb-3 border-bottom">
+                    <input type="hidden" name="auto_refresh" id="auto_refresh" value="0">
                     <div class="col-md-3">
                         <label for="date_from" class="form-label">من تاريخ</label>
                         <input type="date" name="date_from" id="date_from" 
                                value="{{ request('date_from', $filters['date_from'] ?? date('Y-m-01')) }}" 
-                               class="form-control">
+                               class="form-control"
+                               onchange="submitKasrFilters()">
                     </div>
                     <div class="col-md-3">
                         <label for="date_to" class="form-label">إلى تاريخ</label>
                         <input type="date" name="date_to" id="date_to" 
                                value="{{ request('date_to', $filters['date_to'] ?? date('Y-m-d')) }}" 
-                               class="form-control">
+                               class="form-control"
+                               onchange="submitKasrFilters()">
                     </div>
                     <div class="col-md-4">
                         <label for="branch_id" class="form-label">الفرع</label>
-                        <select name="branch_id" id="branch_id" class="form-select">
+                        <select name="branch_id" id="branch_id" class="form-select" onchange="submitKasrFilters()">
                             <option value="">اختر الفرع</option>
                             @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}" 
@@ -87,7 +90,7 @@
                         </select>
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" name="update_weights" value="1" class="btn btn-info w-100">تحديث الأوزان</button>
+                        <div class="w-100 text-muted small text-center">يتم التحديث تلقائياً عند تغيير الفرع أو التاريخ</div>
                     </div>
                 </div>
 
@@ -110,22 +113,6 @@
                                      <input type="number" name="weight_{{ $caliber->id }}" id="weight_{{ $caliber->id }}"
                                          value="{{ $weights[$caliber->id] ?? 0 }}"
                                          step="0.01" class="form-control caliber-input" data-caliber="{{ $caliber->id }}" disabled>
-                                @push('scripts')
-                                <script>
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    var form = document.getElementById('kasrForm');
-                                    var filterFields = ['date_from', 'date_to', 'branch_id'];
-                                    filterFields.forEach(function(id) {
-                                        var el = document.getElementById(id);
-                                        if (el) {
-                                            el.addEventListener('change', function() {
-                                                form.submit();
-                                            });
-                                        }
-                                    });
-                                });
-                                </script>
-                                @endpush
                                 </td>
                                 <td>
                                     <input type="number" name="price_{{ $caliber->id }}" id="price_{{ $caliber->id }}"
@@ -141,20 +128,20 @@
                 <!-- Expenses and Salaries (Auto-loaded from database) -->
                 <div class="row g-3 mt-3">
                     <div class="col-md-6">
-                        <label for="expenses" class="form-label fw-semibold">الأجور (المصروفات) - تلقائي</label>
+                        <label for="expenses" class="form-label fw-semibold">المصروفات الكاملة للفرع خلال المدة</label>
                         <input type="text" id="expenses_display" 
                                value="{{ number_format($expenses ?? 0, 2) }}" 
                                class="form-control bg-light" readonly>
                         <input type="hidden" name="expenses" value="{{ $expenses ?? 0 }}">
-                        <small class="text-muted">يتم جلبها تلقائياً من المصروفات المسجلة</small>
+                        <small class="text-muted">إجمالي كل المصروفات المسجلة للفرع المختار خلال الفترة.</small>
                     </div>
                     <div class="col-md-6">
-                        <label for="salaries" class="form-label fw-semibold">الرواتب - تلقائي</label>
+                        <label for="salaries" class="form-label fw-semibold">الرواتب من شاشة الموظفين</label>
                         <input type="text" id="salaries_display" 
                                value="{{ number_format($salaries ?? 0, 2) }}" 
                                class="form-control bg-light" readonly>
                         <input type="hidden" name="salaries" value="{{ $salaries ?? 0 }}">
-                        <small class="text-muted">يتم جلبها تلقائياً من الرواتب المسجلة</small>
+                        <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة.</small>
                     </div>
                 </div>
 
@@ -167,6 +154,32 @@
             </form>
         </div>
     </div>
+<script>
+// Inline to avoid missing stack includes; auto-submit on branch/date change.
+(function() {
+    const form = document.getElementById('kasrForm');
+    const autoRefresh = document.getElementById('auto_refresh');
+    window.submitKasrFilters = function() {
+        if (!form) return;
+        if (autoRefresh) autoRefresh.value = '1';
+        // slight delay to ensure value is set before submit
+        setTimeout(() => {
+            if (form.requestSubmit) {
+                form.requestSubmit();
+            } else {
+                form.submit();
+            }
+        }, 0);
+    };
+    ['date_from','date_to','branch_id'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', submitKasrFilters);
+            el.addEventListener('input', submitKasrFilters);
+        }
+    });
+})();
+</script>
 
     @if(isset($reportData))
     <!-- Report Results -->

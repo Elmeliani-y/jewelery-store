@@ -1038,29 +1038,24 @@ class ReportController extends Controller
             'branch_id' => $request->get('branch_id'),
             'date_from' => $request->get('date_from', date('Y-m-01')),
             'date_to' => $request->get('date_to', date('Y-m-d')),
+            'auto_refresh' => $request->get('auto_refresh') === '1',
         ];
 
-        // Auto-load expenses and salaries from database
+        // Auto-load expenses (all) and salaries from database
         $expenses = 0;
         $salaries = 0;
 
         if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
-            // Get all expenses (الأجور) - excluding salary type
-            $salaryExpenseType = ExpenseType::where('name', 'like', '%رواتب%')->first();
-
-            $expensesQuery = Expense::where('branch_id', $filters['branch_id'])
+            // All expenses within date range for the selected branch (no exclusions)
+            $expenses = Expense::where('branch_id', $filters['branch_id'])
                 ->whereDate('expense_date', '>=', $filters['date_from'])
-                ->whereDate('expense_date', '<=', $filters['date_to']);
+                ->whereDate('expense_date', '<=', $filters['date_to'])
+                ->sum('amount');
 
-            if ($salaryExpenseType) {
-                // Expenses excluding salaries
-                $expenses = (clone $expensesQuery)->where('expense_type_id', '!=', $salaryExpenseType->id)->sum('amount');
-                // Salaries only
-                $salaries = (clone $expensesQuery)->where('expense_type_id', $salaryExpenseType->id)->sum('amount');
-            } else {
-                // All expenses if no salary type found
-                $expenses = $expensesQuery->sum('amount');
-            }
+            // Salaries come from employees table for the selected branch (active employees)
+            $salaries = Employee::active()
+                ->where('branch_id', $filters['branch_id'])
+                ->sum('salary');
         }
 
         // Get calibers

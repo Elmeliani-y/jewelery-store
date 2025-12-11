@@ -61,6 +61,9 @@
                     <button class="btn btn-info" onclick="exportToCSV()">
                         <i class="mdi mdi-file-delimited me-1"></i> تصدير CSV
                     </button>
+                    <button class="btn btn-outline-primary" onclick="window.exportPageToPdf()">
+                        <i class="mdi mdi-file-pdf me-1"></i> تصدير PDF
+                    </button>
                     <button class="btn btn-success" onclick="window.print()">
                         <i class="mdi mdi-printer me-1"></i> طباعة
                     </button>
