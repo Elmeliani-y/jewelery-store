@@ -1390,6 +1390,7 @@ class ReportController extends Controller
                 }
             }
         }
+        
         $calibersComparison = collect(array_values($caliberSums));
         $showTwoBranchComparison = false;
         $twoBranchComparison = null;
