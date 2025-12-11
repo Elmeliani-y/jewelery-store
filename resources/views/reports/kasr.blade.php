@@ -143,6 +143,15 @@
                         <input type="hidden" name="salaries" value="{{ $salaries ?? 0 }}">
                         <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة.</small>
                     </div>
+                    <div class="col-md-6">
+                        <label for="interest_rate" class="form-label fw-semibold">سعر الفائدة (%)</label>
+                        <input type="number" name="interest_rate" id="interest_rate"
+                               value="{{ old('interest_rate', $filters['interest_rate'] ?? 0) }}"
+                               step="0.01" min="0" class="form-control"
+                               placeholder="مثال: 1.5"
+                               onchange="submitKasrFilters()" oninput="submitKasrFilters()">
+                        <small class="text-muted">يُحتسب كنسبة من المبلغ الإجمالي ويُخصم في صافي الربح.</small>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
@@ -229,6 +238,14 @@
                             <td class="text-end" colspan="3">الرواتب</td>
                             <td dir="ltr">{{ number_format($reportData['salaries'], 2) }}</td>
                         </tr>
+                        <tr>
+                            <td class="text-end" colspan="3">سعر الفائدة (%)</td>
+                            <td dir="ltr">{{ number_format($reportData['interest_rate'], 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-end" colspan="3">قيمة الفائدة</td>
+                            <td dir="ltr">{{ number_format($reportData['interest_amount'], 2) }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -253,15 +270,15 @@
                                     <td dir="ltr" class="fw-bold">{{ number_format($reportData['avg_price_per_gram'], 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-end fw-semibold">إجمالي المصروفات والرواتب:</td>
+                                    <td class="text-end fw-semibold">إجمالي المصروفات والرواتب والفائدة:</td>
                                     <td dir="ltr" class="fw-bold text-danger">{{ number_format($reportData['total_expenses'], 2) }}</td>
                                 </tr>
                                 <tr class="table-active">
-                                    <td class="text-end fw-semibold">الفائدة (قبل خصم الرواتب):</td>
+                                    <td class="text-end fw-semibold">الربح قبل الرواتب والفائدة:</td>
                                     <td dir="ltr" class="fw-bold text-primary">{{ number_format($reportData['profit'], 2) }}</td>
                                 </tr>
                                 <tr class="table-success">
-                                    <td class="text-end fw-semibold fs-5">صافي الربح (بعد كل المصروفات):</td>
+                                    <td class="text-end fw-semibold fs-5">صافي الربح (بعد المصروفات والرواتب والفائدة):</td>
                                     <td dir="ltr" class="fw-bold text-success fs-5">{{ number_format($reportData['net_profit'], 2) }}</td>
                                 </tr>
                             </table>

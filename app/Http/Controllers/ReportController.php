@@ -1039,6 +1039,7 @@ class ReportController extends Controller
             'date_from' => $request->get('date_from', date('Y-m-01')),
             'date_to' => $request->get('date_to', date('Y-m-d')),
             'auto_refresh' => $request->get('auto_refresh') === '1',
+            'interest_rate' => (float) $request->get('interest_rate', 0),
         ];
 
         // Auto-load expenses (all) and salaries from database
@@ -1117,6 +1118,8 @@ class ReportController extends Controller
             $totalAmount += $amount;
             $totalWeight += $weight;
         }
+        $interestRate = (float) ($filters['interest_rate'] ?? 0);
+        $interestAmount = $interestRate > 0 ? ($totalAmount * $interestRate / 100) : 0;
         $reportData = [
             'calibers' => $reportCalibers,
             'total_amount' => $totalAmount,
@@ -1124,9 +1127,11 @@ class ReportController extends Controller
             'avg_price_per_gram' => $totalWeight > 0 ? $totalAmount / $totalWeight : 0,
             'expenses' => $expenses,
             'salaries' => $salaries,
-            'total_expenses' => $expenses + $salaries,
+            'interest_rate' => $interestRate,
+            'interest_amount' => $interestAmount,
+            'total_expenses' => $expenses + $salaries + $interestAmount,
             'profit' => $totalAmount - $expenses,
-            'net_profit' => $totalAmount - ($expenses + $salaries),
+            'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
         ];
         $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
 
