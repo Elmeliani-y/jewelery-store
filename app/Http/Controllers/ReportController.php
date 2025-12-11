@@ -47,10 +47,22 @@ class ReportController extends Controller
                 $salesQuery->whereDate('created_at', '<=', $filters['date_to']);
                 $expensesQuery->whereDate('expense_date', '<=', $filters['date_to']);
             }
-            $totalSales = $salesQuery->sum('total_amount');
-            $totalNetSales = $salesQuery->sum('net_amount');
-            $totalWeight = $salesQuery->sum('weight');
-            $salesCount = $salesQuery->count();
+            $sales = $salesQuery->get();
+            $totalSales = 0;
+            $totalNetSales = 0;
+            $totalWeight = 0;
+            $salesCount = 0;
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        $totalSales += $product['amount'] ?? 0;
+                        $totalNetSales += $product['net_amount'] ?? 0;
+                        $totalWeight += $product['weight'] ?? 0;
+                        $salesCount++;
+                    }
+                }
+            }
             $totalExpenses = $expensesQuery->sum('amount');
             $expensesCount = $expensesQuery->count();
             $netProfit = $totalNetSales - $totalExpenses;
