@@ -289,7 +289,75 @@
     </div>
     @endif
 
-    @if(!$showTwoBranchComparison && count($branchesComparison) > 0)
+    @if(!$showTwoBranchComparison && count($branchesComparison) > 1)
+    <!-- Combined Sales and Expenses Chart for All Branches -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="mdi mdi-chart-bar me-1"></i> إجمالي المبيعات والمصروفات لكل فرع</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="branchesSalesExpensesChart" style="height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const branchesData = @json($branchesComparison);
+            const branchNames = branchesData.map(b => b.branch_name);
+            const salesData = branchesData.map(b => b.total_sales);
+            const expensesData = branchesData.map(b => b.total_expenses);
+            if (branchesData.length > 1) {
+                new Chart(document.getElementById('branchesSalesExpensesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: branchNames,
+                        datasets: [
+                            {
+                                label: 'المبيعات',
+                                data: salesData,
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderRadius: 6,
+                            },
+                            {
+                                label: 'المصروفات',
+                                data: expensesData,
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                borderRadius: 6,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
     <!-- Branch-wise Grouped Data and Charts -->
     @foreach($branchesComparison as $index => $branch)
     @php
@@ -376,32 +444,8 @@
             </div>
         </div>
 
-        <!-- Branch Charts -->
+        <!-- Branch Sales & Expenses Chart -->
         <div class="row g-3">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0"><i class="mdi mdi-chart-bar me-1"></i> المبيعات</h6>
-                    </div>
-                    <div class="card-body">
-                        <div style="position: relative; height: 200px;">
-                            <canvas id="branchSalesChart{{ $index }}"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-danger text-white">
-                        <h6 class="mb-0"><i class="mdi mdi-chart-pie me-1"></i> المصروفات</h6>
-                    </div>
-                    <div class="card-body">
-                        <div style="position: relative; height: 200px;">
-                            <canvas id="branchExpensesChart{{ $index }}"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-info text-white">
@@ -498,26 +542,23 @@
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-        console.log('branchesData:', branchesData);
-    // Toggle branch section
-    function toggleBranchSection(index) {
-        const content = document.getElementById('branchContent' + index);
-        const icon = document.getElementById('branchIcon' + index);
-        // Generate charts for each branch
+    document.addEventListener('DOMContentLoaded', function() {
+        const branchesData = @json($branchesComparison);
         branchesData.forEach((branch, index) => {
-            // Branch Sales Chart (single bar showing total sales)
-            const salesCanvas = document.getElementById('branchSalesChart' + index);
-            if (salesCanvas) {
-                new Chart(salesCanvas, {
+            const canvas = document.getElementById('branchSalesExpensesChart' + index);
+            if (canvas) {
+                new Chart(canvas, {
                     type: 'bar',
                     data: {
-                        labels: ['المبيعات'],
-                        datasets: [{
-                            label: 'المبيعات',
-                            data: [branch.total_sales || 0],
-                            backgroundColor: colors.success,
-                            borderRadius: 6,
-                        }]
+                        labels: ['المبيعات', 'المصروفات'],
+                        datasets: [
+                            {
+                                label: branch.branch_name,
+                                data: [branch.total_sales || 0, branch.total_expenses || 0],
+                                backgroundColor: ['rgba(40, 167, 69, 0.7)', 'rgba(220, 53, 69, 0.7)'],
+                                borderRadius: 6,
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -527,48 +568,7 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return 'المبيعات: ' + context.parsed.y.toLocaleString();
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value.toLocaleString();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            // Branch Expenses Chart (single bar showing total expenses)
-            const expensesCanvas = document.getElementById('branchExpensesChart' + index);
-            if (expensesCanvas) {
-                new Chart(expensesCanvas, {
-                    type: 'bar',
-                    data: {
-                        labels: ['المصروفات'],
-                        datasets: [{
-                            label: 'المصروفات',
-                            data: [branch.total_expenses || 0],
-                            backgroundColor: colors.danger,
-                            borderRadius: 6,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'المصروفات: ' + context.parsed.y.toLocaleString();
+                                        return context.label + ': ' + context.parsed.y.toLocaleString();
                                     }
                                 }
                             }
@@ -588,16 +588,7 @@
                 });
             }
         });
-                                type: 'bar',
-                                data: {
-                                    labels: ['المصروفات'],
-                                    datasets: [{
-                                        label: 'المصروفات',
-                                        data: [0],
-                                        backgroundColor: colors.danger,
-                                        borderRadius: 6,
-                                    }]
-                                },
+    });
                                 options: {
                                     responsive: true,
                                     maintainAspectRatio: false,

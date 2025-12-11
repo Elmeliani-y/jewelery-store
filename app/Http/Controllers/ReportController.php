@@ -349,8 +349,8 @@ class ReportController extends Controller
             $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
             if ($products) {
                 foreach ($products as $product) {
-                    $totalWeight += isset($product['weight']) ? (float)$product['weight'] : 0;
-                    
+                    $totalWeight += isset($product['weight']) ? (float) $product['weight'] : 0;
+
                 }
             }
         }
@@ -1392,6 +1392,18 @@ class ReportController extends Controller
         }
         $calibersComparison = collect(array_values($caliberSums));
         $showTwoBranchComparison = false;
+        $twoBranchComparison = null;
+        if ($request->filled('branch1') && $request->filled('branch2') && $request->input('branch1') != $request->input('branch2')) {
+            $showTwoBranchComparison = true;
+            $branch1 = $branchesComparison->firstWhere('branch_id', (int)$request->input('branch1'));
+            $branch2 = $branchesComparison->firstWhere('branch_id', (int)$request->input('branch2'));
+            if ($branch1 && $branch2) {
+                $twoBranchComparison = [
+                    'branch1' => $branch1,
+                    'branch2' => $branch2,
+                ];
+            }
+        }
 
         // Prepare employees grouped by branch
         $employeesByBranch = [];
@@ -1402,7 +1414,7 @@ class ReportController extends Controller
         // Pass all branch IDs for use in the view
         $branchIds = $branches->pluck('id')->values();
 
-        $data = compact('branches', 'calibers', 'filters', 'branchesComparison', 'employeesComparison', 'categoriesComparison', 'calibersComparison', 'showTwoBranchComparison', 'employeesByBranch', 'branchIds', 'paymentMethodsComparison');
+        $data = compact('branches', 'calibers', 'filters', 'branchesComparison', 'employeesComparison', 'categoriesComparison', 'calibersComparison', 'showTwoBranchComparison', 'twoBranchComparison', 'employeesByBranch', 'branchIds', 'paymentMethodsComparison');
 
         return view('reports.comparative', $data);
     }
