@@ -40,13 +40,7 @@ class Caliber extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Get the sales for the caliber.
-     */
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sale::class);
-    }
+
 
     /**
      * Scope to get only active calibers.

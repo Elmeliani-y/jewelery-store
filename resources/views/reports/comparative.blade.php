@@ -43,33 +43,7 @@
 </style>
 @endsection
 @section('content')
-<!-- Sales By Category Chart -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card overflow-hidden">
-            <div class="card-header">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title text-dark mb-0">المبيعات حسب الفئة</h5>
-                </div>
-            </div>
-            <div class="card-body">
-                <div id="categories_chart" class="apex-charts"></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card overflow-hidden">
-            <div class="card-header">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title text-dark mb-0">المصروفات حسب الفئة</h5>
-                </div>
-            </div>
-            <div class="card-body">
-                <div id="expenses_categories_chart" class="apex-charts"></div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- ...existing code... -->
 <div class="container-fluid">
     <!-- Print Title -->
     <div class="print-title" style="display: none;">

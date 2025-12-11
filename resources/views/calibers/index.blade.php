@@ -140,7 +140,7 @@
                                 </button>
                             </form>
                             
-                            @if($caliber->sales()->count() == 0)
+                            @if($caliber->products_sold_count == 0)
                                 <form action="{{ route('calibers.destroy', $caliber) }}" method="POST" class="delete-form">
                                     @csrf
                                     @method('DELETE')
