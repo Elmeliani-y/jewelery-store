@@ -4,6 +4,11 @@
 @section('css')
 @include('reports.partials.print-css')
 <style>
+        /* Make kasr report titles white for dark mode */
+        .kasr-receipt h4,
+        .page-title {
+            color: #fff !important;
+        }
     .kasr-table th {
         background-color: #f8f9fa;
         font-weight: 600;
@@ -114,6 +119,104 @@
         <div class="card-body">
             <form method="POST" action="{{ route('reports.kasr') }}" id="kasrForm">
                 @csrf
+                                <style>
+                                #customInterestPopup {
+                                    display: none;
+                                    position: fixed;
+                                    top: 0; left: 0;
+                                    width: 100vw; height: 100vh;
+                                    background: rgba(0,0,0,0.35);
+                                    z-index: 9999;
+                                    align-items: center;
+                                    justify-content: center;
+                                    flex-direction: column;
+                                }
+                                #customInterestPopup.active {
+                                    display: flex;
+                                }
+                                #customInterestPopup .popup-content {
+                                    background: #fff;
+                                    padding: 32px 24px 24px 24px;
+                                    border-radius: 10px;
+                                    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+                                    max-width: 90vw;
+                                    width: 340px;
+                                    text-align: center;
+                                }
+                                /* Shake animation for interest input */
+                                @keyframes shake {
+                                  0% { transform: translateX(0); }
+                                  20% { transform: translateX(-8px); }
+                                  40% { transform: translateX(8px); }
+                                  60% { transform: translateX(-8px); }
+                                  80% { transform: translateX(8px); }
+                                  100% { transform: translateX(0); }
+                                }
+                                .shake {
+                                  animation: shake 0.4s;
+                                  border-color: #b91c1c !important;
+                                }
+                                </style>
+                                <div id="customInterestPopup">
+                                    <div class="popup-content">
+                                        <div style="font-size:18px;font-weight:700;color:#b91c1c;margin-bottom:12px;">تنبيه</div>
+                                        <div style="font-size:15px;color:#333;margin-bottom:18px;">يرجى تعبئة سعر الفائدة بقيمة أكبر من الصفر قبل المتابعة</div>
+                                        <button id="closeInterestPopup" style="background:#b91c1c;color:#fff;padding:8px 24px;border:none;border-radius:5px;font-size:15px;cursor:pointer;">حسناً</button>
+                                    </div>
+                                </div>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.getElementById('kasrForm');
+                    const popup = document.getElementById('customInterestPopup');
+                    const closeBtn = document.getElementById('closeInterestPopup');
+                    const interestInput = document.getElementById('interest_rate');
+                    const calculateBtn = document.getElementById('kasrCalculateBtn');
+                    let submitByCalculateBtn = false;
+                    if (interestInput) {
+                        interestInput.removeAttribute('disabled');
+                        interestInput.removeAttribute('readonly');
+                    }
+                    if (calculateBtn) {
+                        calculateBtn.addEventListener('click', function(e) {
+                            submitByCalculateBtn = true;
+                        });
+                    }
+                    form.addEventListener('submit', function(e) {
+                        if (submitByCalculateBtn) {
+                            if (!interestInput.value || parseFloat(interestInput.value) === 0) {
+                                e.preventDefault();
+                                popup.classList.add('active');
+                                setTimeout(() => { closeBtn.focus(); }, 100);
+                            }
+                        }
+                        submitByCalculateBtn = false;
+                    });
+                    function shakeInterestInput() {
+                        if (!interestInput) return;
+                        interestInput.classList.remove('shake');
+                        // Force reflow to restart animation
+                        void interestInput.offsetWidth;
+                        interestInput.classList.add('shake');
+                        setTimeout(() => { interestInput.classList.remove('shake'); }, 500);
+                    }
+                    closeBtn.addEventListener('click', function() {
+                        popup.classList.remove('active');
+                        popup.style.display = 'none'; // Fallback to ensure hiding
+                        setTimeout(() => {
+                            popup.style.display = '';
+                            interestInput.focus();
+                            shakeInterestInput();
+                        }, 100);
+                    });
+                    // Optional: allow closing popup with Escape key
+                    document.addEventListener('keydown', function(e) {
+                        if (popup.classList.contains('active') && (e.key === 'Escape' || e.key === 'Esc')) {
+                            popup.classList.remove('active');
+                            setTimeout(() => { interestInput.focus(); shakeInterestInput(); }, 100);
+                        }
+                    });
+                });
+                </script>
                 
                 <!-- Filters Row -->
                 <div class="row g-3 mb-4 pb-3 border-bottom">
@@ -155,24 +258,24 @@
                     <table class="kasr-table table">
                         <thead>
                             <tr>
-                                <th style="width: 25%">النوع</th>
-                                <th style="width: 35%">الوزن</th>
-                                <th style="width: 40%">سعر الجرام</th>
+                                <th style="width: 33%">النوع</th>
+                                <th style="width: 33%">الوزن</th>
+                                <th style="width: 34%">سعر الكسر</th>
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach($calibers as $caliber)
+                        @foreach($reportData['calibers'] ?? [] as $caliber)
                             <tr>
-                                <td class="caliber-label text-end">{{ $caliber->name }}</td>
+                                <td class="caliber-label text-end">{{ $caliber['name'] }}</td>
                                 <td>
-                                     <input type="number" name="weight_{{ $caliber->id }}" id="weight_{{ $caliber->id }}"
-                                         value="{{ $weights[$caliber->id] ?? 0 }}"
-                                         step="0.01" class="form-control caliber-input" data-caliber="{{ $caliber->id }}" disabled>
+                                     <input type="number" value="{{ $caliber['weight'] ?? 0 }}" step="0.01" class="form-control" disabled>
                                 </td>
                                 <td>
-                                    <input type="number" name="price_{{ $caliber->id }}" id="price_{{ $caliber->id }}"
-                                           value="{{ old('price_' . $caliber->id, request('price_' . $caliber->id, 0)) }}"
-                                           step="0.01" class="form-control caliber-input" data-caliber="{{ $caliber->id }}">
+                                    @php
+                                        $inputName = 'price_' . $caliber['id'];
+                                        $inputValue = request($inputName, $caliber['price_per_gram'] ?? 0);
+                                    @endphp
+                                    <input type="number" name="{{ $inputName }}" value="{{ $inputValue }}" step="0.01" class="form-control" autocomplete="off">
                                 </td>
                             </tr>
                         @endforeach
@@ -184,49 +287,113 @@
                 <div class="row g-3 mt-3">
                     <div class="col-md-6">
                         <label for="expenses" class="form-label fw-semibold">المصروفات الكاملة للفرع خلال المدة</label>
-                        <input type="text" id="expenses_display" 
-                               value="{{ number_format($expenses ?? 0, 2) }}" 
-                               class="form-control bg-light" readonly>
-                        <input type="hidden" name="expenses" value="{{ $expenses ?? 0 }}">
-                        <small class="text-muted">إجمالي كل المصروفات المسجلة للفرع المختار خلال الفترة.</small>
+                        <input type="number" id="expenses_input" name="expenses"
+                            value="{{
+                                (old('expenses') !== null && old('expenses') !== '' && old('expenses') !== '0') ? old('expenses') :
+                                ((request('expenses') !== null && request('expenses') !== '' && request('expenses') !== '0') ? request('expenses') : '')
+                            }}"
+                            placeholder="{{ $expenses ?? '' }}"
+                            class="form-control" step="0.01" min="0">
+                        <small class="text-muted">إجمالي كل المصروفات المسجلة للفرع المختار خلال الفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
                         <label for="salaries" class="form-label fw-semibold">الرواتب من شاشة الموظفين</label>
-                        <input type="text" id="salaries_display" 
-                               value="{{ number_format($salaries ?? 0, 2) }}" 
-                               class="form-control bg-light" readonly>
-                        <input type="hidden" name="salaries" value="{{ $salaries ?? 0 }}">
-                        <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة.</small>
+                        <input type="number" id="salaries_input" name="salaries"
+                            value="{{
+                                (old('salaries') !== null && old('salaries') !== '' && old('salaries') !== '0') ? old('salaries') :
+                                ((request('salaries') !== null && request('salaries') !== '' && request('salaries') !== '0') ? request('salaries') : '')
+                            }}"
+                            placeholder="{{ $salaries ?? '' }}"
+                            class="form-control" step="0.01" min="0">
+                        <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
-                        <label for="interest_rate" class="form-label fw-semibold">سعر الفائدة (%)</label>
-                        <input type="number" name="interest_rate" id="interest_rate"
-                               value="{{ old('interest_rate', $filters['interest_rate'] ?? 0) }}"
-                               step="0.01" min="0" class="form-control"
-                               placeholder="مثال: 1.5"
-                               onchange="submitKasrFilters()" oninput="submitKasrFilters()">
-                        <small class="text-muted">يُحتسب كنسبة من المبلغ الإجمالي ويُخصم في صافي الربح.</small>
+                        <label for="interest_rate" class="form-label fw-semibold">سعر الفائدة</label>
+                                           <input type="number" name="interest_rate" id="interest_rate"
+                                               value="{{ old('interest_rate', $filters['interest_rate'] ?? 0) }}"
+                                               step="0.01" min="0" class="form-control" placeholder="مثال: 1.5">
+                           <small class="text-muted">يُحتسب كنسبة من المبلغ الإجمالي ويُخصم في صافي الربح.</small>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <button type="submit" id="kasrCalculateBtn" class="btn btn-primary btn-lg w-100">
                         <i class="mdi mdi-calculator me-1"></i> احسب التقرير
                     </button>
                 </div>
+
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.getElementById('kasrForm');
+                    const popup = document.getElementById('customInterestPopup');
+                    const closeBtn = document.getElementById('closeInterestPopup');
+                    const interestInput = document.getElementById('interest_rate');
+                    const calculateBtn = document.getElementById('kasrCalculateBtn');
+                    let submitByCalculateBtn = false;
+                    if (interestInput) {
+                        interestInput.removeAttribute('disabled');
+                        interestInput.removeAttribute('readonly');
+                    }
+                    if (calculateBtn) {
+                        calculateBtn.addEventListener('click', function(e) {
+                            submitByCalculateBtn = true;
+                        });
+                    }
+                    form.addEventListener('submit', function(e) {
+                        if (submitByCalculateBtn) {
+                            if (!interestInput.value || parseFloat(interestInput.value) === 0) {
+                                e.preventDefault();
+                                popup.classList.add('active');
+                                setTimeout(() => { closeBtn.focus(); }, 100);
+                            }
+                        }
+                        submitByCalculateBtn = false;
+                    });
+                    function shakeInterestInput() {
+                        if (!interestInput) return;
+                        interestInput.classList.remove('shake');
+                        // Force reflow to restart animation
+                        void interestInput.offsetWidth;
+                        interestInput.classList.add('shake');
+                        setTimeout(() => { interestInput.classList.remove('shake'); }, 500);
+                    }
+                    closeBtn.addEventListener('click', function() {
+                        popup.classList.remove('active');
+                        popup.style.display = 'none'; // Fallback to ensure hiding
+                        setTimeout(() => {
+                            popup.style.display = '';
+                            interestInput.focus();
+                            shakeInterestInput();
+                        }, 100);
+                    });
+                    // Optional: allow closing popup with Escape key
+                    document.addEventListener('keydown', function(e) {
+                        if (popup.classList.contains('active') && (e.key === 'Escape' || e.key === 'Esc')) {
+                            popup.classList.remove('active');
+                            setTimeout(() => { interestInput.focus(); shakeInterestInput(); }, 100);
+                        }
+                    });
+                });
+                </script>
             </form>
         </div>
     </div>
 <script>
 // Inline to avoid missing stack includes; auto-submit on branch/date change.
+// Custom validation for interest_rate
 (function() {
     const form = document.getElementById('kasrForm');
     const autoRefresh = document.getElementById('auto_refresh');
     window.submitKasrFilters = function() {
         if (!form) return;
+        const interestInput = document.getElementById('interest_rate');
+        if (interestInput && (!interestInput.value || parseFloat(interestInput.value) === 0)) {
+            alert('يرجى تعبئة سعر الفائدة قبل المتابعة');
+            interestInput.focus();
+            return;
+        }
         if (autoRefresh) autoRefresh.value = '1';
-        // slight delay to ensure value is set before submit
         setTimeout(() => {
             if (form.requestSubmit) {
                 form.requestSubmit();
@@ -242,6 +409,51 @@
             el.addEventListener('input', submitKasrFilters);
         }
     });
+
+    // Live interest value calculation and live update for expenses/salaries
+    const interestInput = document.getElementById('interest_rate');
+    const interestValue = document.getElementById('interest_value');
+    const expensesInput = document.getElementById('expenses_input');
+    const salariesInput = document.getElementById('salaries_input');
+    // Try to get the total amount from the page (from the hidden input or a JS variable)
+    let totalAmount = 0;
+    @if(isset($reportData['total_amount']))
+        totalAmount = {{ floatval($reportData['total_amount']) }};
+    @endif
+    function updateInterestValue() {
+        const rate = parseFloat(interestInput.value) || 0;
+        const value = (totalAmount * rate / 100).toFixed(2);
+        interestValue.textContent = value;
+        updateReceipt();
+    }
+    function updateReceipt() {
+        // Update receipt values for expenses, salaries, interest, profit, net profit
+        const expenses = parseFloat(expensesInput.value) || 0;
+        const salaries = parseFloat(salariesInput.value) || 0;
+        const interest = parseFloat(interestInput.value) || 0;
+        const interestAmount = (totalAmount * interest / 100) || 0;
+        // Update receipt fields if present
+        const receiptExpenses = document.getElementById('receipt_expenses');
+        const receiptSalaries = document.getElementById('receipt_salaries');
+        const receiptInterestRate = document.getElementById('receipt_interest_rate');
+        const receiptInterestAmount = document.getElementById('receipt_interest_amount');
+        const receiptProfit = document.getElementById('receipt_profit');
+        const receiptNetProfit = document.getElementById('receipt_net_profit');
+        if (receiptExpenses) receiptExpenses.textContent = expenses.toFixed(2);
+        if (receiptSalaries) receiptSalaries.textContent = salaries.toFixed(2);
+        if (receiptInterestRate) receiptInterestRate.textContent = interest.toFixed(2);
+        if (receiptInterestAmount) receiptInterestAmount.textContent = interestAmount.toFixed(2);
+        if (receiptProfit) receiptProfit.textContent = (totalAmount - expenses).toFixed(2);
+        if (receiptNetProfit) receiptNetProfit.textContent = (totalAmount - (expenses + salaries + interestAmount)).toFixed(2);
+    }
+    if (interestInput && interestValue) {
+        interestInput.addEventListener('input', updateInterestValue);
+        updateInterestValue();
+    }
+    if (expensesInput) expensesInput.addEventListener('input', updateReceipt);
+    if (salariesInput) salariesInput.addEventListener('input', updateReceipt);
+    // Initial update
+    updateReceipt();
 })();
 </script>
 
@@ -265,19 +477,15 @@
         <hr class="sep">
         <div class="row-line">
             <span class="label">الأجور:</span>
-            <span class="value">{{ number_format($reportData['expenses'] ?? 0, 2) }}</span>
+            <span class="value" id="receipt_expenses">{{ number_format($reportData['expenses'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">الرواتب:</span>
-            <span class="value">{{ number_format($reportData['salaries'] ?? 0, 2) }}</span>
+            <span class="value" id="receipt_salaries">{{ number_format($reportData['salaries'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">سعر الفائدة:</span>
-            <span class="value">{{ number_format($reportData['interest_rate'] ?? 0, 2) }}</span>
-        </div>
-        <div class="row-line">
-            <span class="label">قيمة الفائدة:</span>
-            <span class="value">{{ number_format($reportData['interest_amount'] ?? 0, 2) }}</span>
+            <span class="value" id="receipt_interest_rate">{{ number_format($reportData['interest_rate'] ?? 0, 2) }}</span>
         </div>
         <hr class="sep">
         <div class="row-line">
@@ -293,42 +501,65 @@
             <span class="value">{{ number_format($reportData['total_tax'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
-            <span class="label">مجموع الوزن:</span>
-            <span class="value">{{ number_format($reportData['total_weight'] ?? 0, 2) }}</span>
+            <span class="label">الإجمالي:</span>
+            <span class="value">{{ number_format($reportData['al_ijmali'] ?? 0, 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">صافي المبيعات:</span>
+            <span class="value">{{ number_format($reportData['net_sales'] ?? 0, 2) }}</span>
+        </div>
+        <div class="row-line">
+            <span class="label">مجموع الوزن (مبيعات + مرتجعات):</span>
+            <span class="value">
+                {{ number_format(($reportData['total_weight'] ?? 0) + ($reportData['total_weight_returns'] ?? 0), 2) }}
+                <span style="color: #888; font-size: 90%">(مبيعات: {{ number_format($reportData['total_weight'] ?? 0, 2) }} + مرتجعات: {{ number_format($reportData['total_weight_returns'] ?? 0, 2) }})</span>
+            </span>
         </div>
         <div class="row-line">
             <span class="label">معدل الجرام:</span>
             <span class="value">{{ number_format($reportData['avg_price_per_gram'] ?? 0, 2) }}</span>
         </div>
+        <div class="row-line">
+            <span class="label">سعر الجرام:</span>
+            <span class="value">{{ number_format($reportData['price_of_gram'] ?? 0, 2) }}</span>
+        </div>
         <hr class="sep">
         @if(isset($reportData['calibers']) && is_array($reportData['calibers']))
             @foreach($reportData['calibers'] as $caliber)
                 <div class="row-line">
-                    <span class="label">{{ $caliber['name'] }}:</span>
-                    <span class="value">{{ number_format($caliber['amount'], 2) }}</span>
+                    <span class="label">مبيعات {{ $caliber['name'] }} بدون ضريبة:</span>
+                    <span class="value">{{ number_format($caliber['cash'] ?? 0, 2) }}</span>
                 </div>
                 <div class="row-line">
                     <span class="label">ذهب {{ $caliber['name'] }}:</span>
                     <span class="value">{{ number_format($caliber['weight'], 2) }}</span>
                 </div>
                 <div class="row-line">
-                    <span class="label">معدل الجرام:</span>
-                    <span class="value">{{ number_format($caliber['price_per_gram'], 2) }}</span>
+                    <span class="label">معدل الجرام (مبيعات ÷ وزن):</span>
+                    <span class="value">{{ number_format($caliber['avg_price_per_gram'] ?? 0, 2) }}</span>
                 </div>
             @endforeach
         @endif
         <hr class="sep">
         <div class="row-line">
-            <span class="label">الربح قبل الرواتب والفائدة:</span>
-            <span class="value">{{ number_format($reportData['profit'] ?? 0, 2) }}</span>
+            <span class="label">فائدة:</span>
+            <span class="value" id="receipt_profit">{{ number_format($reportData['profit'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">صافي الربح:</span>
-            <span class="highlight">{{ number_format($reportData['net_profit'] ?? 0, 2) }}</span>
+            <span class="highlight" id="receipt_net_profit">
+                {{ number_format(($reportData['profit'] ?? 0) - ($reportData['expenses'] ?? 0) - ($reportData['salaries'] ?? 0), 2) }}
+            </span>
         </div>
         <div class="row-line">
-            <span class="label">جوال:</span>
-            <span class="value">{{ number_format($reportData['mobile'] ?? 0, 2) }}</span>
+            <span class="label">سعر الجرام بفائدة:</span>
+            <span class="value">
+                @php
+                    $netProfit = ($reportData['profit'] ?? 0) - ($reportData['expenses'] ?? 0) - ($reportData['salaries'] ?? 0);
+                    $interestRate = floatval($filters['interest_rate'] ?? 0);
+                @endphp
+                {{ $interestRate != 0 ? number_format($netProfit / $interestRate, 2) : '—' }}
+            </span>
         </div>
         <div class="muted text-center mt-2">{{ \Carbon\Carbon::now()->format('l, F d, Y') }}</div>
     </div>
