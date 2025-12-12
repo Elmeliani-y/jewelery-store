@@ -44,6 +44,11 @@ class ExpenseController extends Controller
             $query->where('description', 'like', '%'.$request->description.'%');
         }
 
+        // Filter by expense id if present
+        if ($request->filled('id')) {
+            $query->where('id', $request->id);
+        }
+
         $expenses = $query->paginate(15);
 
         $branches = Branch::active()->get();

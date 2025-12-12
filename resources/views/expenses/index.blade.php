@@ -51,6 +51,14 @@
         </div>
     @endif
 
+    <!-- Search by Expense ID -->
+    <form method="GET" class="mb-3" style="max-width:300px">
+        <div class="input-group">
+            <input type="number" name="id" class="form-control" placeholder="بحث برقم المصروف" value="{{ request('id') }}">
+            <button class="btn btn-primary" type="submit">بحث</button>
+        </div>
+    </form>
+
     <!-- Expenses List -->
     <div class="row">
         <div class="col-12">
@@ -84,19 +92,21 @@
                                     <td dir="ltr"><span class="fw-semibold text-dark">{{ number_format($expense->amount, 0, ',', '.') }} <small class="text-muted">ريال</small></span></td>
                                     <td class="text-muted">{{ $expense->expense_date->format('Y-m-d') }}</td>
                                     <td class="text-center">
-                                        <a href="{{ route('expenses.show', $expense) }}" class="btn btn-icon btn-sm bg-info-subtle" data-bs-toggle="tooltip" data-bs-original-title="عرض">
-                                            <i class="mdi mdi-eye-outline text-info fs-16"></i>
-                                        </a>
-                                        <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-icon btn-sm bg-warning-subtle" data-bs-toggle="tooltip" data-bs-original-title="تعديل">
-                                            <i class="mdi mdi-pencil-outline text-warning fs-16"></i>
-                                        </a>
-                                        <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-icon btn-sm bg-danger-subtle" data-bs-toggle="tooltip" data-bs-original-title="حذف">
-                                                <i class="mdi mdi-delete-outline text-danger fs-16"></i>
-                                            </button>
-                                        </form>
+                                        @if(!request()->filled('id'))
+                                            <a href="{{ route('expenses.show', $expense) }}" class="btn btn-icon btn-sm bg-info-subtle" data-bs-toggle="tooltip" data-bs-original-title="عرض">
+                                                <i class="mdi mdi-eye-outline text-info fs-16"></i>
+                                            </a>
+                                            <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-icon btn-sm bg-warning-subtle" data-bs-toggle="tooltip" data-bs-original-title="تعديل">
+                                                <i class="mdi mdi-pencil-outline text-warning fs-16"></i>
+                                            </a>
+                                            <form action="{{ route('expenses.destroy', $expense) }}" method="POST" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-icon btn-sm bg-danger-subtle" data-bs-toggle="tooltip" data-bs-original-title="حذف">
+                                                    <i class="mdi mdi-delete-outline text-danger fs-16"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach
@@ -112,10 +122,12 @@
                         <i class="mdi mdi-wallet-outline" style="font-size:3.5rem; color:#adb5bd;"></i>
                         <h5 class="text-muted mt-3">لا توجد مصروفات</h5>
                         <p class="text-muted">قم بإضافة مصروف جديد للبدء</p>
+                        @if(!request()->filled('id'))
                         <a href="{{ route('expenses.create') }}" class="btn btn-primary">
                             <i class="mdi mdi-plus-circle-outline me-1"></i>
                             إضافة مصروف
                         </a>
+                        @endif
                     </div>
                     @endif
                 </div>

@@ -58,6 +58,7 @@
                         </a>
                     @endif
                 </div>
+            @if(!request()->filled('invoice_number'))
             <div class="col-auto">
                 @if(auth()->user()->isBranch())
                     <a href="{{ url('/branch/daily-sales') }}" class="btn btn-light">
@@ -71,6 +72,7 @@
                     </a>
                 @endif
             </div>
+            @endif
         </div>
     </div>
 
@@ -89,6 +91,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
+    <!-- Search by Invoice Number -->
+    <form method="GET" class="mb-3" style="max-width:300px">
+        <div class="input-group">
+            <input type="number" name="invoice_number" class="form-control" placeholder="بحث برقم الفاتورة" value="{{ request('invoice_number') }}">
+            <button class="btn btn-primary" type="submit">بحث</button>
+        </div>
+    </form>
 
     <!-- Sales List -->
     <div class="row">
@@ -174,10 +184,12 @@
                         <i class="mdi mdi-shopping-outline" style="font-size:3.5rem; color:#adb5bd;"></i>
                         <h5 class="text-muted mt-3">لا توجد مبيعات</h5>
                         <p class="text-muted">قم بإضافة مبيعة جديدة للبدء</p>
+                        @if(!request()->filled('invoice_number'))
                         <a href="{{ route('sales.create') }}" class="btn btn-primary">
                             <i class="mdi mdi-plus-circle-outline me-1"></i>
                             إضافة مبيعة
                         </a>
+                        @endif
                     </div>
                     @endif
                 </div>

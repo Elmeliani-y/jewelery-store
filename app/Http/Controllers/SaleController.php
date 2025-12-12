@@ -614,10 +614,16 @@ class SaleController extends Controller
      */
     public function returns(Request $request)
     {
-        $returns = Sale::with(['branch', 'employee', 'caliber'])
+        $query = Sale::with(['branch', 'employee', 'caliber'])
             ->where('is_returned', true)
-            ->orderBy('returned_at', 'desc')
-            ->paginate(15);
+            ->orderBy('returned_at', 'desc');
+
+        // Apply invoice_number filter if present
+        if ($request->filled('invoice_number')) {
+            $query->where('invoice_number', 'like', '%'.$request->invoice_number.'%');
+        }
+
+        $returns = $query->paginate(15);
         return view('sales.returns', compact('returns'));
     }
 }

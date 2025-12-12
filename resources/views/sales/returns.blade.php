@@ -26,6 +26,14 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body p-0">
+                    <!-- Search by Invoice Number (Return) -->
+                    <form method="GET" class="mb-3" style="max-width:300px">
+                        <div class="input-group">
+                            <input type="number" name="invoice_number" class="form-control" placeholder="بحث برقم الفاتورة" value="{{ request('invoice_number') }}">
+                            <button class="btn btn-primary" type="submit">بحث</button>
+                        </div>
+                    </form>
+                    <!-- Returns List -->
                     @if($returns->count() > 0)
                     <div class="table-responsive table-card sales-table">
                         <table class="table table-borderless table-centered align-middle table-nowrap table-hover mb-0">
