@@ -216,7 +216,7 @@
             <div class="card report-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">تقرير الكسر</h6>
+                        <h6 class="mb-0">تقرير صافي الربح</h6>
                         <iconify-icon icon="solar:calculator-bold-duotone" class="text-info fs-4"></iconify-icon>
                     </div>
                     <p class="text-muted small mt-2">تقرير مفصل للعيارات والأجور والرواتب حسب الفرع</p>
