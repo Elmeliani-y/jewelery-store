@@ -100,10 +100,10 @@
         </div>
     </div>
 
-    @if($caliber->sales()->count() > 0)
+    @if($caliber->products_sold_count > 0)
         <div class="alert alert-info info-alert mb-4">
             <iconify-icon icon="solar:info-circle-bold" class="fs-5 me-2"></iconify-icon>
-            <strong>تنبيه:</strong> هذا العيار مستخدم في {{ $caliber->sales()->count() }} عملية بيع. تغيير نسبة الضريبة لن يؤثر على المبيعات السابقة.
+            <strong>تنبيه:</strong> هذا العيار مستخدم في {{ $caliber->products_sold_count }} عملية بيع. تغيير نسبة الضريبة لن يؤثر على المبيعات السابقة.
         </div>
     @endif
 
