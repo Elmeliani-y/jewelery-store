@@ -119,104 +119,8 @@
         <div class="card-body">
             <form method="POST" action="{{ route('reports.kasr') }}" id="kasrForm">
                 @csrf
-                                <style>
-                                #customInterestPopup {
-                                    display: none;
-                                    position: fixed;
-                                    top: 0; left: 0;
-                                    width: 100vw; height: 100vh;
-                                    background: rgba(0,0,0,0.35);
-                                    z-index: 9999;
-                                    align-items: center;
-                                    justify-content: center;
-                                    flex-direction: column;
-                                }
-                                #customInterestPopup.active {
-                                    display: flex;
-                                }
-                                #customInterestPopup .popup-content {
-                                    background: #fff;
-                                    padding: 32px 24px 24px 24px;
-                                    border-radius: 10px;
-                                    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-                                    max-width: 90vw;
-                                    width: 340px;
-                                    text-align: center;
-                                }
-                                /* Shake animation for interest input */
-                                @keyframes shake {
-                                  0% { transform: translateX(0); }
-                                  20% { transform: translateX(-8px); }
-                                  40% { transform: translateX(8px); }
-                                  60% { transform: translateX(-8px); }
-                                  80% { transform: translateX(8px); }
-                                  100% { transform: translateX(0); }
-                                }
-                                .shake {
-                                  animation: shake 0.4s;
-                                  border-color: #b91c1c !important;
-                                }
-                                </style>
-                                <div id="customInterestPopup">
-                                    <div class="popup-content">
-                                        <div style="font-size:18px;font-weight:700;color:#b91c1c;margin-bottom:12px;">تنبيه</div>
-                                        <div style="font-size:15px;color:#333;margin-bottom:18px;">يرجى تعبئة سعر الفائدة بقيمة أكبر من الصفر قبل المتابعة</div>
-                                        <button id="closeInterestPopup" style="background:#b91c1c;color:#fff;padding:8px 24px;border:none;border-radius:5px;font-size:15px;cursor:pointer;">حسناً</button>
-                                    </div>
-                                </div>
-                <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const form = document.getElementById('kasrForm');
-                    const popup = document.getElementById('customInterestPopup');
-                    const closeBtn = document.getElementById('closeInterestPopup');
-                    const interestInput = document.getElementById('interest_rate');
-                    const calculateBtn = document.getElementById('kasrCalculateBtn');
-                    let submitByCalculateBtn = false;
-                    if (interestInput) {
-                        interestInput.removeAttribute('disabled');
-                        interestInput.removeAttribute('readonly');
-                    }
-                    if (calculateBtn) {
-                        calculateBtn.addEventListener('click', function(e) {
-                            submitByCalculateBtn = true;
-                        });
-                    }
-                    form.addEventListener('submit', function(e) {
-                        if (submitByCalculateBtn) {
-                            if (!interestInput.value || parseFloat(interestInput.value) === 0) {
-                                e.preventDefault();
-                                popup.classList.add('active');
-                                setTimeout(() => { closeBtn.focus(); }, 100);
-                            }
-                        }
-                        submitByCalculateBtn = false;
-                    });
-                    function shakeInterestInput() {
-                        if (!interestInput) return;
-                        interestInput.classList.remove('shake');
-                        // Force reflow to restart animation
-                        void interestInput.offsetWidth;
-                        interestInput.classList.add('shake');
-                        setTimeout(() => { interestInput.classList.remove('shake'); }, 500);
-                    }
-                    closeBtn.addEventListener('click', function() {
-                        popup.classList.remove('active');
-                        popup.style.display = 'none'; // Fallback to ensure hiding
-                        setTimeout(() => {
-                            popup.style.display = '';
-                            interestInput.focus();
-                            shakeInterestInput();
-                        }, 100);
-                    });
-                    // Optional: allow closing popup with Escape key
-                    document.addEventListener('keydown', function(e) {
-                        if (popup.classList.contains('active') && (e.key === 'Escape' || e.key === 'Esc')) {
-                            popup.classList.remove('active');
-                            setTimeout(() => { interestInput.focus(); shakeInterestInput(); }, 100);
-                        }
-                    });
-                });
-                </script>
+                                <!-- Removed customInterestPopup and shake styles -->
+                                <!-- Removed customInterestPopup HTML -->
                 
                 <!-- Filters Row -->
                 <div class="row g-3 mb-4 pb-3 border-bottom">
@@ -287,24 +191,46 @@
                 <div class="row g-3 mt-3">
                     <div class="col-md-6">
                         <label for="expenses" class="form-label fw-semibold">المصروفات الكاملة للفرع خلال المدة</label>
-                        <input type="number" id="expenses_input" name="expenses"
+                        <input type="text" list="expenses_list" id="expenses_input" name="expenses"
                             value="{{
                                 (old('expenses') !== null && old('expenses') !== '' && old('expenses') !== '0') ? old('expenses') :
-                                ((request('expenses') !== null && request('expenses') !== '' && request('expenses') !== '0') ? request('expenses') : '')
+                                ((request('expenses') !== null && request('expenses') !== '' && request('expenses') !== '0') ? request('expenses') : 0)
                             }}"
-                            placeholder="{{ $expenses ?? '' }}"
-                            class="form-control" step="0.01" min="0">
+                            placeholder="{{ $expenses ?? 'اختر أو اكتب المصروفات' }}"
+                            class="form-control">
+                        <datalist id="expenses_list">
+                            <option value="0">0</option>
+                            @if(isset($expensesList) && is_array($expensesList))
+                                @foreach($expensesList as $expenseSum)
+                                    @if($expenseSum != 0)
+                                        <option value="{{ $expenseSum }}">{{ $expenseSum }}</option>
+                                    @endif
+                                @endforeach
+                            @elseif(isset($expenses) && $expenses != 0)
+                                <option value="{{ $expenses }}">{{ $expenses }}</option>
+                            @endif
+                        </datalist>
                         <small class="text-muted">إجمالي كل المصروفات المسجلة للفرع المختار خلال الفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
                         <label for="salaries" class="form-label fw-semibold">الرواتب من شاشة الموظفين</label>
-                        <input type="number" id="salaries_input" name="salaries"
+                        <input type="text" list="salaries_list" id="salaries_input" name="salaries"
                             value="{{
                                 (old('salaries') !== null && old('salaries') !== '' && old('salaries') !== '0') ? old('salaries') :
-                                ((request('salaries') !== null && request('salaries') !== '' && request('salaries') !== '0') ? request('salaries') : '')
+                                ((request('salaries') !== null && request('salaries') !== '' && request('salaries') !== '0') ? request('salaries') : 0)
                             }}"
-                            placeholder="{{ $salaries ?? '' }}"
-                            class="form-control" step="0.01" min="0">
+                            placeholder="{{ $salaries ?? 'اختر أو اكتب الرواتب' }}"
+                            class="form-control">
+                        <datalist id="salaries_list">
+                            <option value="0">0</option>
+                            @if(isset($salariesList) && is_array($salariesList))
+                                @foreach($salariesList as $salarySum)
+                                    @if($salarySum != 0)
+                                        <option value="{{ $salarySum }}">{{ $salarySum }}</option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </datalist>
                         <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
@@ -322,60 +248,6 @@
                         <i class="mdi mdi-calculator me-1"></i> احسب التقرير
                     </button>
                 </div>
-
-                <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const form = document.getElementById('kasrForm');
-                    const popup = document.getElementById('customInterestPopup');
-                    const closeBtn = document.getElementById('closeInterestPopup');
-                    const interestInput = document.getElementById('interest_rate');
-                    const calculateBtn = document.getElementById('kasrCalculateBtn');
-                    let submitByCalculateBtn = false;
-                    if (interestInput) {
-                        interestInput.removeAttribute('disabled');
-                        interestInput.removeAttribute('readonly');
-                    }
-                    if (calculateBtn) {
-                        calculateBtn.addEventListener('click', function(e) {
-                            submitByCalculateBtn = true;
-                        });
-                    }
-                    form.addEventListener('submit', function(e) {
-                        if (submitByCalculateBtn) {
-                            if (!interestInput.value || parseFloat(interestInput.value) === 0) {
-                                e.preventDefault();
-                                popup.classList.add('active');
-                                setTimeout(() => { closeBtn.focus(); }, 100);
-                            }
-                        }
-                        submitByCalculateBtn = false;
-                    });
-                    function shakeInterestInput() {
-                        if (!interestInput) return;
-                        interestInput.classList.remove('shake');
-                        // Force reflow to restart animation
-                        void interestInput.offsetWidth;
-                        interestInput.classList.add('shake');
-                        setTimeout(() => { interestInput.classList.remove('shake'); }, 500);
-                    }
-                    closeBtn.addEventListener('click', function() {
-                        popup.classList.remove('active');
-                        popup.style.display = 'none'; // Fallback to ensure hiding
-                        setTimeout(() => {
-                            popup.style.display = '';
-                            interestInput.focus();
-                            shakeInterestInput();
-                        }, 100);
-                    });
-                    // Optional: allow closing popup with Escape key
-                    document.addEventListener('keydown', function(e) {
-                        if (popup.classList.contains('active') && (e.key === 'Escape' || e.key === 'Esc')) {
-                            popup.classList.remove('active');
-                            setTimeout(() => { interestInput.focus(); shakeInterestInput(); }, 100);
-                        }
-                    });
-                });
-                </script>
             </form>
         </div>
     </div>
@@ -387,12 +259,6 @@
     const autoRefresh = document.getElementById('auto_refresh');
     window.submitKasrFilters = function() {
         if (!form) return;
-        const interestInput = document.getElementById('interest_rate');
-        if (interestInput && (!interestInput.value || parseFloat(interestInput.value) === 0)) {
-            alert('يرجى تعبئة سعر الفائدة قبل المتابعة');
-            interestInput.focus();
-            return;
-        }
         if (autoRefresh) autoRefresh.value = '1';
         setTimeout(() => {
             if (form.requestSubmit) {
@@ -490,18 +356,18 @@
         <hr class="sep">
         <div class="row-line">
             <span class="label">مجموع المبيعات:</span>
-            <span class="value">{{ number_format($reportData['total_sales'] ?? 0, 2) }}</span>
+            <span class="value">{{ number_format($reportData['total_sales_and_returns'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
             <span class="label">مجموع المرتجعات:</span>
             <span class="value">{{ number_format($reportData['total_returns'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
-            <span class="label">مجموع الضريبة:</span>
+            <span class="label">مجموع الضريبة (مبيعات - مرتجعات):</span>
             <span class="value">{{ number_format($reportData['total_tax'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
-            <span class="label">الإجمالي:</span>
+            <span class="label">الإجمالي (صافي المبيعات + مجموع الضريبة):</span>
             <span class="value">{{ number_format($reportData['al_ijmali'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
@@ -509,10 +375,9 @@
             <span class="value">{{ number_format($reportData['net_sales'] ?? 0, 2) }}</span>
         </div>
         <div class="row-line">
-            <span class="label">مجموع الوزن (مبيعات + مرتجعات):</span>
+            <span class="label">مجموع الوزن (صافي):</span>
             <span class="value">
-                {{ number_format(($reportData['total_weight'] ?? 0) + ($reportData['total_weight_returns'] ?? 0), 2) }}
-                <span style="color: #888; font-size: 90%">(مبيعات: {{ number_format($reportData['total_weight'] ?? 0, 2) }} + مرتجعات: {{ number_format($reportData['total_weight_returns'] ?? 0, 2) }})</span>
+                {{ number_format(($reportData['total_weight'] ?? 0), 2) }}
             </span>
         </div>
         <div class="row-line">
@@ -569,12 +434,25 @@
 
 @section('script')
 <script>
-    // Auto-print functionality if needed
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('print') === '1') {
-        window.onload = function() {
-            window.print();
-        };
-    }
+        // Auto-print functionality if needed
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('print') === '1') {
+                window.onload = function() {
+                        window.print();
+                };
+        }
+        // Only allow numbers in expenses and salaries text inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            function onlyNumberInput(e) {
+                const v = e.target.value;
+                if (v && !/^\d*\.?\d*$/.test(v)) {
+                    e.target.value = v.replace(/[^\d.]/g, '');
+                }
+            }
+            const expensesInput = document.getElementById('expenses_input');
+            const salariesInput = document.getElementById('salaries_input');
+            if (expensesInput) expensesInput.addEventListener('input', onlyNumberInput);
+            if (salariesInput) salariesInput.addEventListener('input', onlyNumberInput);
+        });
 </script>
 @endsection
