@@ -165,6 +165,8 @@
                                             <span class="badge bg-success-subtle text-success"><i class="mdi mdi-cash me-1"></i>نقداً</span>
                                         @elseif($sale->payment_method === 'network')
                                             <span class="badge bg-info-subtle text-info"><i class="mdi mdi-credit-card-outline me-1"></i>شبكة</span>
+                                        @elseif($sale->payment_method === 'transfer')
+                                            <span class="badge bg-primary-subtle text-primary"><i class="mdi mdi-bank-transfer me-1"></i>تحويل</span>
                                         @else
                                             <span class="badge bg-warning-subtle text-warning"><i class="mdi mdi-swap-horizontal me-1"></i>مختلط (نقدي + شبكة)</span>
                                         @endif
