@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('cash_amount', 10, 2)->default(0); // المبلغ النقدي
             $table->decimal('network_amount', 10, 2)->default(0); // مبلغ الشبكة
             $table->string('network_reference')->nullable(); // رقم المعاملة للشبكة
-            $table->enum('payment_method', ['cash', 'network', 'mixed']); // طريقة الدفع
+            $table->enum('payment_method', ['cash', 'network', 'mixed', 'transfer']); // طريقة الدفع
             $table->decimal('tax_amount', 10, 2)->default(0); // مبلغ الضريبة
             $table->decimal('net_amount', 10, 2); // المبلغ الصافي بدون ضريبة
             $table->text('notes')->nullable();

@@ -13,8 +13,8 @@ class BranchController extends Controller
     public function index()
     {
         $branches = Branch::withCount(['employees', 'sales', 'expenses'])
-                         ->orderBy('created_at', 'desc')
-                         ->paginate(15);
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
         return view('branches.index', compact('branches'));
     }
@@ -40,14 +40,33 @@ class BranchController extends Controller
         ]);
 
         try {
-            Branch::create($validated);
+            $branch = Branch::create($validated);
+
+            // Create Snap employee for this branch
+            \App\Models\Employee::create([
+                'name' => 'Snap (' . $branch->name . ')',
+                'phone' => null,
+                'email' => null,
+                'salary' => 0,
+                'branch_id' => $branch->id,
+                'is_active' => true,
+                'is_snap' => true,
+            ]);
+
+                // Create SnapAccount for this branch, name = branch name + ' Snap'
+                \App\Models\SnapAccount::create([
+                    'branch_id' => $branch->id,
+                    'type' => 'snap',
+                    'name' => $branch->name . ' Snap',
+                    'number' => null, // or set as needed
+                ]);
 
             return redirect()->route('branches.index')
-                           ->with('success', 'تم إضافة الفرع بنجاح');
+                ->with('success', 'تم إضافة الفرع بنجاح');
 
         } catch (\Exception $e) {
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في إضافة الفرع: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في إضافة الفرع: '.$e->getMessage());
         }
     }
 
@@ -57,6 +76,7 @@ class BranchController extends Controller
     public function show(Branch $branch)
     {
         $branch->loadCount(['employees', 'sales', 'expenses']);
+
         return view('branches.show', compact('branch'));
     }
 
@@ -74,7 +94,7 @@ class BranchController extends Controller
     public function update(Request $request, Branch $branch)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:branches,name,' . $branch->id,
+            'name' => 'required|string|max:255|unique:branches,name,'.$branch->id,
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:20',
             'is_active' => 'boolean',
@@ -84,11 +104,11 @@ class BranchController extends Controller
             $branch->update($validated);
 
             return redirect()->route('branches.show', $branch)
-                           ->with('success', 'تم تحديث الفرع بنجاح');
+                ->with('success', 'تم تحديث الفرع بنجاح');
 
         } catch (\Exception $e) {
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في تحديث الفرع: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في تحديث الفرع: '.$e->getMessage());
         }
     }
 
@@ -106,10 +126,10 @@ class BranchController extends Controller
             $branch->delete();
 
             return redirect()->route('branches.index')
-                           ->with('success', 'تم حذف الفرع بنجاح');
+                ->with('success', 'تم حذف الفرع بنجاح');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ في حذف الفرع: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في حذف الفرع: '.$e->getMessage());
         }
     }
 
@@ -119,13 +139,14 @@ class BranchController extends Controller
     public function toggleStatus(Branch $branch)
     {
         try {
-            $branch->update(['is_active' => !$branch->is_active]);
+            $branch->update(['is_active' => ! $branch->is_active]);
 
             $status = $branch->is_active ? 'تفعيل' : 'إلغاء تفعيل';
+
             return back()->with('success', "تم {$status} الفرع بنجاح");
 
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ في تغيير حالة الفرع: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في تغيير حالة الفرع: '.$e->getMessage());
         }
     }
 }

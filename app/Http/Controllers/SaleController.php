@@ -113,7 +113,7 @@ class SaleController extends Controller
             'products.*.caliber_id' => 'nullable|exists:calibers,id',
             'products.*.weight' => 'required|numeric|min:0.001',
             'products.*.amount' => 'required|numeric|min:0.01',
-            'payment_method' => 'required|in:cash,network,mixed',
+            'payment_method' => 'required|in:cash,network,mixed,transfer',
             'customer_received' => 'nullable|boolean',
             'notes' => 'nullable|string|max:1000',
         ];
@@ -504,7 +504,7 @@ class SaleController extends Controller
     {
         $employees = Employee::active()
             ->where('branch_id', $request->branch_id)
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'is_snap']);
 
         return response()->json($employees);
     }

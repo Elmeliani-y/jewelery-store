@@ -18,11 +18,13 @@ class Employee extends Model
         'salary',
         'branch_id',
         'is_active',
+        'is_snap',
     ];
 
     protected $casts = [
         'salary' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_snap' => 'boolean',
     ];
 
     /**

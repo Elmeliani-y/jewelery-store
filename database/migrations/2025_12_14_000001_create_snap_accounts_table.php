@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('branches', function (Blueprint $table) {
+        Schema::create('snap_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('branch_id')->constrained('branches');
+            $table->string('type')->default('snap');
             $table->string('name');
-            $table->string('address')->nullable();
-            $table->string('phone')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->string('number')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('branches');
+        Schema::dropIfExists('snap_accounts');
     }
 };

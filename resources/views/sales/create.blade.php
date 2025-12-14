@@ -76,7 +76,7 @@
                                             id="employee_id" name="employee_id" required>
                                         <option value="">اختر الموظف</option>
                                         @foreach($employees as $employee)
-                                            <option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
+                                            <option value="{{ $employee->id }}" data-is-snap="{{ $employee->is_snap ? 1 : 0 }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
                                                 {{ $employee->name }}
                                             </option>
                                         @endforeach
@@ -184,8 +184,8 @@
                             
                             <div class="mb-4">
                                 <label class="form-label mb-3">اختر طريقة الدفع <span class="text-danger">*</span></label>
-                                <div class="row g-3">
-                                    <div class="col-md-4 col-sm-6">
+                                <div class="row g-3" id="payment-method-options">
+                                    <div class="col-md-3 col-sm-6">
                                         <label for="payment_cash" class="payment-card" id="cash-card">
                                             <input class="form-check-input d-none" type="radio" name="payment_method" 
                                                    id="payment_cash" value="cash" {{ old('payment_method') == 'cash' ? 'checked' : '' }}>
@@ -196,7 +196,7 @@
                                             </div>
                                         </label>
                                     </div>
-                                    <div class="col-md-4 col-sm-6">
+                                    <div class="col-md-3 col-sm-6">
                                         <label for="payment_network" class="payment-card" id="network-card">
                                             <input class="form-check-input d-none" type="radio" name="payment_method" 
                                                    id="payment_network" value="network" {{ old('payment_method') == 'network' ? 'checked' : '' }}>
@@ -207,7 +207,7 @@
                                             </div>
                                         </label>
                                     </div>
-                                    <div class="col-md-4 col-sm-12">
+                                    <div class="col-md-3 col-sm-6">
                                         <label for="payment_mixed" class="payment-card" id="mixed-card">
                                             <input class="form-check-input d-none" type="radio" name="payment_method" 
                                                    id="payment_mixed" value="mixed" {{ old('payment_method') == 'mixed' ? 'checked' : '' }}>
@@ -215,6 +215,17 @@
                                             <div class="payment-content">
                                                 <div class="payment-title">مشترك</div>
                                                 <div class="payment-desc">نقدي + شبكة</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6" id="transfer-method-wrapper" style="display:none;">
+                                        <label for="payment_transfer" class="payment-card" id="transfer-card">
+                                            <input class="form-check-input d-none" type="radio" name="payment_method" 
+                                                   id="payment_transfer" value="transfer" {{ old('payment_method') == 'transfer' ? 'checked' : '' }}>
+                                            <iconify-icon icon="solar:bank-bold-duotone" class="payment-icon text-primary"></iconify-icon>
+                                            <div class="payment-content">
+                                                <div class="payment-title">تحويل</div>
+                                                <div class="payment-desc">دفع عبر تحويل (Snap)</div>
                                             </div>
                                         </label>
                                     </div>
@@ -236,13 +247,21 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     <div class="col-md-4 mb-3" id="network_amount_field" style="display: none;">
                                         <label for="network_amount" class="form-label">مبلغ الشبكة</label>
                                         <input type="number" step="0.01" class="form-control @error('network_amount') is-invalid @enderror" 
                                                id="network_amount" name="network_amount" value="{{ old('network_amount') }}" 
                                                placeholder="0.00" inputmode="decimal">
                                         @error('network_amount')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-4 mb-3" id="transfer_amount_field" style="display: none;">
+                                        <label for="transfer_amount" class="form-label">مبلغ التحويل</label>
+                                        <input type="number" step="0.01" min="0" class="form-control @error('transfer_amount') is-invalid @enderror" name="transfer_amount" id="transfer_amount" placeholder="أدخل مبلغ التحويل" value="{{ old('transfer_amount') }}">
+                                        @error('transfer_amount')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -573,7 +592,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 .done(function(data) {
                     employeeSelect.html('<option value="">اختر الموظف</option>');
                     data.forEach(function(employee) {
-                        employeeSelect.append(`<option value="${employee.id}">${employee.name}</option>`);
+                        // Add data-is-snap attribute for JS logic
+                        employeeSelect.append(`<option value="${employee.id}" data-is-snap="${employee.is_snap ? 1 : 0}">${employee.name}</option>`);
                     });
                 })
                 .fail(function() {
@@ -583,6 +603,27 @@ document.addEventListener('DOMContentLoaded', function() {
             employeeSelect.html('<option value="">اختر الموظف</option>');
         }
     });
+
+    // Show/hide transfer payment method based on selected employee
+    function updateTransferPaymentVisibility() {
+        const selectedOption = $('#employee_id option:selected');
+        const isSnap = selectedOption.data('is-snap') == 1;
+        if (isSnap) {
+            $('#transfer-method-wrapper').show();
+        } else {
+            // If transfer was selected, unselect it
+            if ($('input[name="payment_method"]:checked').val() === 'transfer') {
+                $('input[name="payment_method"][value="cash"]').prop('checked', true).trigger('change');
+            }
+            $('#transfer-method-wrapper').hide();
+        }
+    }
+    // On employee change
+    $('#employee_id').on('change', updateTransferPaymentVisibility);
+    // On page load, run it in case of old value
+    updateTransferPaymentVisibility();
+    // Force trigger change event to ensure JS logic runs for pre-selected employee
+    $('#employee_id').trigger('change');
     
     // Auto-load employees if branch is pre-selected
     @if(isset($selectedBranchId) && !$employees->count())
@@ -749,14 +790,14 @@ document.addEventListener('DOMContentLoaded', function() {
     $('input[name="payment_method"]').change(function() {
         const method = $(this).val();
         const total = parseFloat($('#final_total_amount').val()) || 0;
-        
+
         // Update card styling
         $('.payment-card').removeClass('active');
         $(this).closest('.payment-card').addClass('active');
-        
+
         // Hide all payment fields first
-        $('#cash_amount_field, #network_amount_field').hide().removeClass('fade-in');
-        
+        $('#cash_amount_field, #network_amount_field, #transfer_amount_field').hide().removeClass('fade-in');
+
         // Show relevant fields based on payment method with animation
         if (method === 'cash') {
             $('#cash_amount_field').show().addClass('fade-in');
@@ -769,6 +810,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (method === 'mixed') {
             $('#cash_amount_field, #network_amount_field').show().addClass('fade-in');
             $('#cash_amount, #network_amount').val('');
+        } else if (method === 'transfer') {
+            $('#transfer_amount_field').show().addClass('fade-in');
+            $('#transfer_amount').val(total.toFixed(2));
         }
     });
     
