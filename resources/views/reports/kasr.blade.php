@@ -239,11 +239,11 @@
                         <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
-                        <label for="interest_rate" class="form-label fw-semibold">سعر الفائدة</label>
+                        <label for="interest_rate" class="form-label fw-semibold">قيمة الفائدة</label>
                                            <input type="number" name="interest_rate" id="interest_rate"
-                                               value="{{ old('interest_rate', $filters['interest_rate'] ?? 0) }}"
-                                               step="0.01" min="0" class="form-control" placeholder="مثال: 1.5">
-                           <small class="text-muted">يُحتسب كنسبة من المبلغ الإجمالي ويُخصم في صافي الربح.</small>
+                                               value="{{ old('interest_rate', $filters['interest_value'] ?? 0) }}"
+                                               step="0.01" min="0" class="form-control" placeholder="مثال: 100">
+                           <small class="text-muted">أدخل قيمة الفائدة مباشرة (ليست نسبة مئوية).</small>
                     </div>
                 </div>
 
@@ -292,9 +292,8 @@
         totalAmount = {{ floatval($reportData['total_amount']) }};
     @endif
     function updateInterestValue() {
-        const rate = parseFloat(interestInput.value) || 0;
-        const value = (totalAmount * rate / 100).toFixed(2);
-        interestValue.textContent = value;
+        const value = parseFloat(interestInput.value) || 0;
+        interestValue.textContent = value.toFixed(2);
         updateReceipt();
     }
     function updateReceipt() {
@@ -302,7 +301,7 @@
         const expenses = parseFloat(expensesInput.value) || 0;
         const salaries = parseFloat(salariesInput.value) || 0;
         const interest = parseFloat(interestInput.value) || 0;
-        const interestAmount = (totalAmount * interest / 100) || 0;
+        const interestAmount = interest;
         // Update receipt fields if present
         const receiptExpenses = document.getElementById('receipt_expenses');
         const receiptSalaries = document.getElementById('receipt_salaries');
@@ -354,8 +353,8 @@
                 <span class="value" id="receipt_salaries">{{ number_format($reportData['salaries'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
-                <span class="label">سعر الفائدة:</span>
-                <span class="value" id="receipt_interest_rate">{{ number_format($reportData['interest_rate'] ?? 0, 2) }}</span>
+                <span class="label">قيمة الفائدة:</span>
+                <span class="value" id="receipt_interest_rate">{{ number_format($reportData['interest_value'] ?? 0, 2) }}</span>
             </div>
         </fieldset>
         <hr class="sep">

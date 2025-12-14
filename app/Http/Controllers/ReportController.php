@@ -422,7 +422,9 @@ class ReportController extends Controller
                     foreach ($products as $product) {
                         $totalProductAmount += isset($product['total_amount']) ? (float) $product['total_amount'] : 0;
                     }
-                    if ($totalProductAmount == 0) $totalProductAmount = 1; // avoid division by zero
+                    if ($totalProductAmount == 0) {
+                        $totalProductAmount = 1;
+                    } // avoid division by zero
                     foreach ($products as $product) {
                         if (isset($product['caliber_id']) && $product['caliber_id'] == $caliber->id) {
                             $count++;
@@ -1046,56 +1048,27 @@ class ReportController extends Controller
      */
     public function kasr(Request $request)
     {
-            // Calculate total tax for returns
-            $totalReturnTax = 0;
-            if ($request->branch_id && $request->date_from && $request->date_to) {
-                $returnedSales = \App\Models\Sale::where('branch_id', $request->branch_id)
-                    ->where('is_returned', true)
-                    ->whereDate('created_at', '>=', $request->date_from)
-                    ->whereDate('created_at', '<=', $request->date_to)
-                    ->get();
-                foreach ($returnedSales as $sale) {
-                    $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
-                    if ($products) {
-                        foreach ($products as $product) {
-                            $totalReturnTax += isset($product['tax_amount']) ? (float)$product['tax_amount'] : 0;
-                        }
+        // Calculate total tax for returns
+        $totalReturnTax = 0;
+        if ($request->branch_id && $request->date_from && $request->date_to) {
+            $returnedSales = \App\Models\Sale::where('branch_id', $request->branch_id)
+                ->where('is_returned', true)
+                ->whereDate('created_at', '>=', $request->date_from)
+                ->whereDate('created_at', '<=', $request->date_to)
+                ->get();
+            foreach ($returnedSales as $sale) {
+                $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+                if ($products) {
+                    foreach ($products as $product) {
+                        $totalReturnTax += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
                     }
                 }
             }
-    {
-            // Calculate total returns (sum of net_amount for returned sales)
-            $totalReturns = 0;
-            // ...existing code...
-            $branches = Branch::active()->get();
-            $filters = [
-                'branch_id' => $request->get('branch_id'),
-                'date_from' => $request->get('date_from', date('Y-m-01')),
-                'date_to' => $request->get('date_to', date('Y-m-d')),
-                'auto_refresh' => $request->get('auto_refresh') === '1',
-                'interest_rate' => (float) $request->get('interest_rate', 0),
-            ];
-            if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
-                $returnedSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
-                    ->where('is_returned', true)
-                    ->whereDate('created_at', '>=', $filters['date_from'])
-                    ->whereDate('created_at', '<=', $filters['date_to'])
-                    ->get();
-                foreach ($returnedSales as $sale) {
-                    $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
-                    if ($products) {
-                        foreach ($products as $product) {
-                            $totalReturns += isset($product['net_amount'])
-                                ? (float)$product['net_amount']
-                                : ((float)($product['amount'] ?? 0) - (float)($product['tax_amount'] ?? 0));
-                        }
-                    }
-                }
-            }
-    {
-        $debugExpenseQuery = [];
-        $debugSalaryQuery = [];
-    {
+        }
+
+        // Calculate total returns (sum of net_amount for returned sales)
+        $totalReturns = 0;
+        // ...existing code...
         $branches = Branch::active()->get();
         $filters = [
             'branch_id' => $request->get('branch_id'),
@@ -1103,6 +1076,35 @@ class ReportController extends Controller
             'date_to' => $request->get('date_to', date('Y-m-d')),
             'auto_refresh' => $request->get('auto_refresh') === '1',
             'interest_rate' => (float) $request->get('interest_rate', 0),
+        ];
+        if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
+            $returnedSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
+                ->where('is_returned', true)
+                ->whereDate('created_at', '>=', $filters['date_from'])
+                ->whereDate('created_at', '<=', $filters['date_to'])
+                ->get();
+            foreach ($returnedSales as $sale) {
+                $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+                if ($products) {
+                    foreach ($products as $product) {
+                        $totalReturns += isset($product['net_amount'])
+                            ? (float) $product['net_amount']
+                            : ((float) ($product['amount'] ?? 0) - (float) ($product['tax_amount'] ?? 0));
+                    }
+                }
+            }
+        }
+
+        $debugExpenseQuery = [];
+        $debugSalaryQuery = [];
+
+        $branches = Branch::active()->get();
+        $filters = [
+            'branch_id' => $request->get('branch_id'),
+            'date_from' => $request->get('date_from', date('Y-m-01')),
+            'date_to' => $request->get('date_to', date('Y-m-d')),
+            'auto_refresh' => $request->get('auto_refresh') === '1',
+            'interest_value' => (float) $request->get('interest_rate', 0), // now value not percent
         ];
 
         // Auto-load expenses (all) and salaries from database
@@ -1128,7 +1130,7 @@ class ReportController extends Controller
                     ->whereDate('expense_date', '>=', $prevFrom)
                     ->whereDate('expense_date', '<=', $prevTo)
                     ->sum('amount');
-                if (!in_array($prevExpenses, $expensesList)) {
+                if (! in_array($prevExpenses, $expensesList)) {
                     $expensesList[] = $prevExpenses;
                 }
             }
@@ -1148,7 +1150,7 @@ class ReportController extends Controller
                 $prevSalaries = Employee::active()
                     ->where('branch_id', $filters['branch_id'])
                     ->sum('salary');
-                if (!in_array($prevSalaries, $salariesList)) {
+                if (! in_array($prevSalaries, $salariesList)) {
                     $salariesList[] = $prevSalaries;
                 }
             }
@@ -1162,11 +1164,11 @@ class ReportController extends Controller
         \Log::info('KASR SALARIES QUERY', $debugSalaryQuery);
         \Log::info('KASR EXPENSES SUM', ['sum' => $expenses]);
         \Log::info('KASR SALARIES SUM', ['sum' => $salaries]);
-            \Log::info('KASR EXPENSES QUERY', $debugExpenseQuery);
-            \Log::info('KASR SALARIES QUERY', $debugSalaryQuery);
-            \Log::info('KASR EXPENSES SUM', ['sum' => $expenses]);
-            \Log::info('KASR SALARIES SUM', ['sum' => $salaries]);
-        }
+        \Log::info('KASR EXPENSES QUERY', $debugExpenseQuery);
+        \Log::info('KASR SALARIES QUERY', $debugSalaryQuery);
+        \Log::info('KASR EXPENSES SUM', ['sum' => $expenses]);
+        \Log::info('KASR SALARIES SUM', ['sum' => $salaries]);
+
         if ($request->isMethod('post')) {
             \Log::info('KASR POSTED VALUES', [
                 'expenses' => $request->input('expenses'),
@@ -1195,20 +1197,17 @@ class ReportController extends Controller
             $weights[$caliber->id] = 0;
             $caliberNameToId[trim($caliber->name)] = $caliber->id;
         }
+        // Only use sales (not returns) for caliber calculations
         if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
             $sales = \App\Models\Sale::notReturned()
                 ->where('branch_id', $filters['branch_id'])
                 ->whereDate('created_at', '>=', $filters['date_from'])
                 ->whereDate('created_at', '<=', $filters['date_to'])
                 ->get();
-            // Debug: Log sales and products
-            \Log::info('KASR SALES', ['sales' => $sales->toArray()]);
             foreach ($sales as $sale) {
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
-                \Log::info('KASR PRODUCTS', ['sale_id' => $sale->id, 'products' => $products]);
                 if ($products) {
                     foreach ($products as $product) {
-                        // Try to match by caliber_name if caliber_id does not exist in weights
                         $cid = isset($product['caliber_id']) ? (int) $product['caliber_id'] : null;
                         $cname = isset($product['caliber_name']) ? trim($product['caliber_name']) : null;
                         $targetId = null;
@@ -1228,7 +1227,7 @@ class ReportController extends Controller
         $prices = [];
         $postedPrices = [];
         foreach ($calibers as $index => $caliber) {
-            $inputName = isset($caliber->id) ? 'price_' . $caliber->id : 'price_' . $index;
+            $inputName = isset($caliber->id) ? 'price_'.$caliber->id : 'price_'.$index;
             $prices[$caliber->id ?? $index] = (float) $request->get($inputName, 0);
             $postedPrices[$inputName] = $request->get($inputName);
         }
@@ -1251,9 +1250,9 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $totalSales += isset($product['net_amount']) ? (float)$product['net_amount'] : 0;
-                        $totalTax += isset($product['tax_amount']) ? (float)$product['tax_amount'] : 0;
-                        $totalWeightSales += isset($product['weight']) ? (float)$product['weight'] : 0;
+                        $totalSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
+                        $totalTax += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
+                        $totalWeightSales += isset($product['weight']) ? (float) $product['weight'] : 0;
                     }
                 }
             }
@@ -1268,16 +1267,16 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $totalReturns += isset($product['net_amount']) ? (float)$product['net_amount'] : 0;
-                        $totalWeightReturns += isset($product['weight']) ? (float)$product['weight'] : 0;
-                        $totalTaxReturns += isset($product['tax_amount']) ? (float)$product['tax_amount'] : 0;
+                        $totalReturns += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
+                        $totalWeightReturns += isset($product['weight']) ? (float) $product['weight'] : 0;
+                        $totalTaxReturns += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
                     }
                 }
             }
             // Final total weight = sales - returns
             $totalWeight = $totalWeightSales - $totalWeightReturns;
         }
-        // Calculate cash (sum of sales without tax) for each caliber
+        // Calculate cash (sum of sales without tax) for each caliber (only sales, not returns)
         $caliberCash = [];
         foreach ($calibers as $caliber) {
             $caliberCash[$caliber->id] = 0;
@@ -1301,7 +1300,7 @@ class ReportController extends Controller
                             $targetId = $caliberNameToId[$cname];
                         }
                         if ($targetId) {
-                            $cash = (float)($product['amount'] ?? 0) - (float)($product['tax_amount'] ?? 0);
+                            $cash = (float) ($product['amount'] ?? 0) - (float) ($product['tax_amount'] ?? 0);
                             $caliberCash[$targetId] += $cash;
                         }
                     }
@@ -1328,8 +1327,8 @@ class ReportController extends Controller
             $totalWeight += $weight;
             $totalCalibersCost += $weight * $price;
         }
-        $interestRate = (float) ($filters['interest_rate'] ?? 0);
-        $interestAmount = $interestRate > 0 ? ($totalAmount * $interestRate / 100) : 0;
+        $interestValue = (float) ($filters['interest_value'] ?? 0);
+        $interestAmount = $interestValue;
         // صافي المبيعات: sum net_amount where is_returned = 0
         $netSales = 0;
         if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
@@ -1342,13 +1341,13 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $netSales += isset($product['net_amount']) ? (float)$product['net_amount'] : 0;
+                        $netSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
                     }
                 }
             }
         }
-            // Ensure net_sales is sum of all sales (net_amount) minus sum of all returns (net_amount)
-            // totalSales and totalReturns are already calculated as such above
+        // Ensure net_sales is sum of all sales (net_amount) minus sum of all returns (net_amount)
+        // totalSales and totalReturns are already calculated as such above
         $netTax = $totalTax - $totalTaxReturns; // Net tax: sales taxes minus returns taxes
         $totalWeightAll = $totalWeight + $totalWeightReturns;
         // معدل الجرام = صافي المبيعات / مجموع الوزن (صافي)
@@ -1363,7 +1362,7 @@ class ReportController extends Controller
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
             // مجموع المبيعات: sum of all net_amount (sales + returns)
-            'total_sales_and_returns' => (function() use ($filters) {
+            'total_sales_and_returns' => (function () use ($filters) {
                 $allSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
                     ->whereDate('created_at', '>=', $filters['date_from'])
                     ->whereDate('created_at', '<=', $filters['date_to'])
@@ -1373,10 +1372,11 @@ class ReportController extends Controller
                     $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                     if ($products) {
                         foreach ($products as $product) {
-                            $sum += isset($product['net_amount']) ? (float)$product['net_amount'] : 0;
+                            $sum += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
                         }
                     }
                 }
+
                 return $sum;
             })(),
             // مجموع المرتجعات: sum net_amount where is_returned = 1 (already calculated as $totalReturns)
@@ -1390,7 +1390,7 @@ class ReportController extends Controller
             'avg_price_per_gram' => $avgPricePerGram,
             'expenses' => $expenses,
             'salaries' => $salaries,
-            'interest_rate' => $interestRate,
+            'interest_value' => $interestValue,
             'interest_amount' => $interestAmount,
             'total_expenses' => $expenses + $salaries + $interestAmount,
             'profit' => $alIjmali - $totalCalibersCost,
@@ -1406,8 +1406,7 @@ class ReportController extends Controller
         $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
 
         return view('reports.kasr', compact('branches', 'filters', 'reportData', 'selectedBranch', 'expenses', 'expensesList', 'salaries', 'salariesList', 'weights', 'calibers'));
-    }
-    }
+
     }
 
     /**
@@ -1662,14 +1661,14 @@ class ReportController extends Controller
                 }
             }
         }
-        
+
         $calibersComparison = collect(array_values($caliberSums));
         $showTwoBranchComparison = false;
         $twoBranchComparison = null;
         if ($request->filled('branch1') && $request->filled('branch2') && $request->input('branch1') != $request->input('branch2')) {
             $showTwoBranchComparison = true;
-            $branch1 = $branchesComparison->firstWhere('branch_id', (int)$request->input('branch1'));
-            $branch2 = $branchesComparison->firstWhere('branch_id', (int)$request->input('branch2'));
+            $branch1 = $branchesComparison->firstWhere('branch_id', (int) $request->input('branch1'));
+            $branch2 = $branchesComparison->firstWhere('branch_id', (int) $request->input('branch2'));
             if ($branch1 && $branch2) {
                 $twoBranchComparison = [
                     'branch1' => $branch1,
