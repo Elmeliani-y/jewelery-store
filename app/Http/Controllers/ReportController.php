@@ -1053,8 +1053,8 @@ class ReportController extends Controller
         if ($request->branch_id && $request->date_from && $request->date_to) {
             $returnedSales = \App\Models\Sale::where('branch_id', $request->branch_id)
                 ->where('is_returned', true)
-                ->whereDate('created_at', '>=', $request->date_from)
-                ->whereDate('created_at', '<=', $request->date_to)
+                ->whereDate('returned_at', '>=', $request->date_from)
+                ->whereDate('returned_at', '<=', $request->date_to)
                 ->get();
             foreach ($returnedSales as $sale) {
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
@@ -1080,8 +1080,8 @@ class ReportController extends Controller
         if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
             $returnedSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
                 ->where('is_returned', true)
-                ->whereDate('created_at', '>=', $filters['date_from'])
-                ->whereDate('created_at', '<=', $filters['date_to'])
+                ->whereDate('returned_at', '>=', $filters['date_from'])
+                ->whereDate('returned_at', '<=', $filters['date_to'])
                 ->get();
             foreach ($returnedSales as $sale) {
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);

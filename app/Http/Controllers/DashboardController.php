@@ -145,7 +145,7 @@ class DashboardController extends Controller
         
         $returnedSalesQuery = Sale::query()->where('is_returned', true);
         if ($startDate && $endDate) {
-            $returnedSalesQuery = $returnedSalesQuery->inDateRange($startDate, $endDate);
+            $returnedSalesQuery = $returnedSalesQuery->whereBetween('returned_at', [$startDate, $endDate]);
         }
         if ($branchId) {
             $returnedSalesQuery = $returnedSalesQuery->where('branch_id', $branchId);
