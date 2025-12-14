@@ -876,11 +876,22 @@ class ReportController extends Controller
         }
         $totalSalaries = $employeesQuery->sum('salary');
 
-        // Net profit calculation
-        $netProfit = $totalSales - $totalExpenses - $totalSalaries;
+        // Calculate total returns (net_amount for returned sales, filtered by returned_at)
+        $returnedSalesQuery = \App\Models\Sale::query()->where('is_returned', true);
+        if (isset($filters['branch_id'])) {
+            $returnedSalesQuery->where('branch_id', $filters['branch_id']);
+        }
+        if (isset($filters['date_from']) && isset($filters['date_to'])) {
+            $returnedSalesQuery->whereBetween('returned_at', [$filters['date_from'], $filters['date_to']]);
+        }
+        $totalReturns = $returnedSalesQuery->sum('net_amount');
+
+        // Net profit calculation (subtract returns)
+        $netProfit = $totalSales - $totalReturns - $totalExpenses - $totalSalaries;
 
         $data = [
             'total_sales' => $totalSales,
+            'total_returns' => $totalReturns,
             'total_weight' => $totalWeight,
             'total_expenses' => $totalExpenses,
             'total_salaries' => $totalSalaries,
