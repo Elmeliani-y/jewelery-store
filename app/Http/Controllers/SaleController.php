@@ -138,8 +138,27 @@ class SaleController extends Controller
         }
 
         $validated = $request->validate($baseRules, [
-                // Force payment_method to always be a string
-                $validated['payment_method'] = (string) $validated['payment_method'];
+            'products.required' => 'يجب إضافة منتج واحد على الأقل.',
+            'products.*.category_id.required' => 'الفئة مطلوبة لكل منتج.',
+            'products.*.caliber_id.required' => 'العيار مطلوب لكل منتج.',
+            'products.*.weight.required' => 'الوزن مطلوب.',
+            'products.*.weight.numeric' => 'الوزن يجب أن يكون رقماً.',
+            'products.*.amount.required' => 'المبلغ مطلوب.',
+            'products.*.amount.numeric' => 'المبلغ يجب أن يكون رقماً.',
+            'branch_id.required' => 'الفرع مطلوب.',
+            'employee_id.required' => 'الموظف مطلوب.',
+            'payment_method.required' => 'طريقة الدفع مطلوبة.',
+            'cash_amount.required_if' => 'المبلغ النقدي مطلوب لطريقة الدفع المختارة.',
+            'cash_amount.numeric' => 'المبلغ النقدي يجب أن يكون رقماً.',
+            'network_amount.required_if' => 'مبلغ الشبكة مطلوب لطريقة الدفع المختارة.',
+            'network_amount.numeric' => 'مبلغ الشبكة يجب أن يكون رقماً.',
+            'network_reference.required_if' => 'المرجع الشبكي مطلوب لطريقة الدفع المختارة.',
+            'network_reference.string' => 'المرجع الشبكي يجب أن يكون نصاً.',
+            'notes' => 'الملاحظات',
+        ]);
+
+        // Force payment_method to always be a string
+        $validated['payment_method'] = (string) $validated['payment_method'];
             'products.required' => 'يجب إضافة منتج واحد على الأقل.',
             'products.*.category_id.required' => 'الفئة مطلوبة لكل منتج.',
             'products.*.caliber_id.required' => 'العيار مطلوب لكل منتج.',
