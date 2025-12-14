@@ -118,7 +118,7 @@ class SaleController extends Controller
             'notes' => 'nullable|string|max:1000',
         ];
 
-        $pm = $request->input('payment_method');
+        $pm = (string) $request->input('payment_method');
         if ($pm === 'cash') {
             $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'nullable|numeric|min:0';
@@ -128,6 +128,9 @@ class SaleController extends Controller
         } elseif ($pm === 'mixed') {
             $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'required|numeric|min:0';
+        } elseif ($pm === 'transfer') {
+            $baseRules['cash_amount'] = 'required|numeric|min:0';
+            $baseRules['network_amount'] = 'nullable|numeric|min:0';
         } else {
             // Fallback to nullable to prevent unwanted errors
             $baseRules['cash_amount'] = 'nullable|numeric|min:0';
@@ -135,6 +138,8 @@ class SaleController extends Controller
         }
 
         $validated = $request->validate($baseRules, [
+                // Force payment_method to always be a string
+                $validated['payment_method'] = (string) $validated['payment_method'];
             'products.required' => 'يجب إضافة منتج واحد على الأقل.',
             'products.*.category_id.required' => 'الفئة مطلوبة لكل منتج.',
             'products.*.caliber_id.required' => 'العيار مطلوب لكل منتج.',
