@@ -102,12 +102,30 @@
                 @endif
 
                 @if(!auth()->user()->isBranch())
+
                     <li class="menu-title mt-2">التقارير</li>
                     <li>
-                        <a href="{{ route('reports.all') }}" class="tp-link">
+                        <a href="#sidebarReports" data-bs-toggle="collapse" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-chart-line"></i></span>
                             <span> جميع التقارير </span>
+                            <span class="menu-arrow"></span>
                         </a>
+                        <div class="collapse" id="sidebarReports">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="{{ route('reports.all') }}" class="tp-link">تقرير الكل</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('reports.net-profit') }}" class="tp-link">تقرير صافي الربح</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير المقارن</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('reports.speed') }}" class="tp-link">تقرير السرعة</a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
 
                     <li class="menu-title mt-2">الإدارة</li>

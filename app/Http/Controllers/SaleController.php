@@ -604,7 +604,10 @@ class SaleController extends Controller
 
         $mixedTotal = $sales->where('payment_method', 'mixed')->sum('total_amount');
 
-        return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate', 'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal'));
+        // Snap/Transfer total: payment_method == 'transfer' or (if you want to include network, add network_amount)
+        $snapTotal = $sales->where('payment_method', 'transfer')->sum('total_amount');
+
+        return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate', 'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal', 'snapTotal'));
     }
 
     /**

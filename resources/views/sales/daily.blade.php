@@ -135,11 +135,12 @@
                 </div>
             </div>
         </div>
+        <!-- Snap (تحويل) summary card with white background removed as requested -->
     </div>
     
     <!-- Second Row for Average -->
     <div class="row mb-3">
-        <div class="col-md-3 col-sm-6 mb-3">
+        <div class="col-md-6 col-sm-12 mb-3">
             <div class="card summary-card" style="border-left-color: var(--bs-warning);">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -149,6 +150,21 @@
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">متوسط سعر الجرام</h6>
                             <h4 class="mb-0">{{ number_format($averageRate, 2) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-12 mb-3">
+            <div class="card summary-card" style="border-left-color: #6f42c1;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <iconify-icon icon="solar:bank-bold-duotone" class="fs-1" style="color: #6f42c1;"></iconify-icon>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">مبيعات سناب (تحويل)</h6>
+                            <h4 class="mb-0">{{ number_format($snapTotal, 2) }}</h4>
                         </div>
                     </div>
                 </div>
