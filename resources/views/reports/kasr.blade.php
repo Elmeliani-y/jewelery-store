@@ -346,27 +346,27 @@
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">المصروفات والرواتب</legend>
             <div class="row-line">
                 <span class="label">الأجور:</span>
-                <span class="value" id="receipt_expenses">{{ number_format($reportData['expenses'] ?? 0, 2) }}</span>
+                <span class="value" id="receipt_expenses">{{ number_format($reportData['expenses'] ?? $expenses ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">الرواتب:</span>
-                <span class="value" id="receipt_salaries">{{ number_format($reportData['salaries'] ?? 0, 2) }}</span>
+                <span class="value" id="receipt_salaries">{{ number_format($reportData['salaries'] ?? $salaries ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">قيمة الفائدة:</span>
-                <span class="value" id="receipt_interest_rate">{{ number_format($reportData['interest_value'] ?? 0, 2) }}</span>
+                <span class="value" id="receipt_interest_rate">{{ number_format($reportData['interest_value'] ?? $filters['interest_value'] ?? 0, 2) }}</span>
             </div>
         </fieldset>
         <hr class="sep">
         <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">ملخص المبيعات</legend>
             <div class="row-line">
-                <span class="label">مجموع المبيعات:</span>
-                <span class="value">{{ number_format(($reportData['net_sales'] ?? 0) + ($reportData['total_returns'] ?? 0), 2) }}</span>
+                <span class="label">مجموع المبيعات (صافي):</span>
+                <span class="value">{{ number_format($reportData['total_sales'] + ($reportData['total_returns'] ?? 0), 2) }}</span>
             </div>
             <div class="row-line">
-                <span class="label">مجموع المرتجعات:</span>
-                <span class="value">{{ number_format($reportData['total_returns'] ?? 0, 2) }}</span>
+                <span class="label">قيمة المرتجع:</span>
+                <span class="value highlight">{{ number_format($reportData['total_returns'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">مجموع الضريبة (مبيعات - مرتجعات):</span>
@@ -385,15 +385,23 @@
         <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">تفاصيل الوزن والأسعار</legend>
             <div class="row-line">
-                <span class="label">مجموع الوزن (صافي):</span>
-                <span class="value">{{ number_format(($reportData['total_weight'] ?? 0), 2) }}</span>
+                <span class="label">مجموع الوزن (المبيعات):</span>
+                <span class="value">{{ number_format(($reportData['total_weight'] ?? 0) + ($reportData['total_weight_returns'] ?? 0), 2) }}</span>
             </div>
             <div class="row-line">
-                <span class="label">معدل الجرام:</span>
+                <span class="label">وزن المرتجع:</span>
+                <span class="value highlight">{{ number_format($reportData['total_weight_returns'] ?? 0, 2) }}</span>
+            </div>
+            <div class="row-line">
+                <span class="label">مجموع الوزن (صافي = مبيعات - مرتجع):</span>
+                <span class="value">{{ number_format($reportData['total_weight'] ?? 0, 2) }}</span>
+            </div>
+            <div class="row-line">
+                <span class="label">معدل الجرام (صافي المبيعات ÷ صافي الوزن):</span>
                 <span class="value">{{ number_format($reportData['avg_price_per_gram'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
-                <span class="label">سعر الجرام:</span>
+                <span class="label">سعر الجرام (الإجمالي ÷ صافي الوزن):</span>
                 <span class="value">{{ number_format($reportData['price_of_gram'] ?? 0, 2) }}</span>
             </div>
         </fieldset>
