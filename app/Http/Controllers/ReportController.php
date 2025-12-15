@@ -1473,8 +1473,8 @@ class ReportController extends Controller
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
             // إجمالي المبيعات: مجموع المبيعات (بدون أي خصم أو طرح)
+            'total_sales' => $alIjmali, // Use alIjmali everywhere إجمالي المبيعات is needed
             'al_ijmali' => $alIjmali,
-            'total_sales' => $totalSales,
             // صافي المبيعات: مجموع net_amount لكل المنتجات (بدون أي خصم أو طرح)
             'net_sales' => $totalNetSales,
             // ...existing code...
