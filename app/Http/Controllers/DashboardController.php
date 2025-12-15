@@ -145,7 +145,7 @@ class DashboardController extends Controller
         
         $returnedSalesQuery = Sale::query()->where('is_returned', true);
         if ($startDate && $endDate) {
-            $returnedSalesQuery = $returnedSalesQuery->inDateRange($startDate, $endDate);
+            $returnedSalesQuery = $returnedSalesQuery->whereBetween('returned_at', [$startDate, $endDate]);
         }
         if ($branchId) {
             $returnedSalesQuery = $returnedSalesQuery->where('branch_id', $branchId);
@@ -154,7 +154,9 @@ class DashboardController extends Controller
         $returnedSalesCount = $returnedSalesQuery->count();
 
         return [
-            'total_sales' => $totalSales,
+            // Show net sales after returns as total_sales
+            'total_sales' => $totalSales - $totalReturnedSales,
+            'gross_sales' => $totalSales, // If you want to show gross sales separately
             'total_net_sales' => $salesQuery->sum('net_amount'),
             'total_tax' => $salesQuery->sum('tax_amount'),
             'total_weight' => $totalWeight,
