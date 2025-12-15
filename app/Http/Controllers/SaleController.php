@@ -166,6 +166,7 @@ class SaleController extends Controller
         if ($user->isBranch() && $validated['branch_id'] != $user->branch_id) {
             abort(403, 'غير مصرح لك بالوصول إلى هذا الفرع');
         }
+        
 
         try {
             DB::beginTransaction();
