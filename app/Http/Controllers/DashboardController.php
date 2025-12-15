@@ -128,7 +128,17 @@ class DashboardController extends Controller
             $expensesQuery = $expensesQuery->where('branch_id', $branchId);
         }
 
-        $totalSales = $salesQuery->sum('total_amount');
+        // Calculate true gross sales from all product amounts (not just total_amount column)
+        $totalSales = $salesQuery->get()->reduce(function($carry, $sale) {
+            $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+            $sum = 0;
+            if ($products) {
+                foreach ($products as $product) {
+                    $sum += isset($product['amount']) ? (float)$product['amount'] : 0;
+                }
+            }
+            return $carry + $sum;
+        }, 0);
         // Sum weights from products JSON, not a column
         $totalWeight = $salesQuery->get()->reduce(function($carry, $sale) {
             $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
@@ -150,13 +160,23 @@ class DashboardController extends Controller
         if ($branchId) {
             $returnedSalesQuery = $returnedSalesQuery->where('branch_id', $branchId);
         }
-        $totalReturnedSales = $returnedSalesQuery->sum('total_amount');
+        // Calculate true gross returned sales from all product amounts
+        $totalReturnedSales = $returnedSalesQuery->get()->reduce(function($carry, $sale) {
+            $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+            $sum = 0;
+            if ($products) {
+                foreach ($products as $product) {
+                    $sum += isset($product['amount']) ? (float)$product['amount'] : 0;
+                }
+            }
+            return $carry + $sum;
+        }, 0);
         $returnedSalesCount = $returnedSalesQuery->count();
 
         return [
-            // Show net sales after returns as total_sales
-            'total_sales' => $totalSales - $totalReturnedSales,
-            'gross_sales' => $totalSales, // If you want to show gross sales separately
+            // Show إجمالي المبيعات (gross sales, sum of all product amounts for non-returned sales)
+            'total_sales' => $totalSales,
+            'gross_sales' => $totalSales, // For clarity, same as total_sales now
             'total_net_sales' => $salesQuery->sum('net_amount'),
             'total_tax' => $salesQuery->sum('tax_amount'),
             'total_weight' => $totalWeight,
