@@ -129,7 +129,7 @@ class SaleController extends Controller
             $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'required|numeric|min:0';
         } elseif ($pm === 'transfer') {
-            $baseRules['cash_amount'] = 'nullable|numeric|min:0';
+            $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'nullable|numeric|min:0';
         } else {
             // Fallback to nullable to prevent unwanted errors
@@ -154,10 +154,12 @@ class SaleController extends Controller
             'network_amount.numeric' => 'مبلغ الشبكة يجب أن يكون رقماً.',
             'network_reference.required_if' => 'المرجع الشبكي مطلوب لطريقة الدفع المختارة.',
             'network_reference.string' => 'المرجع الشبكي يجب أن يكون نصاً.',
+            'notes' => 'الملاحظات',
         ]);
 
         // Force payment_method to always be a string
         $validated['payment_method'] = (string) $validated['payment_method'];
+        // ...existing code...
 
         // Check if branch user is trying to access another branch
         $user = auth()->user();
