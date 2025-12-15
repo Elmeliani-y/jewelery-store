@@ -374,7 +374,7 @@
             </div>
             <div class="row-line">
                 <span class="label">الإجمالي (صافي المبيعات + مجموع الضريبة):</span>
-                <span class="value">{{ number_format($reportData['al_ijmali'] ?? 0, 2) }}</span>
+                <span class="value">{{ number_format(($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0), 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">صافي المبيعات:</span>
