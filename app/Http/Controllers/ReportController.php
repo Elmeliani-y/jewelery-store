@@ -1482,7 +1482,7 @@ class ReportController extends Controller
             'total_expenses' => $expenses + $salaries + $interestAmount,
             'profit' => ($totalSales - $totalReturns + $netTax) - $totalCalibersCost,
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
-            'total_sales' => $totalSales - $totalReturns,
+            'total_sales' => $totalSales,
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
