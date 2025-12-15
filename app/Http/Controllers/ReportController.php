@@ -1343,7 +1343,7 @@ class ReportController extends Controller
         $totalAmount = 0;
         $totalWeight = 0;
         $totalWeightSales = 0;
-        $alIjmali = 0; // إجمالي المبيعات بدون الضريبة (sum of all product net_amount, no tax)
+        $alIjmali = 0; // إجمالي المبيعات (sum of all product amounts, no deductions)
         $totalSales = 0; // for other uses if needed
         $totalNetSales = 0; // net (without tax, no deductions)
         $totalTax = 0;
@@ -1359,7 +1359,7 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $alIjmali += isset($product['net_amount']) ? (float) $product['net_amount'] : 0; // إجمالي المبيعات بدون الضريبة
+                        $alIjmali += isset($product['amount']) ? (float) $product['amount'] : 0; // إجمالي المبيعات الحقيقي
                         $totalSales += isset($product['amount']) ? (float) $product['amount'] : 0; // for compatibility
                         $totalNetSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
                         $totalTax += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
@@ -1473,8 +1473,8 @@ class ReportController extends Controller
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
             // إجمالي المبيعات: مجموع المبيعات (بدون أي خصم أو طرح)
-            'total_sales' => $alIjmali, // Use alIjmali everywhere إجمالي المبيعات is needed
-            'al_ijmali' => $alIjmali - $totalReturns,
+            'al_ijmali' => $alIjmali,
+            'total_sales' => $totalSales,
             // صافي المبيعات: مجموع net_amount لكل المنتجات (بدون أي خصم أو طرح)
             'net_sales' => $totalNetSales,
             // ...existing code...
