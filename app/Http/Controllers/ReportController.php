@@ -1451,7 +1451,7 @@ class ReportController extends Controller
         }
         // Ensure net_sales is sum of all sales (net_amount) minus sum of all returns (net_amount)
         // totalSales and totalReturns are already calculated as such above
-        $netTax = $totalTax - $totalTaxReturns; // Net tax: sales taxes minus returns taxes
+        $netTax = $totalTax ; // Net tax: sales taxes minus returns taxes
         $totalWeightAll = $totalWeight + $totalWeightReturns;
         // معدل الجرام = صافي المبيعات / مجموع الوزن (صافي)
         $avgPricePerGram = ($totalWeightSales > 0) ? ($netSales / $totalWeightSales) : 0;
@@ -1464,7 +1464,7 @@ class ReportController extends Controller
         // سعر الجرام = الإجمالي / مجموع الوزن (صافي)
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
-            // إجمالي المبيعات: مجموع المبيعات (صافي) + مجموع المرتجعات
+            // إجمالي المبيعات: مجموع المبيعات (صافي) فقط بدون طرح المرتجعات
             'total_sales_and_returns' => $totalSales + $totalReturns,
             // مجموع المرتجعات: sum net_amount where is_returned = 1 (already calculated as $totalReturns)
             'total_returns' => $totalReturns,
@@ -1480,14 +1480,14 @@ class ReportController extends Controller
             'interest_value' => $interestValue,
             'interest_amount' => $interestAmount,
             'total_expenses' => $expenses + $salaries + $interestAmount,
-            'profit' => ($totalSales - $totalReturns + $netTax) - $totalCalibersCost,
+            'profit' => ($totalSales + $netTax) - $totalCalibersCost, // لا تطرح المرتجعات من الربح هنا
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
-            'total_sales' => $totalSales,
+            'total_sales' => $totalSales, // لا تطرح المرتجعات من إجمالي المبيعات
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
-            // الإجمالي: صافي المبيعات + مجموع الضريبة (بعد طرح المرتجعات)
-            'al_ijmali' => ($totalSales - $totalReturns) + $netTax,
+            // الإجمالي: إجمالي المبيعات + مجموع الضريبة (بدون طرح المرتجعات)
+            'al_ijmali' => $totalSales + $netTax,
             'price_of_gram' => $priceOfGram,
         ];
         $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
