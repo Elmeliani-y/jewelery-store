@@ -1343,8 +1343,9 @@ class ReportController extends Controller
         $totalAmount = 0;
         $totalWeight = 0;
         $totalWeightSales = 0;
-        $totalSales = 0; // gross (with tax)
-        $totalNetSales = 0; // net (without tax)
+        $alIjmali = 0; // إجمالي المبيعات (sum of all product amounts, no deductions)
+        $totalSales = 0; // for other uses if needed
+        $totalNetSales = 0; // net (without tax, no deductions)
         $totalTax = 0;
         $totalWeightReturns = 0;
         $totalTaxReturns = 0;
@@ -1358,8 +1359,9 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $totalSales += isset($product['amount']) ? (float) $product['amount'] : 0; // gross (with tax)
-                        $totalNetSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0; // net
+                        $alIjmali += isset($product['amount']) ? (float) $product['amount'] : 0; // إجمالي المبيعات الحقيقي
+                        $totalSales += isset($product['amount']) ? (float) $product['amount'] : 0; // for compatibility
+                        $totalNetSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
                         $totalTax += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
                         $totalWeightSales += isset($product['weight']) ? (float) $product['weight'] : 0;
                     }
@@ -1470,12 +1472,14 @@ class ReportController extends Controller
         // سعر الجرام = الإجمالي / مجموع الوزن (صافي)
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
-            // إجمالي المبيعات: مجموع المبيعات (بدون الضريبة)
-            'total_sales_and_returns' => $totalSales + $totalReturns,
-            // مجموع المرتجعات: sum net_amount where is_returned = 1 (already calculated as $totalReturns)
-            'total_returns' => $totalReturns,
-            // صافي المبيعات: sum net_amount where is_returned = 0 (calculated above as $netSales) (do not deduct returns)
+            // إجمالي المبيعات: مجموع المبيعات (بدون أي خصم أو طرح)
+            'al_ijmali' => $alIjmali,
+            'total_sales' => $totalSales,
+            // صافي المبيعات: مجموع net_amount لكل المنتجات (بدون أي خصم أو طرح)
             'net_sales' => $totalNetSales,
+            // ...existing code...
+            'total_sales_and_returns' => $totalSales + $totalReturns,
+            'total_returns' => $totalReturns,
             'calibers' => $reportCalibers,
             'total_amount' => $totalAmount,
             'total_weight' => $totalWeightSales - $totalWeightReturns,
@@ -1486,14 +1490,11 @@ class ReportController extends Controller
             'interest_value' => $interestValue,
             'interest_amount' => $interestAmount,
             'total_expenses' => $expenses + $salaries + $interestAmount,
-            'profit' => ($totalSales + $netTax) - $totalCalibersCost, // لا تطرح المرتجعات من الربح هنا
+            'profit' => ($totalSales + $netTax) - $totalCalibersCost,
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
-            'total_sales' => $totalSales, // إجمالي المبيعات بدون الضريبة
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
-            // الإجمالي: مجموع المبيعات فقط (بدون أي إضافات أو طرح)
-            'al_ijmali' => $totalSales,
             'price_of_gram' => $priceOfGram,
         ];
         $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
