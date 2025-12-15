@@ -129,7 +129,7 @@ class SaleController extends Controller
             $baseRules['cash_amount'] = 'required|numeric|min:0';
             $baseRules['network_amount'] = 'required|numeric|min:0';
         } elseif ($pm === 'transfer') {
-            $baseRules['cash_amount'] = 'required|numeric|min:0';
+            $baseRules['cash_amount'] = 'nullable|numeric|min:0';
             $baseRules['network_amount'] = 'nullable|numeric|min:0';
         } else {
             // Fallback to nullable to prevent unwanted errors
