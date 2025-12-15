@@ -65,6 +65,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('by-branch', [ReportController::class, 'byBranch'])->name('by-branch');
         Route::get('comparative', [ReportController::class, 'comparative'])->name('comparative');
         Route::match(['get', 'post'], 'kasr', [ReportController::class, 'kasr'])->name('kasr');
+        Route::get('accounts', [ReportController::class, 'accounts'])->name('accounts');
     });
 
     // Branches Management

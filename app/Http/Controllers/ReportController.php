@@ -19,10 +19,75 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
-    // ...existing code...
     /**
-     * Generate report by branch (sales and expenses grouped by branch).
+     * Accounts report: show network, cash, transfer by branch and date range
      */
+    public function accounts(Request $request)
+    {
+        $branches = Branch::active()->get();
+        $branchId = $request->get('branch_id');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        $summary = null;
+        $debug = null;
+        $allSales = \App\Models\Sale::all();
+        // If branch/date not selected, show all sales as 'sales' for easier debugging
+        if ($branchId && $dateFrom && $dateTo) {
+            $sales = Sale::byBranch($branchId)
+                ->inDateRange($dateFrom, $dateTo)
+                ->where(function($q) {
+                    $q->where('is_returned', false)
+                      ->orWhere('is_returned', 0)
+                      ->orWhere('is_returned', '0')
+                      ->orWhereNull('is_returned');
+                })
+                ->get();
+            $returns = Sale::where('is_returned', true)
+                ->byBranch($branchId)
+                ->whereBetween('returned_at', [$dateFrom, $dateTo])
+                ->get();
+        } else {
+            $sales = $allSales;
+            $returns = collect();
+        }
+        $network = 0;
+        $cash = 0;
+        $transfer = 0;
+        foreach ($sales as $sale) {
+            if ($sale->payment_method === 'network') {
+                $network += $sale->network_amount ?? $sale->amount ?? 0;
+            } elseif ($sale->payment_method === 'cash') {
+                $cash += $sale->cash_amount ?? $sale->amount ?? 0;
+            } elseif ($sale->payment_method === 'transfer') {
+                $transfer += $sale->amount ?? 0;
+            }
+        }
+        foreach ($returns as $sale) {
+            if ($sale->payment_method === 'network') {
+                $network -= $sale->network_amount ?? $sale->amount ?? 0;
+            } elseif ($sale->payment_method === 'cash') {
+                $cash -= $sale->cash_amount ?? $sale->amount ?? 0;
+            } elseif ($sale->payment_method === 'transfer') {
+                $transfer -= $sale->amount ?? 0;
+            }
+        }
+        $summary = [
+            'network' => $network,
+            'cash' => $cash,
+            'transfer' => $transfer,
+        ];
+        $debug = [
+            'sales' => $sales,
+            'returns' => $returns,
+            'allSales' => $allSales,
+        ];
+        return view('reports.accounts', compact('branches', 'summary', 'debug'));
+        return view('reports.accounts', compact('branches', 'summary'));
+}
+
+/**
+ * Generate report by branch (sales and expenses grouped by branch).
+ */
     public function byBranch(Request $request)
     {
         $filters = $this->validateFilters($request);

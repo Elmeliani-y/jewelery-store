@@ -95,7 +95,10 @@ class Sale extends Model
     public function scopeInDateRange($query, $startDate, $endDate)
     {
         if ($startDate && $endDate) {
-            return $query->whereBetween('created_at', [$startDate, $endDate]);
+            // Ensure end date includes the full day
+            $start = $startDate . ' 00:00:00';
+            $end = $endDate . ' 23:59:59';
+            return $query->whereBetween('created_at', [$start, $end]);
         }
         return $query;
     }

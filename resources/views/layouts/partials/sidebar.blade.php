@@ -124,6 +124,9 @@
                                 <li>
                                     <a href="{{ route('reports.speed') }}" class="tp-link">تقرير السرعة</a>
                                 </li>
+                                <li>
+                                    <a href="{{ route('reports.accounts') }}" class="tp-link">تقرير الحسابات</a>
+                                </li>
                             </ul>
                         </div>
                     </li>
