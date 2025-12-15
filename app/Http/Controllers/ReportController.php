@@ -68,6 +68,13 @@ class ReportController extends Controller
             $netProfit = $totalNetSales - $totalExpenses;
             $avgPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
 
+            // Returned sales for this branch and date range (filtered by returned_at)
+            $returnedSales = \App\Models\Sale::where('branch_id', $branch->id)
+                ->where('is_returned', true)
+                ->whereDate('returned_at', '>=', $filters['date_from'])
+                ->whereDate('returned_at', '<=', $filters['date_to'])
+                ->get();
+
             return [
                 'branch' => $branch,
                 'total_sales' => $totalSales,
@@ -78,6 +85,7 @@ class ReportController extends Controller
                 'expenses_count' => $expensesCount,
                 'net_profit' => $netProfit,
                 'avg_price_per_gram' => $avgPricePerGram,
+                // Optionally, you can add 'returned_sales' => $returnedSales if needed in the view
             ];
         });
 
