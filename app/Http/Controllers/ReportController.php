@@ -1367,37 +1367,12 @@ class ReportController extends Controller
         // سعر الجرام = الإجمالي / مجموع الوزن (صافي)
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
-            // مجموع المبيعات: sum of all net_amount (sales + returns)
-            'total_sales_and_returns' => (function () use ($filters) {
-                $allSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
-                    ->where(function($query) use ($filters) {
-                        $query->where(function($q) use ($filters) {
-                            $q->where('is_returned', false)
-                                ->whereDate('created_at', '>=', $filters['date_from'])
-                                ->whereDate('created_at', '<=', $filters['date_to']);
-                        })
-                        ->orWhere(function($q) use ($filters) {
-                            $q->where('is_returned', true)
-                                ->whereDate('returned_at', '>=', $filters['date_from'])
-                                ->whereDate('returned_at', '<=', $filters['date_to']);
-                        });
-                    })
-                    ->get();
-                $sum = 0;
-                foreach ($allSales as $sale) {
-                    $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
-                    if ($products) {
-                        foreach ($products as $product) {
-                            $sum += isset($product['net_amount']) ? (float) $product['net_amount'] : 0;
-                        }
-                    }
-                }
-                return $sum;
-            })(),
+            // إجمالي المبيعات: مجموع المبيعات (صافي) + مجموع المرتجعات
+            'total_sales_and_returns' => $totalSales + $totalReturns,
             // مجموع المرتجعات: sum net_amount where is_returned = 1 (already calculated as $totalReturns)
             'total_returns' => $totalReturns,
             // صافي المبيعات: sum net_amount where is_returned = 0 (calculated above as $netSales)
-            'net_sales' => $netSales,
+            'net_sales' => $totalSales - $totalReturns,
             'calibers' => $reportCalibers,
             'total_amount' => $totalAmount,
             'total_weight' => $totalWeightSales - $totalWeightReturns,
@@ -1408,13 +1383,14 @@ class ReportController extends Controller
             'interest_value' => $interestValue,
             'interest_amount' => $interestAmount,
             'total_expenses' => $expenses + $salaries + $interestAmount,
-            'profit' => $alIjmali - $totalCalibersCost,
+            'profit' => ($totalSales - $totalReturns + $netTax) - $totalCalibersCost,
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
             'total_sales' => $totalSales - $totalReturns,
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
-            'al_ijmali' => $alIjmali,
+            // الإجمالي: صافي المبيعات + مجموع الضريبة (بعد طرح المرتجعات)
+            'al_ijmali' => ($totalSales - $totalReturns) + $netTax,
             'price_of_gram' => $priceOfGram,
         ];
         $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
