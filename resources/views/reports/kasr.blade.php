@@ -361,7 +361,7 @@
         <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">ملخص المبيعات</legend>
             <div class="row-line">
-                <span class="label">إجمالي المبيعات:</span>
+                <span class="label">إجمالي المبيعات (بدون الضريبة):</span>
                 <span class="value">{{ number_format($reportData['al_ijmali'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
