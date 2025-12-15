@@ -362,7 +362,7 @@
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">ملخص المبيعات</legend>
             <div class="row-line">
                 <span class="label">إجمالي المبيعات (بدون الضريبة):</span>
-                <span class="value">{{ number_format($reportData['al_ijmali'] ?? 0, 2) }}</span>
+                <span class="value">{{ number_format($reportData['total_sales_and_returns'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">قيمة المرتجع:</span>
