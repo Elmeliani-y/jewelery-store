@@ -116,7 +116,7 @@
                                     <a href="{{ route('reports.all') }}" class="tp-link">تقرير الكل</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('reports.net-profit') }}" class="tp-link">تقرير صافي الربح</a>
+                                    <a href="{{ route('reports.kasr') }}" class="tp-link">تقرير الكسر (صافي الربح)</a>
                                 </li>
                                 <li>
                                     <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير المقارن</a>
