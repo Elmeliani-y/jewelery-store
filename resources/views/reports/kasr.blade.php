@@ -402,6 +402,7 @@
         <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">تفاصيل العيارات</legend>
             @foreach($reportData['calibers'] as $caliber)
+                @if(($caliber['cash'] ?? 0) > 0 || ($caliber['weight'] ?? 0) > 0)
                 <div class="row-line">
                     <span class="label">مبيعات {{ $caliber['name'] }} بدون ضريبة:</span>
                     <span class="value">{{ number_format($caliber['cash'] ?? 0, 2) }}</span>
@@ -414,6 +415,7 @@
                     <span class="label">معدل الجرام (مبيعات ÷ وزن):</span>
                     <span class="value">{{ number_format($caliber['avg_price_per_gram'] ?? 0, 2) }}</span>
                 </div>
+                @endif
             @endforeach
         </fieldset>
         <hr class="sep">
