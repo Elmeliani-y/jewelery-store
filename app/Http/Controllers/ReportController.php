@@ -1400,7 +1400,7 @@ class ReportController extends Controller
             'net_sales' => $netSales,
             'calibers' => $reportCalibers,
             'total_amount' => $totalAmount,
-            'total_weight' => $totalWeightSales, // FIX: use only the sum of all product weights
+            'total_weight' => $totalWeightSales - $totalWeightReturns,
             'total_weight_returns' => $totalWeightReturns,
             'avg_price_per_gram' => $avgPricePerGram,
             'expenses' => $expenses,
@@ -1410,11 +1410,10 @@ class ReportController extends Controller
             'total_expenses' => $expenses + $salaries + $interestAmount,
             'profit' => $alIjmali - $totalCalibersCost,
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
-            'total_sales' => $totalSales,
-            'total_tax' => $totalTax,
+            'total_sales' => $totalSales - $totalReturns,
+            'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
-            'total_returns' => $totalReturns,
             'al_ijmali' => $alIjmali,
             'price_of_gram' => $priceOfGram,
         ];

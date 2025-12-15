@@ -65,7 +65,7 @@ class SaleController extends Controller
         $calibers = Caliber::active()->get();
 
         // Load minimum price setting from database
-        $minGramPrice = (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
+        $minGramPrice = (float) \App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
 
         return view('sales.index', compact('sales', 'branches', 'employees', 'categories', 'calibers', 'minGramPrice'));
     }
@@ -93,7 +93,7 @@ class SaleController extends Controller
 
         // Load settings from database
         $settings = [
-            'min_invoice_gram_avg' => (float)\App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0)),
+            'min_invoice_gram_avg' => (float) \App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0)),
         ];
 
         return view('sales.create', compact('branches', 'employees', 'categories', 'calibers', 'selectedBranchId', 'settings'));
@@ -482,7 +482,7 @@ class SaleController extends Controller
      */
     public function unreturnSale(Sale $sale)
     {
-        if (!$sale->is_returned) {
+        if (! $sale->is_returned) {
             return redirect()->route('sales.show', $sale)
                 ->with('error', 'هذه الفاتورة ليست مرتجعاً');
         }
@@ -490,6 +490,7 @@ class SaleController extends Controller
             'is_returned' => false,
             'returned_at' => null,
         ]);
+
         return redirect()->route('sales.index')->with('success', 'تمت إعادة الفاتورة إلى قائمة المبيعات بنجاح');
     }
 
@@ -548,9 +549,9 @@ class SaleController extends Controller
     public function dailySales(Request $request)
     {
         $user = auth()->user();
-        
+
         // Only branch users can access
-        if (!$user->isBranch()) {
+        if (! $user->isBranch()) {
             abort(403, 'هذه الصفحة مخصصة لحسابات الفروع فقط');
         }
 
@@ -580,12 +581,13 @@ class SaleController extends Controller
         $sales = $query->get();
 
         // Calculate totals
-        $totalWeight = $sales->reduce(function($carry, $sale) {
+        $totalWeight = $sales->reduce(function ($carry, $sale) {
             if (is_array($sale->products)) {
                 foreach ($sale->products as $product) {
-                    $carry += isset($product['weight']) ? (float)$product['weight'] : 0;
+                    $carry += isset($product['weight']) ? (float) $product['weight'] : 0;
                 }
             }
+
             return $carry;
         }, 0);
         $totalAmount = $sales->sum('total_amount');
@@ -593,13 +595,13 @@ class SaleController extends Controller
 
         // Calculate payment type totals
         // Cash only includes: pure cash payments + cash portion of mixed payments
-        $cashOnlyTotal = $sales->where('payment_method', 'cash')->sum('total_amount') 
+        $cashOnlyTotal = $sales->where('payment_method', 'cash')->sum('total_amount')
                        + $sales->where('payment_method', 'mixed')->sum('cash_amount');
-        
+
         // Network only includes: pure network payments + network portion of mixed payments
-        $networkOnlyTotal = $sales->where('payment_method', 'network')->sum('total_amount') 
+        $networkOnlyTotal = $sales->where('payment_method', 'network')->sum('total_amount')
                           + $sales->where('payment_method', 'mixed')->sum('network_amount');
-        
+
         $mixedTotal = $sales->where('payment_method', 'mixed')->sum('total_amount');
 
         return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate', 'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal'));
@@ -620,6 +622,7 @@ class SaleController extends Controller
         }
 
         $returns = $query->paginate(15);
+
         return view('sales.returns', compact('returns'));
     }
 }
