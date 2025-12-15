@@ -1058,6 +1058,22 @@ class ReportController extends Controller
      * Kasr Report - تقرير الكسر (Input Form)
      */
     public function kasr(Request $request)
+            \Log::info('KASR FILTERS', $filters);
+            if (isset($filters['branch_id']) && isset($filters['date_from']) && isset($filters['date_to'])) {
+                $debugReturnedSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
+                    ->where('is_returned', true)
+                    ->whereDate('returned_at', '>=', $filters['date_from'])
+                    ->whereDate('returned_at', '<=', $filters['date_to'])
+                    ->get();
+                \Log::info('KASR RETURNED SALES COUNT', ['count' => $debugReturnedSales->count()]);
+                foreach ($debugReturnedSales as $sale) {
+                    \Log::info('KASR RETURNED SALE', [
+                        'id' => $sale->id,
+                        'returned_at' => $sale->returned_at,
+                        'net_amount' => $sale->net_amount,
+                    ]);
+                }
+            }
     {
         // Calculate total tax for returns
         $totalReturnTax = 0;
