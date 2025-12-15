@@ -1478,7 +1478,7 @@ class ReportController extends Controller
             // صافي المبيعات: مجموع net_amount لكل المنتجات (بدون أي خصم أو طرح)
             'net_sales' => $totalNetSales,
             // ...existing code...
-            'total_sales_and_returns' => $totalSales + $totalReturns,
+            'total_sales_and_returns' => $totalNetSales + $totalReturns,
             'total_returns' => $totalReturns,
             'calibers' => $reportCalibers,
             'total_amount' => $totalAmount,
