@@ -362,7 +362,7 @@
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">ملخص المبيعات</legend>
             <div class="row-line">
                 <span class="label">مجموع المبيعات (صافي):</span>
-                <span class="value">{{ number_format($reportData['total_sales'] + ($reportData['total_returns'] ?? 0), 2) }}</span>
+                <span class="value">{{ number_format($reportData['total_sales'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">قيمة المرتجع:</span>
@@ -393,7 +393,7 @@
                 <span class="value highlight">{{ number_format($reportData['total_weight_returns'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
-                <span class="label">مجموع الوزن (صافي = مبيعات - مرتجع):</span>
+                <span class="label">مجموع الوزن (صافي):</span>
                 <span class="value">{{ number_format($reportData['total_weight'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
