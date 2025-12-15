@@ -35,11 +35,11 @@ class ReportController extends Controller
         if ($branchId && $dateFrom && $dateTo) {
             $sales = Sale::byBranch($branchId)
                 ->inDateRange($dateFrom, $dateTo)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('is_returned', false)
-                      ->orWhere('is_returned', 0)
-                      ->orWhere('is_returned', '0')
-                      ->orWhereNull('is_returned');
+                        ->orWhere('is_returned', 0)
+                        ->orWhere('is_returned', '0')
+                        ->orWhereNull('is_returned');
                 })
                 ->get();
             $returns = Sale::where('is_returned', true)
@@ -81,13 +81,15 @@ class ReportController extends Controller
             'returns' => $returns,
             'allSales' => $allSales,
         ];
-        return view('reports.accounts', compact('branches', 'summary', 'debug'));
-        return view('reports.accounts', compact('branches', 'summary'));
-}
 
-/**
- * Generate report by branch (sales and expenses grouped by branch).
- */
+        return view('reports.accounts', compact('branches', 'summary', 'debug'));
+
+        return view('reports.accounts', compact('branches', 'summary'));
+    }
+
+    /**
+     * Generate report by branch (sales and expenses grouped by branch).
+     */
     public function byBranch(Request $request)
     {
         $filters = $this->validateFilters($request);
@@ -1323,7 +1325,9 @@ class ReportController extends Controller
             // Subtract returned weights from each caliber
             foreach ($weights as $caliberId => $weight) {
                 $weights[$caliberId] -= $returnedWeights[$caliberId] ?? 0;
-                if ($weights[$caliberId] < 0) $weights[$caliberId] = 0;
+                if ($weights[$caliberId] < 0) {
+                    $weights[$caliberId] = 0;
+                }
             }
         }
 
@@ -1354,7 +1358,7 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $totalSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0; // gross (now net, without tax)
+                        $totalSales += isset($product['amount']) ? (float) $product['amount'] : 0; // gross (with tax)
                         $totalNetSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0; // net
                         $totalTax += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
                         $totalWeightSales += isset($product['weight']) ? (float) $product['weight'] : 0;
@@ -1453,7 +1457,7 @@ class ReportController extends Controller
         }
         // Ensure net_sales is sum of all sales (net_amount) minus sum of all returns (net_amount)
         // totalSales and totalReturns are already calculated as such above
-        $netTax = $totalTax ; // Net tax: sales taxes minus returns taxes
+        $netTax = $totalTax; // Net tax: sales taxes minus returns taxes
         $totalWeightAll = $totalWeight + $totalWeightReturns;
         // معدل الجرام = صافي المبيعات / مجموع الوزن (صافي)
         $avgPricePerGram = ($totalWeightSales > 0) ? ($netSales / $totalWeightSales) : 0;
@@ -1488,8 +1492,8 @@ class ReportController extends Controller
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
-            // الإجمالي: إجمالي المبيعات + مجموع الضريبة (بدون طرح المرتجعات)
-            'al_ijmali' => $totalSales + $netTax,
+            // الإجمالي: مجموع المبيعات فقط (بدون أي إضافات أو طرح)
+            'al_ijmali' => $totalSales,
             'price_of_gram' => $priceOfGram,
         ];
         $selectedBranch = $filters['branch_id'] ? Branch::find($filters['branch_id']) : null;
