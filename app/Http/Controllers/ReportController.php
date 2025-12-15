@@ -596,7 +596,7 @@ class ReportController extends Controller
 
         // Calculate summaries
         $summary = [
-            'total_sales' => (clone $salesQuery)->sum('total_amount'),
+            'total_sales' => (clone $salesQuery)->sum('net_amount'), // مطابق لصافي المبيعات
             'total_net_sales' => (clone $salesQuery)->sum('net_amount'),
             'total_tax' => (clone $salesQuery)->sum('tax_amount'),
             // ...existing code...
