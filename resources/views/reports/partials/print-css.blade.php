@@ -1,4 +1,8 @@
-<style>
+  <style>
+  @media print {
+    h4.page-title {
+      display: none !important;
+    }
 .report-toolbar .btn { border-radius: 8px; }
 .report-toolbar .btn + .btn, .report-toolbar .btn-group { margin-inline-start: .35rem; }
 .report-toolbar .dropdown-menu { min-width: 160px; }
@@ -9,38 +13,80 @@ table { page-break-inside: auto; }
 tr    { page-break-inside: avoid; page-break-after: auto; }
 thead { display: table-header-group; }
 tfoot { display: table-footer-group; }
-@media print { 
-  @page { size: A4 landscape; margin: 12mm; }
-  body { 
-    font-family: 'Arial', sans-serif !important;
+@media print {
+  @page { size: A4 portrait; margin: 2mm 8mm 2mm 8mm; }
+  /* Remove forced height and overflow to allow content to print fully */
+
+  /* Scale content to fit one page if needed */
+  body {
+    transform-origin: top left !important;
+    /* The scale will be set by the browser if user selects "Fit to page" in print dialog */
+  }
+  body {
+    font-family: 'Cairo', 'Arial', 'Tahoma', 'sans-serif' !important;
     background: white !important;
     padding: 0 !important;
+    font-size: 13px !important;
+    direction: rtl !important;
   }
-  .topbar-custom,.app-sidebar-menu,.footer, .report-toolbar, .no-print, .card-footer { display:none !important; }
-  
-  /* Print Header */
-  .print-title { 
-    display: block !important; 
-    text-align: center !important; 
-    margin: 0 0 20px 0 !important; 
-    padding: 20px 15px !important; 
-    border-bottom: none !important;
-    background: #2c3e50 !important;
-    border-radius: 6px !important;
+  .topbar-custom,
+  .app-sidebar-menu,
+  .footer,
+  .report-toolbar,
+  .no-print,
+  .card-footer,
+  .kasr-filters-form {
+    display: none !important;
   }
-  .print-title h2 { 
-    font-size: 26px !important; 
-    font-weight: 700 !important; 
-    margin: 0 0 10px 0 !important;
-    color: white !important;
-    letter-spacing: 0.5px !important;
-  }
-  .print-title p { 
-    font-size: 13px !important; 
-    color: #ecf0f1 !important; 
+  /* Always show main report content in print */
+  .container-fluid,
+  .kasr-receipt {
+    display: block !important;
+    visibility: visible !important;
+    color: #222 !important;
+    background: #fff !important;
+    max-width: 100% !important;
+    width: 100% !important;
     margin: 0 !important;
-    line-height: 1.8 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
   }
+  /* For kasr report: keep all content on one page, but do NOT force each element to a new page */
+  .kasr-receipt, .kasr-table, .kasr-table th, .kasr-table td, .kasr-table tr, .kasr-table tbody, .kasr-table thead {
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    visibility: visible !important;
+    color: #222 !important;
+  }
+  .kasr-receipt .row-line {
+    font-size: 13px !important;
+    padding: 1.5mm 0 !important;
+    display: flex !important;
+    visibility: visible !important;
+  }
+  .kasr-receipt legend {
+    font-size: 15px !important;
+    font-weight: bold !important;
+    margin-bottom: 2mm !important;
+    margin-top: 1mm !important;
+    visibility: visible !important;
+  }
+  .kasr-receipt .label, .kasr-receipt .value {
+    font-size: 13px !important;
+    font-family: 'Cairo', 'Arial', 'Tahoma', 'sans-serif' !important;
+    visibility: visible !important;
+  }
+  /* Remove page breaks for kasr report */
+  .kasr-receipt, .kasr-table, .kasr-table th, .kasr-table td, .kasr-table tr, .kasr-table tbody, .kasr-table thead {
+    page-break-after: auto !important;
+    page-break-inside: avoid !important;
+  }
+  .kasr-receipt:last-of-type, .kasr-table:last-of-type {
+    page-break-after: auto !important;
+  }
+  
   
   /* Cards Layout */
   .card {
@@ -85,29 +131,34 @@ tfoot { display: table-footer-group; }
   .table-responsive {
     overflow: visible !important;
   }
-  .table { 
-    width: 100% !important; 
-    font-size: 11px !important; 
+  .table {
+    width: 100% !important;
+    font-size: 14px !important;
     border-collapse: collapse !important;
     margin: 0 !important;
+    direction: rtl !important;
+    border: 1.5px solid #222 !important;
   }
-  .table th, .table td { 
-    padding: 8px 10px !important; 
-    border: 1px solid #ddd !important;
+  .table th, .table td {
+    padding: 12px 14px !important;
+    border: 1.5px solid #222 !important;
     text-align: center !important;
+    font-size: 14px !important;
+    font-family: 'Cairo', 'Arial', 'Tahoma', 'sans-serif' !important;
   }
-  .table th { 
+  .table th {
     background: #34495e !important;
     font-weight: 700 !important;
     color: white !important;
-    font-size: 12px !important;
+    font-size: 15px !important;
+    border-bottom: 2px solid #222 !important;
   }
   .table td {
     background: white !important;
-    color: #2c3e50 !important;
+    color: #222 !important;
   }
   .table tbody tr:nth-child(even) td {
-    background: #f8f9fa !important;
+    background: #f3f3f3 !important;
   }
   
   /* Badges & Text */
@@ -161,18 +212,6 @@ tfoot { display: table-footer-group; }
     overflow: visible !important;
   }
 
-  /* Force each chart/table to print on its own page */
-  canvas,
-  .table-responsive,
-  table {
-    page-break-after: always !important;
-    page-break-inside: avoid !important;
-  }
-  /* Avoid extra trailing blank page */
-  canvas:last-of-type,
-  .table-responsive:last-of-type,
-  table:last-of-type {
-    page-break-after: auto !important;
-  }
+  /* Remove forced page breaks for tables and charts so all report content prints together */
 }
 </style>

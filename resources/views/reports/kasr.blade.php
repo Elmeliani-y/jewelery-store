@@ -393,10 +393,6 @@
                 <span class="value highlight">{{ number_format($reportData['total_weight_returns'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
-                <span class="label">مجموع الوزن (صافي):</span>
-                <span class="value">{{ number_format($reportData['total_weight'] ?? 0, 2) }}</span>
-            </div>
-            <div class="row-line">
                 <span class="label">معدل الجرام (صافي المبيعات ÷ صافي الوزن):</span>
                 <span class="value">{{ number_format($reportData['avg_price_per_gram'] ?? 0, 2) }}</span>
             </div>
