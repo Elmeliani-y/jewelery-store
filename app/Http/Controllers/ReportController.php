@@ -1265,8 +1265,8 @@ class ReportController extends Controller
             // Calculate total weight and net sales for returns
             $returnedSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
                 ->where('is_returned', true)
-                ->whereDate('created_at', '>=', $filters['date_from'])
-                ->whereDate('created_at', '<=', $filters['date_to'])
+                ->whereDate('returned_at', '>=', $filters['date_from'])
+                ->whereDate('returned_at', '<=', $filters['date_to'])
                 ->get();
             $totalReturns = 0;
             foreach ($returnedSales as $sale) {
@@ -1370,8 +1370,18 @@ class ReportController extends Controller
             // مجموع المبيعات: sum of all net_amount (sales + returns)
             'total_sales_and_returns' => (function () use ($filters) {
                 $allSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
-                    ->whereDate('created_at', '>=', $filters['date_from'])
-                    ->whereDate('created_at', '<=', $filters['date_to'])
+                    ->where(function($query) use ($filters) {
+                        $query->where(function($q) use ($filters) {
+                            $q->where('is_returned', false)
+                                ->whereDate('created_at', '>=', $filters['date_from'])
+                                ->whereDate('created_at', '<=', $filters['date_to']);
+                        })
+                        ->orWhere(function($q) use ($filters) {
+                            $q->where('is_returned', true)
+                                ->whereDate('returned_at', '>=', $filters['date_from'])
+                                ->whereDate('returned_at', '<=', $filters['date_to']);
+                        });
+                    })
                     ->get();
                 $sum = 0;
                 foreach ($allSales as $sale) {
@@ -1382,7 +1392,6 @@ class ReportController extends Controller
                         }
                     }
                 }
-
                 return $sum;
             })(),
             // مجموع المرتجعات: sum net_amount where is_returned = 1 (already calculated as $totalReturns)
