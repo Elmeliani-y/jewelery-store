@@ -209,7 +209,7 @@ class ReportController extends Controller
             }
         }
         $summary = [
-            'total_sales' => $totalSales,
+            'total_sales' => $totalNetSales, // مطابق لصافي المبيعات
             'total_net_sales' => $totalNetSales,
             'total_tax' => $totalTax,
             'total_weight' => $totalWeight,
