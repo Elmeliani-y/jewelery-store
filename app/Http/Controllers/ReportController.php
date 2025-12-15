@@ -1354,7 +1354,7 @@ class ReportController extends Controller
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $totalSales += isset($product['amount']) ? (float) $product['amount'] : 0; // gross
+                        $totalSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0; // gross (now net, without tax)
                         $totalNetSales += isset($product['net_amount']) ? (float) $product['net_amount'] : 0; // net
                         $totalTax += isset($product['tax_amount']) ? (float) $product['tax_amount'] : 0;
                         $totalWeightSales += isset($product['weight']) ? (float) $product['weight'] : 0;
@@ -1466,12 +1466,12 @@ class ReportController extends Controller
         // سعر الجرام = الإجمالي / مجموع الوزن (صافي)
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
         $reportData = [
-            // إجمالي المبيعات: مجموع المبيعات (إجمالي = مع الضريبة)
+            // إجمالي المبيعات: مجموع المبيعات (بدون الضريبة)
             'total_sales_and_returns' => $totalSales + $totalReturns,
             // مجموع المرتجعات: sum net_amount where is_returned = 1 (already calculated as $totalReturns)
             'total_returns' => $totalReturns,
-            // صافي المبيعات: sum net_amount where is_returned = 0 (calculated above as $netSales) minus returns
-            'net_sales' => $totalNetSales - $totalReturns,
+            // صافي المبيعات: sum net_amount where is_returned = 0 (calculated above as $netSales) (do not deduct returns)
+            'net_sales' => $totalNetSales,
             'calibers' => $reportCalibers,
             'total_amount' => $totalAmount,
             'total_weight' => $totalWeightSales - $totalWeightReturns,
@@ -1484,7 +1484,7 @@ class ReportController extends Controller
             'total_expenses' => $expenses + $salaries + $interestAmount,
             'profit' => ($totalSales + $netTax) - $totalCalibersCost, // لا تطرح المرتجعات من الربح هنا
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
-            'total_sales' => $totalSales, // إجمالي المبيعات مع الضريبة
+            'total_sales' => $totalSales, // إجمالي المبيعات بدون الضريبة
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
             'total_tax_returns' => $totalTaxReturns,
