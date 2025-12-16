@@ -1,17 +1,5 @@
+<?php
 // Serve storage files directly to avoid RoutingController catching them
-Route::get('storage/{path}', function ($path) {
-    $file = storage_path('app/public/' . $path);
-    if (file_exists($file)) {
-        return response()->file($file);
-    }
-    // Use the login logo as the placeholder image instead of 404
-    $logo = public_path('images/logo-login.png');
-    if (file_exists($logo)) {
-        return response()->file($logo);
-    }
-    // If no logo, return a 204 No Content so nothing is shown
-    return response('', 204);
-})->where('path', '.*')->withoutMiddleware(['auth']);
 
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CaliberController;
@@ -39,6 +27,21 @@ use Illuminate\Support\Facades\Route;
 */
 
 require __DIR__.'/auth.php';
+
+
+Route::get('storage/{path}', function ($path) {
+    $file = storage_path('app/public/' . $path);
+    if (file_exists($file)) {
+        return response()->file($file);
+    }
+    // Use the login logo as the placeholder image instead of 404
+    $logo = public_path('images/logo-login.png');
+    if (file_exists($logo)) {
+        return response()->file($logo);
+    }
+    // If no logo, return a 204 No Content so nothing is shown
+    return response('', 204);
+})->where('path', '.*')->withoutMiddleware(['auth']);
 
 Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // Exclude storage paths from catch-all legacy routes
