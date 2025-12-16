@@ -16,6 +16,22 @@ class BranchController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
+        // Ensure every branch has a Snap employee
+        foreach ($branches as $branch) {
+            $hasSnapEmployee = $branch->employees()->where('is_snap', true)->exists();
+            if (!$hasSnapEmployee) {
+                \App\Models\Employee::create([
+                    'name' => 'Snap (' . $branch->name . ')',
+                    'phone' => null,
+                    'email' => null,
+                    'salary' => 0,
+                    'branch_id' => $branch->id,
+                    'is_active' => true,
+                    'is_snap' => true,
+                ]);
+            }
+        }
+
         return view('branches.index', compact('branches'));
     }
 
