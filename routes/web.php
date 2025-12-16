@@ -12,7 +12,6 @@ Route::get('storage/{path}', function ($path) {
     // If no logo, return a 204 No Content so nothing is shown
     return response('', 204);
 })->where('path', '.*')->withoutMiddleware(['auth']);
-<?php
 
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CaliberController;
