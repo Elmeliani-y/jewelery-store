@@ -2,6 +2,7 @@
 @section('title', 'تقرير صافي الربح')
 
 @section('css')
+
 @include('reports.partials.print-css')
 <style>
     @media print {
