@@ -1270,40 +1270,13 @@ class ReportController extends Controller
             $weights[$caliber->id] = 0;
             $caliberNameToId[trim($caliber->name)] = $caliber->id;
         }
-        // Only use sales (not returns) for caliber calculations
+        // Only use sales (not returns) for by-caliber calculations
         if ($filters['branch_id'] && $filters['date_from'] && $filters['date_to']) {
             $sales = \App\Models\Sale::notReturned()
                 ->where('branch_id', $filters['branch_id'])
                 ->whereDate('created_at', '>=', $filters['date_from'])
                 ->whereDate('created_at', '<=', $filters['date_to'])
                 ->get();
-            $returnedSales = \App\Models\Sale::where('branch_id', $filters['branch_id'])
-                ->where('is_returned', true)
-                ->whereDate('returned_at', '>=', $filters['date_from'])
-                ->whereDate('returned_at', '<=', $filters['date_to'])
-                ->get();
-            $returnedWeights = [];
-            foreach ($calibers as $caliber) {
-                $returnedWeights[$caliber->id] = 0;
-            }
-            foreach ($returnedSales as $sale) {
-                $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
-                if ($products) {
-                    foreach ($products as $product) {
-                        $cid = isset($product['caliber_id']) ? (int) $product['caliber_id'] : null;
-                        $cname = isset($product['caliber_name']) ? trim($product['caliber_name']) : null;
-                        $targetId = null;
-                        if ($cid && isset($returnedWeights[$cid])) {
-                            $targetId = $cid;
-                        } elseif ($cname && isset($caliberNameToId[$cname])) {
-                            $targetId = $caliberNameToId[$cname];
-                        }
-                        if ($targetId && isset($product['weight'])) {
-                            $returnedWeights[$targetId] += (float) $product['weight'];
-                        }
-                    }
-                }
-            }
             foreach ($sales as $sale) {
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
@@ -1320,13 +1293,6 @@ class ReportController extends Controller
                             $weights[$targetId] += (float) $product['weight'];
                         }
                     }
-                }
-            }
-            // Subtract returned weights from each caliber
-            foreach ($weights as $caliberId => $weight) {
-                $weights[$caliberId] -= $returnedWeights[$caliberId] ?? 0;
-                if ($weights[$caliberId] < 0) {
-                    $weights[$caliberId] = 0;
                 }
             }
         }
