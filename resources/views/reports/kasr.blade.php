@@ -441,7 +441,7 @@
                 <span class="label">سعر الجرام بفائدة:</span>
                 <span class="value">
                     @php
-                        $netProfit = ($reportData['profit'] ?? 0) - ($reportData['expenses'] ?? 0) - ($reportData['salaries'] ?? 0);
+                        $netProfit = ($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0) - (($reportData['expenses'] ?? 0) + ($reportData['salaries'] ?? 0));
                         $interestRate = floatval($filters['interest_rate'] ?? 0);
                     @endphp
                     {{ $interestRate != 0 ? number_format($netProfit / $interestRate, 2) : '—' }}
