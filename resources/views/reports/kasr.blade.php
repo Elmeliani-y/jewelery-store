@@ -458,7 +458,7 @@
                         }
                     }
                     $total_sales = ($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0);
-                    $final_faida = $faida_sum - $total_sales;
+                    $final_faida =  $total_sales - $faida_sum;
                 @endphp
                 <span class="value" id="receipt_profit">{{ number_format($final_faida, 2) }}</span>
             </div>
@@ -482,10 +482,11 @@
                 <span class="label">سعر الجرام بفائدة:</span>
                 <span class="value">
                     @php
-                        $net=$safi;
+                        $net = $safi;
                         $interestRate = floatval($filters['interest_rate'] ?? 0);
+                        $gramWithFaida = ($interestRate != 0 && $net != 0) ? number_format($net / $interestRate, 2) : '—';
                     @endphp
-                    {{ $interestRate != 0 ? number_format($net / $interestRate, 2) : '—' }}
+                    {{ $gramWithFaida }}
                 </span>
             </div>
         </fieldset>
