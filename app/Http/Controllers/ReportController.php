@@ -1437,6 +1437,11 @@ class ReportController extends Controller
         $totalWeightAll = $totalWeight + $totalWeightReturns;
         // سعر الجرام = الإجمالي / مجموع الوزن (صافي)
         $priceOfGram = ($totalWeightSales > 0) ? ($alIjmali / $totalWeightSales) : 0;
+        // Sum of each caliber's weight x its kasr price (سعر الكسر)
+        $fa2ida_sum = 0;
+        foreach ($reportCalibers as $caliber) {
+            $fa2ida_sum += ($caliber['weight'] ?? 0) * ($caliber['price_per_gram'] ?? 0);
+        }
         $reportData = [
             // إجمالي المبيعات: مجموع المبيعات (بدون أي خصم أو طرح)
             'al_ijmali' => $alIjmali,
@@ -1456,7 +1461,8 @@ class ReportController extends Controller
             'interest_value' => $interestValue,
             'interest_amount' => $interestAmount,
             'total_expenses' => $expenses + $salaries + $interestAmount,
-            'profit' => ($totalSales + $netTax) - $totalCalibersCost,
+            // 'profit' => ($totalSales + $netTax) - $totalCalibersCost,
+            'profit' => $fa2ida_sum,
             'net_profit' => $totalAmount - ($expenses + $salaries + $interestAmount),
             'total_tax' => $netTax,
             'total_tax_sales' => $totalTax,
