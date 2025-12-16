@@ -37,6 +37,9 @@ require __DIR__.'/auth.php';
 
 Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
 
+    // Exclude storage paths from catch-all legacy routes
+    Route::pattern('first', '^(?!storage$).*$');
+
     // Original Dashboard route at root
     Route::get('', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
