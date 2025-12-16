@@ -456,8 +456,10 @@
                             $faida_sum += ($caliber['weight'] ?? 0) * ($caliber['price_per_gram'] ?? 0);
                         }
                     }
+                    $total_sales = $reportData['total_sales_and_returns'] ?? 0;
+                    $final_faida = $faida_sum - $total_sales;
                 @endphp
-                <span class="value" id="receipt_profit">{{ number_format($faida_sum, 2) }}</span>
+                <span class="value" id="receipt_profit">{{ number_format($final_faida, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">صافي الربح:</span>
