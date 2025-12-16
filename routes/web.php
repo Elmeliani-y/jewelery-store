@@ -4,7 +4,13 @@ Route::get('storage/{path}', function ($path) {
     if (file_exists($file)) {
         return response()->file($file);
     }
-    abort(404);
+    // Use the login logo as the placeholder image instead of 404
+    $logo = public_path('images/logo-login.png');
+    if (file_exists($logo)) {
+        return response()->file($logo);
+    }
+    // If no logo, return a 204 No Content so nothing is shown
+    return response('', 204);
 })->where('path', '.*')->withoutMiddleware(['auth']);
 <?php
 

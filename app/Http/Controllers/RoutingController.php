@@ -56,6 +56,10 @@ class RoutingController extends BaseController
      */
     public function thirdLevel(Request $request, $first, $second, $third)
     {
+        // Prevent trying to render storage files as views
+        if ($first === 'storage') {
+            abort(404);
+        }
         return view($first . '.' . $second . '.' . $third);
     }
 }
