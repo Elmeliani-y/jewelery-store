@@ -214,13 +214,14 @@
                     </div>
                     <div class="col-md-6">
                         <label for="salaries" class="form-label fw-semibold">الرواتب من شاشة الموظفين</label>
+                        @php
+                            $salariesSum = 0;
+                            if(isset($branches) && isset($filters['branch_id']) && $filters['branch_id']) {
+                                $branchEmployees = \App\Models\Employee::active()->where('branch_id', $filters['branch_id'])->get();
+                                $salariesSum = $branchEmployees->sum('salary');
+                            }
+                        @endphp
                         <select name="salaries_select" id="salaries_select" class="form-select mb-2">
-                            @php
-                                $salariesSum = 0;
-                                if(isset($salariesList) && is_array($salariesList)) {
-                                    $salariesSum = array_sum($salariesList);
-                                }
-                            @endphp
                             <option value="{{ $salariesSum }}" {{ (request('salaries_select', $salariesSum) == $salariesSum) ? 'selected' : '' }}>المجموع: {{ number_format($salariesSum, 2) }}</option>
                             <option value="custom" {{ (request('salaries_select') == 'custom') ? 'selected' : '' }}>أدخل قيمة يدوياً</option>
                         </select>
