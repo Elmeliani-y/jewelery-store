@@ -78,7 +78,7 @@
                             <input type="file" id="logo" name="logo" accept="image/*" class="form-control @error('logo') is-invalid @enderror">
                             @error('logo')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <div class="mt-2 d-flex align-items-center gap-3">
-                                @if(!empty($settings['logo_path']))
+                                @if(!empty($settings['logo_path']) && file_exists(public_path($settings['logo_path'])))
                                     <img src="{{ asset($settings['logo_path']) }}" alt="شعار المتجر" style="height:48px; border-radius:8px; border:1px solid var(--ct-border-color)">
                                 @endif
                                 <img id="logoPreview" src="#" alt="معاينة الشعار" style="height:48px; border-radius:8px; border:1px solid var(--ct-border-color); display:none;">
