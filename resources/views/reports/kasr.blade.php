@@ -103,6 +103,29 @@
 
 @section('content')
 <div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right no-print">
+                    <a href="{{ route('reports.all') }}" class="btn btn-secondary">
+                        <i class="mdi mdi-arrow-left me-1"></i> عودة
+                    </a>
+                    <button class="btn btn-success" onclick="window.print()">
+                        <i class="mdi mdi-printer me-1"></i> طباعة
+                    </button>
+                </div>
+                <h4 class="page-title"><i class="mdi mdi-chart-box me-1"></i> تقرير صافي الربح</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="card mb-3 kasr-filters-form">
+        <div class="card-body">
+            <form method="POST" action="{{ route('reports.kasr') }}" id="kasrForm">
+                @csrf
+                                <!-- Removed customInterestPopup and shake styles -->
+                                <!-- Removed customInterestPopup HTML -->
                 
                 <!-- Filters Row -->
                 <div class="row g-3 mb-4 pb-3 border-bottom">
@@ -171,52 +194,59 @@
 
                 <!-- Expenses and Salaries (Auto-loaded from database) -->
                 <div class="row g-3 mt-3">
-                    <!-- Removed duplicate old expenses input/label block -->
-                            <div class="col-md-6">
-                                <label class="fw-semibold">المصروفات الكاملة للفرع خلال المدة</label>
-                                <select id="expenses_select" class="form-select mb-2"
-                                        onchange="handleSelectWithCustom('expenses')">
-                                    <option value="">اختر</option>
-                                    <option value="0">0</option>
-                                    @foreach(($expensesList ?? []) as $v)
-                                        @if($v != 0)
-                                            <option value="{{ $v }}"
-                                                {{ request('expenses')==$v?'selected':'' }}>
-                                                {{ number_format($v,2) }}
-                                            </option>
-                                        @endif
-                                    @endforeach
-                                    <option value="custom">إدخال قيمة أخرى</option>
-                                </select>
-                                <input type="number" step="0.01" min="0"
-                                       name="expenses" id="expenses_input"
-                                       class="form-control"
-                                       value="{{ request('expenses',$expenses??0) }}"
-                                       style="display:none;">
-                            </div>
+                    <div class="col-md-6">
+                        <label for="expenses" class="form-label fw-semibold">المصروفات الكاملة للفرع خلال المدة</label>
+                        <input type="text" list="expenses_list" id="expenses_input" name="expenses"
+                            value="{{
+                                (old('expenses') !== null && old('expenses') !== '' && old('expenses') !== '0') ? old('expenses') :
+                                ((request('expenses') !== null && request('expenses') !== '' && request('expenses') !== '0') ? request('expenses') : 0)
+                            }}"
+                            placeholder="{{ $expenses ?? 'اختر أو اكتب المصروفات' }}"
+                            class="form-control">
+                        <datalist id="expenses_list">
+                            <option value="0">0</option>
+                            @if(isset($expensesList) && is_array($expensesList))
+                                @foreach($expensesList as $expenseSum)
+                                    @if($expenseSum != 0)
+                                        <option value="{{ $expenseSum }}">{{ $expenseSum }}</option>
+                                    @endif
+                                @endforeach
+                            @elseif(isset($expenses) && $expenses != 0)
+                                <option value="{{ $expenses }}">{{ $expenses }}</option>
+                            @endif
+                        </datalist>
+                        <small class="text-muted">إجمالي كل المصروفات المسجلة للفرع المختار خلال الفترة. يمكنك التعديل هنا.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="salaries" class="form-label fw-semibold">الرواتب من شاشة الموظفين</label>
+                        <input type="text" list="salaries_list" id="salaries_input" name="salaries"
+                            value="{{
+                                (old('salaries') !== null && old('salaries') !== '' && old('salaries') !== '0') ? old('salaries') :
+                                ((request('salaries') !== null && request('salaries') !== '' && request('salaries') !== '0') ? request('salaries') : 0)
+                            }}"
+                            placeholder="{{ $salaries ?? 'اختر أو اكتب الرواتب' }}"
+                            class="form-control">
+                        <datalist id="salaries_list">
+                            <option value="0">0</option>
+                            @if(isset($salariesList) && is_array($salariesList))
+                                @foreach($salariesList as $salarySum)
+                                    @if($salarySum != 0)
+                                        <option value="{{ $salarySum }}">{{ $salarySum }}</option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </datalist>
+                        <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة. يمكنك التعديل هنا.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="interest_rate" class="form-label fw-semibold">قيمة الفائدة</label>
+                                           <input type="number" name="interest_rate" id="interest_rate"
+                                               value="{{ old('interest_rate', $filters['interest_value'] ?? 0) }}"
+                                               step="0.01" min="0" class="form-control" placeholder="مثال: 100">
+                           <small class="text-muted">أدخل قيمة الفائدة مباشرة (ليست نسبة مئوية).</small>
+                    </div>
+                </div>
 
-                            <div class="col-md-6">
-                                <label class="fw-semibold">الرواتب من شاشة الموظفين</label>
-                                <select id="salaries_select" class="form-select mb-2"
-                                        onchange="handleSelectWithCustom('salaries')">
-                                    <option value="">اختر</option>
-                                    <option value="0">0</option>
-                                    @foreach(($salariesList ?? []) as $v)
-                                        @if($v != 0)
-                                            <option value="{{ $v }}"
-                                                {{ request('salaries')==$v?'selected':'' }}>
-                                                {{ number_format($v,2) }}
-                                            </option>
-                                        @endif
-                                    @endforeach
-                                    <option value="custom">إدخال قيمة أخرى</option>
-                                </select>
-                                <input type="number" step="0.01" min="0"
-                                       name="salaries" id="salaries_input"
-                                       class="form-control"
-                                       value="{{ request('salaries',$salaries??0) }}"
-                                       style="display:none;">
-                            </div>
                 <!-- Submit Button -->
                 <div class="mt-4">
                     <button type="submit" id="kasrCalculateBtn" class="btn btn-primary btn-lg w-100">
@@ -410,7 +440,7 @@
                 <span class="label">سعر الجرام بفائدة:</span>
                 <span class="value">
                     @php
-                        $netProfit = ($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0) - ($reportData['expenses'] ?? 0) - ($reportData['salaries'] ?? 0);
+                        $netProfit = ($reportData['profit'] ?? 0) - ($reportData['expenses'] ?? 0) - ($reportData['salaries'] ?? 0);
                         $interestRate = floatval($filters['interest_rate'] ?? 0);
                     @endphp
                     {{ $interestRate != 0 ? number_format($netProfit / $interestRate, 2) : '—' }}
@@ -425,53 +455,25 @@
 
 @section('script')
 <script>
-// Auto-print functionality if needed
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('print') === '1') {
-    window.onload = function() {
-        window.print();
-    };
-}
-// Only allow numbers in expenses and salaries text inputs
-document.addEventListener('DOMContentLoaded', function() {
-    function onlyNumberInput(e) {
-        const v = e.target.value;
-        if (v && !/^\d*\.?\d*$/.test(v)) {
-            e.target.value = v.replace(/[^\d.]/g, '');
+        // Auto-print functionality if needed
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('print') === '1') {
+                window.onload = function() {
+                        window.print();
+                };
         }
-    }
-    const expensesInput = document.getElementById('expenses_input');
-    const salariesInput = document.getElementById('salaries_input');
-    if (expensesInput) expensesInput.addEventListener('input', onlyNumberInput);
-    if (salariesInput) salariesInput.addEventListener('input', onlyNumberInput);
-});
-
-function handleSelectWithCustom(type) {
-    const select = document.getElementById(type + '_select');
-    const input  = document.getElementById(type + '_input');
-    if (!select || !input) return;
-
-    if (select.value === 'custom') {
-        input.style.display = 'block';
-        input.value = '';
-        input.focus();
-    } else if (select.value !== '') {
-        input.style.display = 'none';
-        input.value = select.value;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    ['expenses','salaries'].forEach(type => {
-        const select = document.getElementById(type + '_select');
-        const input  = document.getElementById(type + '_input');
-        if (!select || !input) return;
-
-        if (input.value && ![...select.options].some(o => o.value === input.value)) {
-            select.value = 'custom';
-            input.style.display = 'block';
-        }
-    });
-});
+        // Only allow numbers in expenses and salaries text inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            function onlyNumberInput(e) {
+                const v = e.target.value;
+                if (v && !/^\d*\.?\d*$/.test(v)) {
+                    e.target.value = v.replace(/[^\d.]/g, '');
+                }
+            }
+            const expensesInput = document.getElementById('expenses_input');
+            const salariesInput = document.getElementById('salaries_input');
+            if (expensesInput) expensesInput.addEventListener('input', onlyNumberInput);
+            if (salariesInput) salariesInput.addEventListener('input', onlyNumberInput);
+        });
 </script>
-@endsection
+@endsection   
