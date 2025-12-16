@@ -449,7 +449,15 @@
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">الربح النهائي</legend>
             <div class="row-line">
                 <span class="label">فائدة :</span>
-                <span class="value" id="receipt_profit">{{ number_format($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0, 2) }}</span>
+                @php
+                    $faida_sum = 0;
+                    if(isset($reportData['calibers'])) {
+                        foreach($reportData['calibers'] as $caliber) {
+                            $faida_sum += ($caliber['weight'] ?? 0) * ($caliber['price_per_gram'] ?? 0);
+                        }
+                    }
+                @endphp
+                <span class="value" id="receipt_profit">{{ number_format($faida_sum, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">صافي الربح:</span>

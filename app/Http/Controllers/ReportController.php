@@ -1210,26 +1210,13 @@ class ReportController extends Controller
             // Remove duplicates and sort descending
             $expensesList = array_unique($expensesList);
             rsort($expensesList);
-            $salariesQuery = Employee::active()
-                ->where('branch_id', $filters['branch_id']);
+        }
+        // Salaries: always sum all employees of the branch, no date filter
+        if ($filters['branch_id']) {
+            $salariesQuery = Employee::active()->where('branch_id', $filters['branch_id']);
             $debugSalaryQuery = $salariesQuery->get()->toArray();
             $salaries = collect($debugSalaryQuery)->sum('salary');
-            // Add current sum
-            $salariesList[] = $salaries;
-            // Optionally, add previous salary sums (e.g., from previous months)
-            for ($i = 1; $i <= $prevMonths; $i++) {
-                $prevFrom = date('Y-m-01', strtotime("-{$i} month", strtotime($filters['date_from'])));
-                $prevTo = date('Y-m-t', strtotime("-{$i} month", strtotime($filters['date_from'])));
-                $prevSalaries = Employee::active()
-                    ->where('branch_id', $filters['branch_id'])
-                    ->sum('salary');
-                if (! in_array($prevSalaries, $salariesList)) {
-                    $salariesList[] = $prevSalaries;
-                }
-            }
-            // Remove duplicates and sort descending
-            $salariesList = array_unique($salariesList);
-            rsort($salariesList);
+            $salariesList = [$salaries];
         }
         // Debug logging
         \Log::info('KASR FILTERS', $filters);
