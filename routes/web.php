@@ -5,7 +5,7 @@ Route::get('storage/{path}', function ($path) {
         return response()->file($file);
     }
     abort(404);
-})->where('path', '.*');
+})->where('path', '.*')->withoutMiddleware(['auth']);
 <?php
 
 use App\Http\Controllers\BranchController;
@@ -36,7 +36,6 @@ use Illuminate\Support\Facades\Route;
 require __DIR__.'/auth.php';
 
 Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
-
     // Exclude storage paths from catch-all legacy routes
     Route::pattern('first', '^(?!storage$).*$');
 
