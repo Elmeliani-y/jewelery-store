@@ -456,15 +456,25 @@
                             $faida_sum += ($caliber['weight'] ?? 0) * ($caliber['price_per_gram'] ?? 0);
                         }
                     }
-                    $total_sales = $reportData['total_sales_and_returns'] ?? 0;
+                    $total_sales = number_format(($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0), 2);
                     $final_faida = $faida_sum - $total_sales;
                 @endphp
                 <span class="value" id="receipt_profit">{{ number_format($final_faida, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">صافي الربح:</span>
+                @php
+                    // Get expenses and salaries from the top filters (form input or select)
+                    $expenses_from_filter = request('expenses_select') === 'custom'
+                        ? floatval(request('expenses', 0))
+                        : floatval(request('expenses_select', $expensesSum ?? 0));
+                    $salaries_from_filter = request('salaries_select') === 'custom'
+                        ? floatval(request('salaries', 0))
+                        : floatval(request('salaries_select', $salariesSum ?? 0));
+                    $net_profit = $final_faida - ($expenses_from_filter + $salaries_from_filter);
+                @endphp
                 <span class="highlight" id="receipt_net_profit">
-                    {{ number_format(($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0) - (($reportData['expenses'] ?? 0) + ($reportData['salaries'] ?? 0)), 2) }}
+                    {{ number_format($net_profit, 2) }}
                 </span>
             </div>
             <div class="row-line">
