@@ -8,14 +8,15 @@
             <div class="logo-box text-center py-2">
                 @php
                     $settings = \App\Models\Setting::all()->pluck('value', 'key');
-                    $logoPath = !empty($settings['logo_path']) ? public_path($settings['logo_path']) : null;
-                    $showCustomLogo = $logoPath && file_exists($logoPath);
+                    $logoWebPath = !empty($settings['logo_path']) ? $settings['logo_path'] : null;
+                    $logoFullPath = $logoWebPath ? public_path($logoWebPath) : null;
+                    $showCustomLogo = $logoFullPath && file_exists($logoFullPath);
                 @endphp
                 <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo">
                     @if($showCustomLogo)
-                        <img src="{{ asset($settings['logo_path']) }}" alt="Logo" style="height:64px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
+                        <img src="{{ asset($logoWebPath) }}" alt="Logo" style="height:64px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
                     @else
-                        <img src="/images/logo-light.png" alt="Logo" style="height:48px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
+                        <img src="/images/dusty-default-logo.png" alt="Dusty Logo" style="height:48px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
                     @endif
                 </a>
             </div>
