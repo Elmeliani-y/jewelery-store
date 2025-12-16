@@ -197,46 +197,34 @@
                 <div class="row g-3 mt-3">
                     <div class="col-md-6">
                         <label for="expenses" class="form-label fw-semibold">المصروفات الكاملة للفرع خلال المدة</label>
-                        <input type="text" list="expenses_list" id="expenses_input" name="expenses"
-                            value="{{
-                                (old('expenses') !== null && old('expenses') !== '' && old('expenses') !== '0') ? old('expenses') :
-                                ((request('expenses') !== null && request('expenses') !== '' && request('expenses') !== '0') ? request('expenses') : 0)
-                            }}"
-                            placeholder="{{ $expenses ?? 'اختر أو اكتب المصروفات' }}"
-                            class="form-control">
-                        <datalist id="expenses_list">
-                            <option value="0">0</option>
-                            @if(isset($expensesList) && is_array($expensesList))
-                                @foreach($expensesList as $expenseSum)
-                                    @if($expenseSum != 0)
-                                        <option value="{{ $expenseSum }}">{{ $expenseSum }}</option>
-                                    @endif
-                                @endforeach
-                            @elseif(isset($expenses) && $expenses != 0)
-                                <option value="{{ $expenses }}">{{ $expenses }}</option>
-                            @endif
-                        </datalist>
+                        <select name="expenses_select" id="expenses_select" class="form-select mb-2">
+                                                        @php
+                                                            $expensesSum = 0;
+                                                            if(isset($expensesList) && is_array($expensesList)) {
+                                                                $expensesSum = array_sum($expensesList);
+                                                            } elseif(isset($expenses)) {
+                                                                $expensesSum = $expenses;
+                                                            }
+                                                        @endphp
+                                                        <option value="{{ $expensesSum }}" {{ (request('expenses_select', $expensesSum) == $expensesSum) ? 'selected' : '' }}>المجموع: {{ number_format($expensesSum, 2) }}</option>
+                                                        <option value="custom" {{ (request('expenses_select') == 'custom') ? 'selected' : '' }}>أدخل قيمة يدوياً</option>
+                        </select>
+                        <input type="number" step="0.01" name="expenses" id="expenses_input" class="form-control" style="display:none;" value="{{ request('expenses', '') }}" placeholder="أدخل المصروفات يدوياً">
                         <small class="text-muted">إجمالي كل المصروفات المسجلة للفرع المختار خلال الفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
                         <label for="salaries" class="form-label fw-semibold">الرواتب من شاشة الموظفين</label>
-                        <input type="text" list="salaries_list" id="salaries_input" name="salaries"
-                            value="{{
-                                (old('salaries') !== null && old('salaries') !== '' && old('salaries') !== '0') ? old('salaries') :
-                                ((request('salaries') !== null && request('salaries') !== '' && request('salaries') !== '0') ? request('salaries') : 0)
-                            }}"
-                            placeholder="{{ $salaries ?? 'اختر أو اكتب الرواتب' }}"
-                            class="form-control">
-                        <datalist id="salaries_list">
-                            <option value="0">0</option>
-                            @if(isset($salariesList) && is_array($salariesList))
-                                @foreach($salariesList as $salarySum)
-                                    @if($salarySum != 0)
-                                        <option value="{{ $salarySum }}">{{ $salarySum }}</option>
-                                    @endif
-                                @endforeach
-                            @endif
-                        </datalist>
+                        <select name="salaries_select" id="salaries_select" class="form-select mb-2">
+                            @php
+                                $salariesSum = 0;
+                                if(isset($salariesList) && is_array($salariesList)) {
+                                    $salariesSum = array_sum($salariesList);
+                                }
+                            @endphp
+                            <option value="{{ $salariesSum }}" {{ (request('salaries_select', $salariesSum) == $salariesSum) ? 'selected' : '' }}>المجموع: {{ number_format($salariesSum, 2) }}</option>
+                            <option value="custom" {{ (request('salaries_select') == 'custom') ? 'selected' : '' }}>أدخل قيمة يدوياً</option>
+                        </select>
+                        <input type="number" step="0.01" name="salaries" id="salaries_input" class="form-control" style="display:none;" value="{{ request('salaries', '') }}" placeholder="أدخل الرواتب يدوياً">
                         <small class="text-muted">مجموع رواتب موظفي الفرع (من شاشة الموظفين) دون ربط بفترة. يمكنك التعديل هنا.</small>
                     </div>
                     <div class="col-md-6">
@@ -286,12 +274,44 @@
     const interestInput = document.getElementById('interest_rate');
     const interestValue = document.getElementById('interest_value');
     const expensesInput = document.getElementById('expenses_input');
+    const expensesSelect = document.getElementById('expenses_select');
     const salariesInput = document.getElementById('salaries_input');
+    const salariesSelect = document.getElementById('salaries_select');
     // Try to get the total amount from the page (from the hidden input or a JS variable)
     let totalAmount = 0;
     @if(isset($reportData['total_amount']))
         totalAmount = {{ floatval($reportData['total_amount']) }};
     @endif
+
+    function toggleInput(selectEl, inputEl) {
+        if (!selectEl || !inputEl) return;
+        if (selectEl.value === 'custom') {
+            inputEl.style.display = '';
+            inputEl.required = true;
+        } else {
+            inputEl.style.display = 'none';
+            inputEl.required = false;
+            inputEl.value = selectEl.value;
+        }
+    }
+
+    if (expensesSelect && expensesInput) {
+        expensesSelect.addEventListener('change', function() {
+            toggleInput(expensesSelect, expensesInput);
+            updateReceipt();
+        });
+        // Initial state
+        toggleInput(expensesSelect, expensesInput);
+    }
+    if (salariesSelect && salariesInput) {
+        salariesSelect.addEventListener('change', function() {
+            toggleInput(salariesSelect, salariesInput);
+            updateReceipt();
+        });
+        // Initial state
+        toggleInput(salariesSelect, salariesInput);
+    }
+
     function updateInterestValue() {
         const value = parseFloat(interestInput.value) || 0;
         interestValue.textContent = value.toFixed(2);
