@@ -16,7 +16,14 @@
                     @if($showCustomLogo)
                         <img src="{{ asset($logoWebPath) }}" alt="Logo" style="height:64px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
                     @else
-                        <img src="/images/dusty-default-logo.png" alt="Dusty Logo" style="height:48px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
+                        <img src="/images/logo-light.png" alt="Logo" class="logo-img logo-light" style="height:48px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
+                        <img src="/images/logo-dark.png" alt="Logo" class="logo-img logo-dark" style="height:48px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px; display:none;">
+                        <style>
+                            body[data-bs-theme="dark"] .logo-light { display: none !important; }
+                            body[data-bs-theme="dark"] .logo-dark { display: block !important; }
+                            body:not([data-bs-theme="dark"]) .logo-light { display: block !important; }
+                            body:not([data-bs-theme="dark"]) .logo-dark { display: none !important; }
+                        </style>
                     @endif
                 </a>
             </div>
