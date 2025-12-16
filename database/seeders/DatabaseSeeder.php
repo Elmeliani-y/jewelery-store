@@ -21,8 +21,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        FakeSalesExpensesSeeder::class;
-        JewelrySystemSeeder::class;
+        $this->call([
+            JewelrySystemSeeder::class,
+            FakeSalesExpensesSeeder::class,
+        ]);
         // Create branches
         $branch1 = Branch::create([
             'name' => 'الفرع الرئيسي',

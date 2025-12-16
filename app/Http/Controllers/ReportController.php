@@ -55,20 +55,20 @@ class ReportController extends Controller
         $transfer = 0;
         foreach ($sales as $sale) {
             if ($sale->payment_method === 'network') {
-                $network += $sale->network_amount ?? $sale->amount ?? 0;
+                $network += $sale->network_amount ?? $sale->total_amount ?? 0;
             } elseif ($sale->payment_method === 'cash') {
-                $cash += $sale->cash_amount ?? $sale->amount ?? 0;
+                $cash += $sale->cash_amount ?? $sale->total_amount ?? 0;
             } elseif ($sale->payment_method === 'transfer') {
-                $transfer += $sale->amount ?? 0;
+                $transfer += $sale->total_amount ?? 0;
             }
         }
         foreach ($returns as $sale) {
             if ($sale->payment_method === 'network') {
-                $network -= $sale->network_amount ?? $sale->amount ?? 0;
+                $network -= $sale->network_amount ?? $sale->total_amount ?? 0;
             } elseif ($sale->payment_method === 'cash') {
-                $cash -= $sale->cash_amount ?? $sale->amount ?? 0;
+                $cash -= $sale->cash_amount ?? $sale->total_amount ?? 0;
             } elseif ($sale->payment_method === 'transfer') {
-                $transfer -= $sale->amount ?? 0;
+                $transfer -= $sale->total_amount ?? 0;
             }
         }
         $summary = [

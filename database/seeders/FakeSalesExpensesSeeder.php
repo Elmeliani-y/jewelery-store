@@ -50,15 +50,20 @@ class FakeSalesExpensesSeeder extends Seeder
                 $taxAmount = $totalAmount * ($caliber->tax_rate / 100);
                 $netAmount = $totalAmount - $taxAmount;
                 
-                $paymentMethod = ['cash', 'network', 'mixed'][rand(0, 2)];
+                // Add 'transfer' as a possible payment method
+                $paymentMethods = ['cash', 'network', 'mixed', 'transfer'];
+                // Ensure at least 1 in 5 sales is a transfer
+                $paymentMethod = (rand(1, 5) === 1) ? 'transfer' : $paymentMethods[rand(0, 2)];
                 $cashAmount = 0;
                 $networkAmount = 0;
-                
+                $transferAmount = 0;
                 if ($paymentMethod == 'cash') {
                     $cashAmount = $totalAmount;
                 } elseif ($paymentMethod == 'network') {
                     $networkAmount = $totalAmount;
-                } else {
+                } elseif ($paymentMethod == 'transfer') {
+                    $transferAmount = $totalAmount;
+                } else { // mixed
                     $cashAmount = $totalAmount / 2;
                     $networkAmount = $totalAmount / 2;
                 }
@@ -88,6 +93,8 @@ class FakeSalesExpensesSeeder extends Seeder
                     'total_amount' => $totalAmount,
                     'cash_amount' => $cashAmount,
                     'network_amount' => $networkAmount,
+                    // Optionally add a transfer_amount field if your model supports it
+                    // 'transfer_amount' => $transferAmount,
                     'network_reference' => $paymentMethod != 'cash' ? 'REF-' . rand(100000, 999999) : null,
                     'payment_method' => $paymentMethod,
                     'tax_amount' => $taxAmount,
