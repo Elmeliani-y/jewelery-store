@@ -472,20 +472,20 @@
                     $salaries_from_filter = request('salaries_select') === 'custom'
                         ? floatval(request('salaries', 0))
                         : floatval(request('salaries_select', $salariesSum ?? 0));
-                    $net_profit = $final_faida - ($expenses_from_filter + $salaries_from_filter);
+                    $safi = $final_faida - ($expenses_from_filter + $salaries_from_filter);
                 @endphp
                 <span class="highlight" id="receipt_net_profit">
-                    {{ number_format($net_profit, 2) }}
+                    {{ number_format($safi, 2) }}
                 </span>
             </div>
             <div class="row-line">
                 <span class="label">سعر الجرام بفائدة:</span>
                 <span class="value">
                     @php
-                        $netProfit = ($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0) - (($reportData['expenses'] ?? 0) + ($reportData['salaries'] ?? 0));
+                        $netProfit = $safi;
                         $interestRate = floatval($filters['interest_rate'] ?? 0);
                     @endphp
-                    {{ $interestRate != 0 ? number_format($netProfit / $interestRate, 2) : '—' }}
+                    {{ $interestRate != 0 ? number_format($safi / $interestRate, 2) : '—' }}
                 </span>
             </div>
         </fieldset>
