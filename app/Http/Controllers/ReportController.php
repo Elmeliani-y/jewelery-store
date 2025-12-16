@@ -1445,6 +1445,8 @@ class ReportController extends Controller
         $reportData = [
             // إجمالي المبيعات: مجموع المبيعات (بدون أي خصم أو طرح)
             'al_ijmali' => $alIjmali,
+            'fa2ida_sum' => $fa2ida_sum,
+            'al_ijmali_minus_fa2ida_sum' => $alIjmali - $fa2ida_sum,
             'total_sales' => $totalSales,
             // صافي المبيعات: مجموع net_amount لكل المنتجات (بدون أي خصم أو طرح)
             'net_sales' => $totalNetSales,

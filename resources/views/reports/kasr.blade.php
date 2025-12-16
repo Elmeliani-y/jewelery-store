@@ -427,13 +427,13 @@
         <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
             <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">الربح النهائي</legend>
             <div class="row-line">
-                <span class="label">فائدة (مجموع وزن كل عيار × سعر الكسر):</span>
-                <span class="value" id="receipt_profit">{{ number_format($reportData['profit'] ?? 0, 2) }}</span>
+                <span class="label">فائدة :</span>
+                <span class="value" id="receipt_profit">{{ number_format($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0, 2) }}</span>
             </div>
             <div class="row-line">
                 <span class="label">صافي الربح:</span>
                 <span class="highlight" id="receipt_net_profit">
-                    {{ number_format(($reportData['profit'] ?? 0) - ($reportData['expenses'] ?? 0) - ($reportData['salaries'] ?? 0), 2) }}
+                    {{ number_format(($reportData['al_ijmali_minus_fa2ida_sum'] ?? 0) - (($reportData['expenses'] ?? 0) + ($reportData['salaries'] ?? 0)), 2) }}
                 </span>
             </div>
             <div class="row-line">
