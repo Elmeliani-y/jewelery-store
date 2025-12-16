@@ -482,10 +482,10 @@
                 <span class="label">سعر الجرام بفائدة:</span>
                 <span class="value">
                     @php
-                        $netProfit = $safi;
+                        $net=$safi;
                         $interestRate = floatval($filters['interest_rate'] ?? 0);
                     @endphp
-                    {{ $interestRate != 0 ? number_format($safi / $interestRate, 2) : '—' }}
+                    {{ $interestRate != 0 ? number_format($net / $interestRate, 2) : '—' }}
                 </span>
             </div>
         </fieldset>
