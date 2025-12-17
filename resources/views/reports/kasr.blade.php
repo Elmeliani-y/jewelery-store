@@ -482,9 +482,10 @@
                 <span class="label">سعر الجرام بفائدة:</span>
                 <span class="value">
                     @php
-                        $net = $safi;
-                        $interestRate = floatval($filters['interest_rate'] ?? 0);
-                        $gramWithFaida = ($interestRate != 0 && $net != 0) ? number_format($net / $interestRate, 2) : '—';
+                        // Use net profit (safi) as numerator, user-entered faida (interest_value) as denominator
+                        $interest_value = $reportData['interest_value'] ?? $filters['interest_value'] ?? 0;
+                        $safi = isset($safi) ? $safi : 0;
+                        $gramWithFaida = ($interest_value != 0) ? number_format($safi / $interest_value, 2) : '—';
                     @endphp
                     {{ $gramWithFaida }}
                 </span>
