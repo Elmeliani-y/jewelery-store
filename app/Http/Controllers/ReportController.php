@@ -540,7 +540,7 @@ class ReportController extends Controller
             ->where('is_returned', false)
             ->whereDate('created_at', $date)
             ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-            ->selectRaw("payment_method, COUNT(*) as count, SUM(total_amount) as amount")
+            ->selectRaw('payment_method, COUNT(*) as count, SUM(total_amount) as amount')
             ->whereIn('payment_method', ['cash', 'network', 'mixed', 'transfer', 'snap'])
             ->groupBy('payment_method')
             ->get();

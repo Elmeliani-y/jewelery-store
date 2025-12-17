@@ -2,6 +2,42 @@
 @section('title', 'تقرير صافي الربح')
 
 @section('css')
+<style>
+    @media print {
+        .kasr-receipt {
+            max-width: 100vw !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding: 8px 12px 8px 12px !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            background: #fff !important;
+            font-size: 15px !important;
+            page-break-inside: avoid !important;
+        }
+        .kasr-receipt * {
+            font-size: 15px !important;
+        }
+        .kasr-receipt .row-line,
+        .kasr-receipt .kasr-card {
+            page-break-inside: avoid !important;
+        }
+        .kasr-receipt .kasr-grid-2by2 {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 18px !important;
+        }
+        body {
+            background: #fff !important;
+        }
+        .kasr-filters-form, .kasr-filters-form * {
+            display: none !important;
+        }
+        .kasr-receipt .muted {
+            color: #888 !important;
+        }
+    }
+</style>
 
 @include('reports.partials.print-css')
 <style>
@@ -350,148 +386,137 @@
 </script>
 
     @if(isset($reportData))
-    <!-- Enhanced Report Results with Lines and Fieldsets -->
-    <div class="kasr-receipt mt-3" style="width:100%; max-width:none; padding:0;">
-        <fieldset style="border:2px solid #222; padding:18px 18px 10px 18px; margin-bottom:18px; width:100%; box-sizing:border-box;">
-            <legend style="width:auto; font-size:18px; font-weight:bold; margin-right:12px;">تقرير صافي الربح</legend>
-            <div class="row-line">
-                <span class="label">الفرع:</span>
-                <span class="value">{{ $selectedBranch->name ?? '-' }}</span>
+        @php
+            // Ensure these variables are always defined for the styled results section
+            $faida_sum = 0;
+            if(isset($reportData['calibers'])) {
+                foreach($reportData['calibers'] as $caliber) {
+                    $faida_sum += ($caliber['weight'] ?? 0) * ($caliber['price_per_gram'] ?? 0);
+                }
+            }
+            $total_sales = ($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0);
+            $final_faida =  $total_sales - $faida_sum;
+            // Get expenses and salaries from the top filters (form input or select)
+            $expenses_from_filter = request('expenses_select') === 'custom'
+                ? floatval(request('expenses', 0))
+                : floatval(request('expenses_select', $expensesSum ?? 0));
+            $salaries_from_filter = request('salaries_select') === 'custom'
+                ? floatval(request('salaries', 0))
+                : floatval(request('salaries_select', $salariesSum ?? 0));
+            $safi = $final_faida - ($expenses_from_filter + $salaries_from_filter);
+            $interest_value = $reportData['interest_value'] ?? $filters['interest_value'] ?? 0;
+            $safi = isset($safi) ? $safi : 0;
+            $gramWithFaida = ($interest_value != 0) ? number_format($safi / $interest_value, 2) : '—';
+        @endphp
+    <!-- Modern Beautiful Kasr Report Results -->
+    <div class="kasr-receipt mt-3" style="width:100%; max-width:700px; margin:0 auto; background:linear-gradient(135deg,#f8fafc 60%,#e0e7ef 100%); box-shadow:0 6px 32px rgba(0,0,0,0.10); border-radius:18px; padding:32px 28px 18px 28px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+            <span style="font-size:2.2rem;color:#6366f1;"><i class="mdi mdi-cash-multiple"></i></span>
+            <h3 style="margin:0;font-weight:800;color:#222;letter-spacing:0.5px;">تقرير صافي الربح</h3>
+        </div>
+        <div class="kasr-grid-2by2" style="margin-bottom:18px;">
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">الفرع</div>
+                <div style="font-size:1.2rem;color:#222;font-weight:700;">{{ $selectedBranch->name ?? '-' }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">التاريخ:</span>
-                <span class="value">{{ $filters['date_from'] ?? '-' }} إلى {{ $filters['date_to'] ?? '-' }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">الفترة</div>
+                <div style="font-size:1.2rem;color:#222;font-weight:700;">{{ $filters['date_from'] ?? '-' }} إلى {{ $filters['date_to'] ?? '-' }}</div>
             </div>
-        </fieldset>
-        <hr class="sep">
-        <fieldset style="border:2px solid #222; padding:14px 18px 10px 18px; margin-bottom:18px; width:100%; box-sizing:border-box;">
-            <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">المصروفات والرواتب</legend>
-            <div class="row-line">
-                <span class="label">الأجور:</span>
-                <span class="value" id="receipt_expenses">{{ number_format($reportData['expenses'] ?? $expenses ?? 0, 2) }}</span>
+        </div>
+        <div class="kasr-grid-2by2" style="margin-bottom:18px;">
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">المصروفات</div>
+                <div style="font-size:1.2rem;color:#e11d48;font-weight:700;" id="receipt_expenses">{{ number_format($reportData['expenses'] ?? $expenses ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">الرواتب:</span>
-                <span class="value" id="receipt_salaries">{{ number_format($reportData['salaries'] ?? $salaries ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">الرواتب</div>
+                <div style="font-size:1.2rem;color:#eab308;font-weight:700;" id="receipt_salaries">{{ number_format($reportData['salaries'] ?? $salaries ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">قيمة الفائدة:</span>
-                <span class="value" id="receipt_interest_rate">{{ number_format($reportData['interest_value'] ?? $filters['interest_value'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">قيمة الفائدة</div>
+                <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;" id="receipt_interest_rate">{{ number_format($reportData['interest_value'] ?? $filters['interest_value'] ?? 0, 2) }}</div>
             </div>
-        </fieldset>
-        <hr class="sep">
-        <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
-            <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">ملخص المبيعات</legend>
-            <div class="row-line">
-                <span class="label">إجمالي المبيعات (بدون الضريبة):</span>
-                <span class="value">{{ number_format($reportData['total_sales_and_returns'] ?? 0, 2) }}</span>
+        </div>
+        <div style="border-top:1.5px dashed #cbd5e1;margin:18px 0 18px 0;"></div>
+        <div class="kasr-grid-2by2" style="margin-bottom:18px;">
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">إجمالي المبيعات (بدون الضريبة)</div>
+                <div style="font-size:1.2rem;color:#16a34a;font-weight:700;">{{ number_format($reportData['total_sales_and_returns'] ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">قيمة المرتجع:</span>
-                <span class="value highlight">{{ number_format($reportData['total_returns'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">قيمة المرتجع</div>
+                <div style="font-size:1.2rem;color:#e11d48;font-weight:700;">{{ number_format($reportData['total_returns'] ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">مجموع الضريبة (مبيعات - مرتجعات):</span>
-                <span class="value">{{ number_format($reportData['total_tax'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">مجموع الضريبة</div>
+                <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;">{{ number_format($reportData['total_tax'] ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">الإجمالي (صافي المبيعات + مجموع الضريبة):</span>
-                <span class="value">{{ number_format(($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0), 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">الإجمالي (صافي المبيعات + الضريبة)</div>
+                <div style="font-size:1.2rem;color:#6366f1;font-weight:700;">{{ number_format(($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0), 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">صافي المبيعات:</span>
-                <span class="value">{{ number_format($reportData['net_sales'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">صافي المبيعات</div>
+                <div style="font-size:1.2rem;color:#16a34a;font-weight:700;">{{ number_format($reportData['net_sales'] ?? 0, 2) }}</div>
             </div>
-        </fieldset>
-        <hr class="sep">
-        <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
-            <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">تفاصيل الوزن والأسعار</legend>
-            <div class="row-line">
-                <span class="label">مجموع الوزن (المبيعات):</span>
-                <span class="value">{{ number_format(($reportData['total_weight'] ?? 0) + ($reportData['total_weight_returns'] ?? 0), 2) }}</span>
+        </div>
+        <div style="border-top:1.5px dashed #cbd5e1;margin:18px 0 18px 0;"></div>
+        <div class="kasr-grid-2by2" style="margin-bottom:18px;">
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">مجموع الوزن (المبيعات)</div>
+                <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;">{{ number_format(($reportData['total_weight'] ?? 0) + ($reportData['total_weight_returns'] ?? 0), 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">وزن المرتجع:</span>
-                <span class="value highlight">{{ number_format($reportData['total_weight_returns'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">وزن المرتجع</div>
+                <div style="font-size:1.2rem;color:#e11d48;font-weight:700;">{{ number_format($reportData['total_weight_returns'] ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">معدل الجرام (صافي المبيعات ÷ صافي الوزن):</span>
-                <span class="value">{{ number_format($reportData['avg_price_per_gram'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">معدل الجرام (صافي المبيعات ÷ صافي الوزن)</div>
+                <div style="font-size:1.2rem;color:#6366f1;font-weight:700;">{{ number_format($reportData['avg_price_per_gram'] ?? 0, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">سعر الجرام (الإجمالي ÷ صافي الوزن):</span>
-                <span class="value">{{ number_format($reportData['price_of_gram'] ?? 0, 2) }}</span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">سعر الجرام (الإجمالي ÷ صافي الوزن)</div>
+                <div style="font-size:1.2rem;color:#6366f1;font-weight:700;">{{ number_format($reportData['price_of_gram'] ?? 0, 2) }}</div>
             </div>
-        </fieldset>
-        <hr class="sep">
+        </div>
         @if(isset($reportData['calibers']) && is_array($reportData['calibers']))
-        <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
-            <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">تفاصيل العيارات</legend>
-            @foreach($reportData['calibers'] as $caliber)
-                @if(($caliber['cash'] ?? 0) > 0 || ($caliber['weight'] ?? 0) > 0)
-                <div class="row-line">
-                    <span class="label">مبيعات {{ $caliber['name'] }} بدون ضريبة:</span>
-                    <span class="value">{{ number_format($caliber['cash'] ?? 0, 2) }}</span>
-                </div>
-                <div class="row-line">
-                    <span class="label">ذهب {{ $caliber['name'] }}:</span>
-                    <span class="value">{{ number_format($caliber['weight'], 2) }}</span>
-                </div>
-                <div class="row-line">
-                    <span class="label">معدل الجرام (مبيعات ÷ وزن):</span>
-                    <span class="value">{{ number_format($caliber['avg_price_per_gram'] ?? 0, 2) }}</span>
-                </div>
-                @endif
-            @endforeach
-        </fieldset>
-        <hr class="sep">
+        <div style="border-top:1.5px dashed #cbd5e1;margin:18px 0 18px 0;"></div>
+        <div style="margin-bottom:18px;">
+            <div style="font-size:1.2rem;font-weight:700;color:#222;margin-bottom:8px;">تفاصيل العيارات</div>
+            <div style="display:flex;flex-wrap:wrap;gap:18px;">
+                @foreach($reportData['calibers'] as $caliber)
+                    @if(($caliber['cash'] ?? 0) > 0 || ($caliber['weight'] ?? 0) > 0)
+                    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px #e0e7ef;padding:18px 16px;min-width:180px;flex:1 1 220px;">
+                        <div style="font-size:1.1rem;color:#6366f1;font-weight:700;margin-bottom:6px;"><i class="mdi mdi-gold"></i> {{ $caliber['name'] }}</div>
+                        <div style="font-size:1.05rem;color:#64748b;font-weight:600;">مبيعات بدون ضريبة</div>
+                        <div style="font-size:1.2rem;color:#16a34a;font-weight:700;">{{ number_format($caliber['cash'] ?? 0, 2) }}</div>
+                        <div style="font-size:1.05rem;color:#64748b;font-weight:600;">ذهب (وزن)</div>
+                        <div style="font-size:1.2rem;color:#eab308;font-weight:700;">{{ number_format($caliber['weight'], 2) }}</div>
+                        <div style="font-size:1.05rem;color:#64748b;font-weight:600;">معدل الجرام</div>
+                        <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;">{{ number_format($caliber['avg_price_per_gram'] ?? 0, 2) }}</div>
+                    </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
         @endif
-        <fieldset style="border:2px solid #222; padding:20px 32px 12px 32px; margin-bottom:20px; width:100%; box-sizing:border-box;">
-            <legend style="width:auto; font-size:15px; font-weight:bold; margin-right:12px;">الربح النهائي</legend>
-            <div class="row-line">
-                <span class="label">فائدة :</span>
-                @php
-                    $faida_sum = 0;
-                    if(isset($reportData['calibers'])) {
-                        foreach($reportData['calibers'] as $caliber) {
-                            $faida_sum += ($caliber['weight'] ?? 0) * ($caliber['price_per_gram'] ?? 0);
-                        }
-                    }
-                    $total_sales = ($reportData['net_sales'] ?? 0) + ($reportData['total_tax'] ?? 0);
-                    $final_faida =  $total_sales - $faida_sum;
-                @endphp
-                <span class="value" id="receipt_profit">{{ number_format($final_faida, 2) }}</span>
+        <div style="border-top:1.5px dashed #cbd5e1;margin:18px 0 18px 0;"></div>
+        <div class="kasr-grid-2by2" style="margin-bottom:18px;">
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">فائدة</div>
+                <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;" id="receipt_profit">{{ number_format($final_faida, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">صافي الربح:</span>
-                @php
-                    // Get expenses and salaries from the top filters (form input or select)
-                    $expenses_from_filter = request('expenses_select') === 'custom'
-                        ? floatval(request('expenses', 0))
-                        : floatval(request('expenses_select', $expensesSum ?? 0));
-                    $salaries_from_filter = request('salaries_select') === 'custom'
-                        ? floatval(request('salaries', 0))
-                        : floatval(request('salaries_select', $salariesSum ?? 0));
-                    $safi = $final_faida - ($expenses_from_filter + $salaries_from_filter);
-                @endphp
-                <span class="highlight" id="receipt_net_profit">
-                    {{ number_format($safi, 2) }}
-                </span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">صافي الربح</div>
+                <div style="font-size:1.2rem;color:#16a34a;font-weight:700;" id="receipt_net_profit">{{ number_format($safi, 2) }}</div>
             </div>
-            <div class="row-line">
-                <span class="label">سعر الجرام بفائدة:</span>
-                <span class="value">
-                    @php
-                        // Use net profit (safi) as numerator, user-entered faida (interest_value) as denominator
-                        $interest_value = $reportData['interest_value'] ?? $filters['interest_value'] ?? 0;
-                        $safi = isset($safi) ? $safi : 0;
-                        $gramWithFaida = ($interest_value != 0) ? number_format($safi / $interest_value, 2) : '—';
-                    @endphp
-                    {{ $gramWithFaida }}
-                </span>
+            <div>
+                <div style="font-size:1.1rem;color:#64748b;font-weight:600;">سعر الجرام بفائدة</div>
+                <div style="font-size:1.2rem;color:#e11d48;font-weight:700;">{{ $gramWithFaida }}</div>
             </div>
-        </fieldset>
-        <div class="muted text-center mt-2">{{ \Carbon\Carbon::now()->format('l, F d, Y') }}</div>
+        </div>
+        <div class="muted text-center mt-2" style="font-size:1.1rem;">{{ \Carbon\Carbon::now()->format('l, F d, Y') }}</div>
     </div>
     @endif
 </div>
