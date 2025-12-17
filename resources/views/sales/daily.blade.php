@@ -172,6 +172,33 @@
         </div>
     </div>
 
+    <!-- Sales Summary Cards (copied from expenses/daily.blade.php) -->
+    <div class="row mb-3">
+        <div class="col-md-6 mb-3">
+            <div class="card summary-card" style="border-left-color: #0d6efd; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div class="card-body text-center">
+                    <iconify-icon icon="solar:cart-bold-duotone" class="fs-1 text-primary mb-2"></iconify-icon>
+                    <div class="sales-summary-label mb-1">إجمالي المبيعات (كل العمليات)</div>
+                    <div class="sales-summary-value">
+                        {{ isset($salesSumAll) ? number_format($salesSumAll, 2) : '0.00' }} <small>ريال</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card summary-card" style="border-left-color: #6610f2; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+                <div class="card-body text-center">
+                    <iconify-icon icon="solar:cart-large-bold-duotone" class="fs-1 text-purple mb-2"></iconify-icon>
+                    <div class="sales-summary-label mb-1">إجمالي المبيعات (بدون تحويل)</div>
+                    <div class="sales-summary-value">
+                        {{ isset($salesSumWithoutTransfer) ? number_format($salesSumWithoutTransfer, 2) : '0.00' }} <small>ريال</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
     <!-- Filters -->
     <div class="row mb-3">
         <div class="col-12">

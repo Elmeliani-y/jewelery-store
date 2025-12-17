@@ -166,7 +166,6 @@ class SaleController extends Controller
         if ($user->isBranch() && $validated['branch_id'] != $user->branch_id) {
             abort(403, 'غير مصرح لك بالوصول إلى هذا الفرع');
         }
-        
 
         try {
             DB::beginTransaction();
@@ -608,7 +607,18 @@ class SaleController extends Controller
         // Snap/Transfer total: payment_method == 'transfer' or (if you want to include network, add network_amount)
         $snapTotal = $sales->where('payment_method', 'transfer')->sum('total_amount');
 
-        return view('sales.daily', compact('sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate', 'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal', 'snapTotal'));
+        // Total sales (all)
+        $salesSumAll = $sales->sum('total_amount');
+        // Total sales without transfer
+        $salesSumWithoutTransfer = $sales->where('payment_method', '!=', 'transfer')->sum('total_amount');
+        // Total sales without snap/transfer
+        $totalSalesWithoutSnap = $sales->where('payment_method', '!=', 'transfer')->sum('total_amount');
+
+        return view('sales.daily', compact(
+            'sales', 'employees', 'totalWeight', 'totalAmount', 'averageRate',
+            'cashOnlyTotal', 'networkOnlyTotal', 'mixedTotal', 'snapTotal',
+            'salesSumAll', 'salesSumWithoutTransfer', 'totalSalesWithoutSnap'
+        ));
     }
 
     /**
