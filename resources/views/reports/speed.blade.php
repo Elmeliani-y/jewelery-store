@@ -300,6 +300,8 @@
                                             <span class="badge bg-success">نقدي</span>
                                         @elseif($method->payment_method == 'network')
                                             <span class="badge bg-info">شبكة</span>
+                                        @elseif($method->payment_method == 'transfer' || $method->payment_method == 'snap')
+                                            <span class="badge bg-primary">تحويل</span>
                                         @else
                                             <span class="badge bg-warning">مختلط</span>
                                         @endif

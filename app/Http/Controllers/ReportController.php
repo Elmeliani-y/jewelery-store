@@ -421,20 +421,19 @@ class ReportController extends Controller
             $salesForWeight->where('branch_id', $branchId);
         }
         $salesForWeight = $salesForWeight->get();
-        $totalWeight = 0;
+        $totalWeightAllSales = 0;
         foreach ($salesForWeight as $sale) {
             $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
             if ($products) {
                 foreach ($products as $product) {
-                    $totalWeight += isset($product['weight']) ? (float) $product['weight'] : 0;
-
+                    $totalWeightAllSales += isset($product['weight']) ? (float) $product['weight'] : 0;
                 }
             }
         }
 
         // Calculate derived metrics
         $profit = ($salesStats->net ?? 0) - ($expensesStats->total ?? 0);
-        $pricePerGram = ($totalWeight > 0) ? (($salesStats->total ?? 0) / $totalWeight) : 0;
+        $pricePerGram = ($totalWeightAllSales > 0) ? (($salesStats->total ?? 0) / $totalWeightAllSales) : 0;
 
         // Top 5 employees (fast query)
         $topEmployeesRaw = DB::table('sales')
@@ -458,12 +457,12 @@ class ReportController extends Controller
                 $sales->where('branch_id', $branchId);
             }
             $sales = $sales->get();
-            $totalWeight = 0;
+            $empWeight = 0;
             foreach ($sales as $sale) {
                 $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
                 if ($products) {
                     foreach ($products as $product) {
-                        $totalWeight += isset($product['weight']) ? (float) $product['weight'] : 0;
+                        $empWeight += isset($product['weight']) ? (float) $product['weight'] : 0;
                     }
                 }
             }
@@ -471,7 +470,7 @@ class ReportController extends Controller
                 'name' => $emp->name,
                 'sales_count' => $emp->sales_count,
                 'total_sales' => $emp->total_sales,
-                'total_weight' => $totalWeight,
+                'total_weight' => $empWeight,
             ]);
         }
 
@@ -482,7 +481,22 @@ class ReportController extends Controller
             $salesQuery->where('branch_id', $branchId);
         }
         $sales = $salesQuery->get();
-        $calibers = \App\Models\Caliber::active()->get();
+
+        // Dynamically collect all caliber_ids used in today's sales
+        $usedCaliberIds = collect();
+        foreach ($sales as $sale) {
+            $products = is_array($sale->products) ? $sale->products : json_decode($sale->products, true);
+            if ($products) {
+                foreach ($products as $product) {
+                    if (isset($product['caliber_id'])) {
+                        $usedCaliberIds->push($product['caliber_id']);
+                    }
+                }
+            }
+        }
+        $usedCaliberIds = $usedCaliberIds->unique()->filter()->values();
+        $calibers = \App\Models\Caliber::whereIn('id', $usedCaliberIds)->get();
+
         $salesByCaliber = collect();
         foreach ($calibers as $caliber) {
             $count = 0;
@@ -495,7 +509,7 @@ class ReportController extends Controller
                     // Calculate total amount for proportional distribution
                     $totalProductAmount = 0;
                     foreach ($products as $product) {
-                        $totalProductAmount += isset($product['total_amount']) ? (float) $product['total_amount'] : 0;
+                        $totalProductAmount += isset($product['amount']) ? (float) $product['amount'] : 0;
                     }
                     if ($totalProductAmount == 0) {
                         $totalProductAmount = 1;
@@ -504,9 +518,9 @@ class ReportController extends Controller
                         if (isset($product['caliber_id']) && $product['caliber_id'] == $caliber->id) {
                             $count++;
                             $weight += isset($product['weight']) ? (float) $product['weight'] : 0;
-                            $amount += isset($product['total_amount']) ? (float) $product['total_amount'] : 0;
-                            // Proportional share of net_amount
-                            $share = isset($product['total_amount']) ? (float) $product['total_amount'] / $totalProductAmount : 0;
+                            // Distribute sale total_amount proportionally to product amount
+                            $share = isset($product['amount']) ? (float) $product['amount'] / $totalProductAmount : 0;
+                            $amount += isset($sale->total_amount) ? $sale->total_amount * $share : 0;
                             $salesWithoutTax += isset($sale->net_amount) ? $sale->net_amount * $share : 0;
                         }
                     }
@@ -526,7 +540,8 @@ class ReportController extends Controller
             ->where('is_returned', false)
             ->whereDate('created_at', $date)
             ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-            ->selectRaw('payment_method, COUNT(*) as count, SUM(total_amount) as amount')
+            ->selectRaw("payment_method, COUNT(*) as count, SUM(total_amount) as amount")
+            ->whereIn('payment_method', ['cash', 'network', 'mixed', 'transfer', 'snap'])
             ->groupBy('payment_method')
             ->get();
 
@@ -548,7 +563,7 @@ class ReportController extends Controller
             'sales_total' => $salesStats->total ?? 0,
             'sales_net' => $salesStats->net ?? 0,
             'sales_tax' => $salesStats->tax ?? 0,
-            'sales_weight' => $totalWeight,
+            'sales_weight' => $totalWeightAllSales,
             'cash_amount' => $salesStats->cash ?? 0,
             'network_amount' => $salesStats->network ?? 0,
             'expenses_count' => $expensesStats->count ?? 0,
