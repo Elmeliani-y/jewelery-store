@@ -143,10 +143,10 @@
                                 <option value="cash" {{ $pm=='cash'?'selected':'' }}>نقداً</option>
                                 <option value="network" {{ $pm=='network'?'selected':'' }}>شبكة</option>
                                 <option value="mixed" {{ $pm=='mixed'?'selected':'' }}>مختلط (نقدي + شبكة)</option>
+                                <option value="transfer" {{ $pm=='transfer'?'selected':'' }} id="transfer-option" style="display:none;">تحويل (Snap)</option>
                             </select>
                             @error('payment_method')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
-                        
                         <!-- Current Payment Summary -->
                         <div class="col-12" id="payment_summary">
                             <div class="alert alert-primary bg-primary-subtle border-0" role="alert">
@@ -166,6 +166,8 @@
                                             <div><small class="text-muted">شبكة:</small> <span class="text-info fw-bold">{{ number_format($sale->network_amount, 2) }}</span> ريال</div>
                                         @elseif($sale->payment_method === 'cash')
                                             <span class="text-success fw-bold">{{ number_format($sale->cash_amount, 2) }}</span> ريال <small class="text-muted">(نقدي)</small>
+                                        @elseif($sale->payment_method === 'transfer')
+                                            <span class="text-primary fw-bold">{{ number_format($sale->cash_amount, 2) }}</span> ريال <small class="text-muted">(تحويل)</small>
                                         @else
                                             <span class="text-info fw-bold">{{ number_format($sale->network_amount, 2) }}</span> ريال <small class="text-muted">(شبكة)</small>
                                         @endif
@@ -173,7 +175,6 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="col-md-6 payment-group" id="cash_group">
                             <label class="form-label">المبلغ النقدي <span class="text-danger payment-required">*</span></label>
                             <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ old('cash_amount', $sale->cash_amount) }}" class="form-control @error('cash_amount') is-invalid @enderror" placeholder="0.00">
@@ -188,6 +189,14 @@
                             @error('network_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-calculator-variant me-1"></i>سيتم حساب المبلغ النقدي تلقائياً
+                            </small>
+                        </div>
+                        <div class="col-md-6 payment-group" id="transfer_group" style="display:none;">
+                            <label class="form-label">مبلغ التحويل <span class="text-danger payment-required">*</span></label>
+                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', $sale->cash_amount) }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
+                            @error('transfer_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <small class="form-text text-muted">
+                                <i class="mdi mdi-bank-transfer me-1"></i>أدخل مبلغ التحويل إذا كان الدفع عبر سناب
                             </small>
                         </div>
                     </div>
@@ -401,7 +410,72 @@
         autoCalculateAmounts();
     });
     
+    // Show/hide transfer option based on selected employee
+    function updateTransferOptionVisibility() {
+        const employeeSelect = document.getElementById('employee_id');
+        const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
+        const isSnap = selectedOption && selectedOption.getAttribute('data-is-snap') == '1';
+        const transferOption = document.querySelector('#payment_method option[value="transfer"]');
+        if (isSnap) {
+            transferOption.style.display = '';
+        } else {
+            if(document.getElementById('payment_method').value === 'transfer') {
+                document.getElementById('payment_method').value = 'cash';
+            }
+            transferOption.style.display = 'none';
+        }
+        togglePaymentGroups();
+    }
+
+    // Extend togglePaymentGroups to handle transfer
+    function togglePaymentGroups(){
+        const pm = document.getElementById('payment_method').value;
+        const cash = document.getElementById('cash_group');
+        const net = document.getElementById('network_group');
+        const transfer = document.getElementById('transfer_group');
+        const cashInput = document.getElementById('cash_amount_input');
+        const netInput = document.getElementById('network_amount_input');
+        const transferInput = document.getElementById('transfer_amount_input');
+
+        cash.classList.remove('payment-visible');
+        net.classList.remove('payment-visible');
+        if(transfer) transfer.classList.remove('payment-visible');
+
+        // Reset required attributes
+        cashInput.removeAttribute('required');
+        netInput.removeAttribute('required');
+        if(transferInput) transferInput.removeAttribute('required');
+
+        if(pm === 'cash'){ 
+            cash.classList.add('payment-visible');
+            cashInput.setAttribute('required', 'required');
+            netInput.value = '0';
+            if(transferInput) transferInput.value = '0';
+        }
+        else if(pm === 'network'){ 
+            net.classList.add('payment-visible');
+            netInput.setAttribute('required', 'required');
+            cashInput.value = '0';
+            if(transferInput) transferInput.value = '0';
+        }
+        else if(pm === 'mixed'){ 
+            cash.classList.add('payment-visible');
+            net.classList.add('payment-visible');
+            cashInput.setAttribute('required', 'required');
+            netInput.setAttribute('required', 'required');
+            if(transferInput) transferInput.value = '0';
+        }
+        else if(pm === 'transfer'){
+            if(transfer) transfer.classList.add('payment-visible');
+            if(transferInput) transferInput.setAttribute('required', 'required');
+            cashInput.value = '0';
+            netInput.value = '0';
+        }
+    }
+
     document.getElementById('payment_method').addEventListener('change', togglePaymentGroups);
-    togglePaymentGroups();
+    document.getElementById('employee_id').addEventListener('change', updateTransferOptionVisibility);
+    // On page load
+    updateTransferOptionVisibility();
 </script>
 @endsection
