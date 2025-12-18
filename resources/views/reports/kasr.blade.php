@@ -4,34 +4,48 @@
 @section('css')
 <style>
     @media print {
-        .kasr-receipt {
-            max-width: 100vw !important;
-            width: 100vw !important;
-            margin: 0 !important;
-            padding: 8px 12px 8px 12px !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-            background: #fff !important;
-            font-size: 15px !important;
-            page-break-inside: avoid !important;
-        }
-        .kasr-receipt * {
-            font-size: 15px !important;
-        }
-        .kasr-receipt .row-line,
-        .kasr-receipt .kasr-card {
-            page-break-inside: avoid !important;
-        }
-        .kasr-receipt .kasr-grid-2by2 {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 18px !important;
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
         }
         body {
             background: #fff !important;
         }
         .kasr-filters-form, .kasr-filters-form * {
             display: none !important;
+        }
+        .kasr-receipt {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 10mm 8mm 8mm 8mm !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            background: #fff !important;
+            font-size: 12px !important;
+            page-break-inside: avoid !important;
+            page-break-before: avoid !important;
+            page-break-after: avoid !important;
+            break-inside: avoid !important;
+            break-before: avoid !important;
+            break-after: avoid !important;
+        }
+        .kasr-receipt * {
+            font-size: 12px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        .kasr-receipt .kasr-grid-2by2 {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        .kasr-receipt .row-line,
+        .kasr-receipt .kasr-card {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         .kasr-receipt .muted {
             color: #888 !important;
