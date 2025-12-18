@@ -16,7 +16,7 @@ class BranchSalesController extends Controller
         $from = $request->get('from') ?: now()->format('Y-m-d');
         $to = $request->get('to') ?: now()->format('Y-m-d');
 
-        $query = Sale::query();
+        $query = Sale::query()->where('is_returned', false);
         if ($branchId) {
             $query->where('branch_id', $branchId);
         }
