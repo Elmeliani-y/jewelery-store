@@ -300,12 +300,14 @@ document.addEventListener('DOMContentLoaded', function() {
     updateLiveTotalAmount();
 
     // Prevent form submit if mismatch
+    // Attach check to the save button only
+    var saveBtn = document.querySelector('button[type="submit"]');
     var form = document.getElementById('sale-edit-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
+    if (saveBtn && form) {
+        saveBtn.addEventListener('click', function(e) {
             let total = getProductsTotal();
             let originalTotal = getOriginalTotal();
-            if (originalTotal !== null && Math.abs(total - originalTotal) > 0.01) {
+            if (originalTotal !== null && total !== originalTotal) {
                 e.preventDefault();
                 alert('تحذير: مجموع مبالغ المنتجات لا يطابق المبلغ الإجمالي المدخل. يرجى التحقق!');
             }
