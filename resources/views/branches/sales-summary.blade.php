@@ -15,6 +15,22 @@
                         @endforeach
                     </select>
                 </div>
+                                @if(!empty($salesPerCaliber))
+                                <div class="mt-4">
+                                    <h5 class="mb-2">إجمالي المبيعات لكل عيار:</h5>
+                                    <div class="d-flex flex-wrap align-items-center" style="gap: 0.5rem;">
+                                        @php
+                                            $badgeColors = ['primary','success','danger','warning','info','secondary','dark','purple','pink','teal','orange'];
+                                            $colorCount = count($badgeColors);
+                                        @endphp
+                                        @foreach($salesPerCaliber as $i => $caliber)
+                                            <span class="badge bg-{{ $badgeColors[$i % $colorCount] }}" style="font-size:1rem;">
+                                                {{ $caliber['name'] }}: {{ number_format($caliber['total'], 2) }} ريال
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
                 <div class="col-md-3">
                     <label class="form-label">من تاريخ</label>
                     <input type="date" name="from" class="form-control" value="{{ $from ?? date('Y-m-d') }}">
@@ -48,9 +64,51 @@
                                 <tr>
                                     <td>{{ $data['branch']->name }}</td>
                                     <td>{{ $data['count'] }}</td>
-                                    <td class="fw-bold text-success">{{ number_format($data['total'], 2) }} ريال</td>
-                                    <td class="fw-bold">{{ number_format($data['weight'], 3) }} جم</td>
-                                    <td class="fw-bold text-info">{{ number_format($data['avg_gram'], 2) }} ريال</td>
+                                    <td class="fw-bold text-success">
+                                        {{ number_format($data['total'], 2) }}
+                                        @if(!empty($branchCaliberSales[$branchId]))
+                                            <div class="d-flex flex-wrap mt-1" style="gap:0.25rem;">
+                                                @php
+                                                    $badgeColors = ['#0dcaf0','#20c997','#ffc107','#fd7e14','#6f42c1','#d63384','#198754','#0d6efd','#6610f2','#6c757d'];
+                                                @endphp
+                                                @foreach($branchCaliberSales[$branchId] as $i => $caliber)
+                                                    <span style="background:{{$badgeColors[$i%count($badgeColors)]}};color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;min-width:38px;text-align:center;">
+                                                        {{ $caliber['name'] }}: {{ number_format($caliber['total'], 2) }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="fw-bold">
+                                        {{ number_format($data['weight'], 3) }}
+                                        @if(!empty($branchCaliberSales[$branchId]))
+                                            <div class="d-flex flex-wrap mt-1" style="gap:0.25rem;">
+                                                @php
+                                                    $badgeColors = ['#0dcaf0','#20c997','#ffc107','#fd7e14','#6f42c1','#d63384','#198754','#0d6efd','#6610f2','#6c757d'];
+                                                @endphp
+                                                @foreach($branchCaliberSales[$branchId] as $i => $caliber)
+                                                    <span style="background:{{$badgeColors[$i%count($badgeColors)]}};color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;min-width:38px;text-align:center;">
+                                                        {{ $caliber['name'] }}: {{ number_format($caliber['weight'], 3) }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="fw-bold text-info">
+                                        {{ number_format($data['avg_gram'], 2) }} ريال
+                                        @if(!empty($branchCaliberSales[$branchId]))
+                                            <div class="d-flex flex-wrap mt-1" style="gap:0.25rem;">
+                                                @php
+                                                    $badgeColors = ['#0dcaf0','#20c997','#ffc107','#fd7e14','#6f42c1','#d63384','#198754','#0d6efd','#6610f2','#6c757d'];
+                                                @endphp
+                                                @foreach($branchCaliberSales[$branchId] as $i => $caliber)
+                                                    <span style="background:{{$badgeColors[$i%count($badgeColors)]}};color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;min-width:38px;text-align:center;">
+                                                        {{ $caliber['name'] }}: {{ number_format($caliber['price_per_gram'], 2) }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </td
                                 </tr>
                             @empty
                                 <tr><td colspan="5">لا توجد بيانات</td></tr>
