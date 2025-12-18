@@ -50,11 +50,13 @@ class ExpenseController extends Controller
         }
 
         $expenses = $query->paginate(15);
+        // Compute total (ijmali) for filtered expenses (all pages)
+        $totalExpenses = (clone $query)->sum('amount');
 
         $branches = Branch::active()->get();
         $expenseTypes = ExpenseType::active()->get();
 
-        return view('expenses.index', compact('expenses', 'branches', 'expenseTypes'));
+        return view('expenses.index', compact('expenses', 'branches', 'expenseTypes', 'totalExpenses'));
     }
 
     /**

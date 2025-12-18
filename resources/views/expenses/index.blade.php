@@ -143,7 +143,14 @@
                         </table>
                     </div>
                     <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-                        <small class="text-muted">عرض {{ $expenses->firstItem() }}–{{ $expenses->lastItem() }} من أصل {{ $expenses->total() }}</small>
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-2">
+                            <small class="text-muted">
+                                عرض {{ $expenses->firstItem() }}–{{ $expenses->lastItem() }} من أصل {{ $expenses->total() }}
+                            </small>
+                            <span class="badge bg-info text-dark ms-md-3">
+                                الإجمالي: {{ number_format($totalExpenses, 2, '.', ',') }} ريال
+                            </span>
+                        </div>
                         {{ $expenses->links('pagination::bootstrap-5') }}
                     </div>
                     @else

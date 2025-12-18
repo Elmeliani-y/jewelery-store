@@ -58,6 +58,8 @@ class SaleController extends Controller
         }
 
         $sales = $query->paginate(15);
+        // Compute total (ijmali) for filtered sales (all pages)
+        $totalSales = (clone $query)->sum('total_amount');
 
         $branches = Branch::active()->get();
         $employees = Employee::active()->get();
@@ -67,7 +69,7 @@ class SaleController extends Controller
         // Load minimum price setting from database
         $minGramPrice = (float) \App\Models\Setting::get('min_invoice_gram_avg', config('sales.min_invoice_gram_avg', 2.0));
 
-        return view('sales.index', compact('sales', 'branches', 'employees', 'categories', 'calibers', 'minGramPrice'));
+        return view('sales.index', compact('sales', 'branches', 'employees', 'categories', 'calibers', 'minGramPrice', 'totalSales'));
     }
 
     /**
@@ -645,7 +647,9 @@ class SaleController extends Controller
         }
 
         $returns = $query->paginate(15);
+        // Compute total (ijmali) for filtered returns (all pages)
+        $totalReturns = (clone $query)->sum('total_amount');
 
-        return view('sales.returns', compact('returns'));
+        return view('sales.returns', compact('returns', 'totalReturns'));
     }
 }
