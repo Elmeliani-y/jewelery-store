@@ -9,9 +9,9 @@
                 <div class="col-md-3">
                     <label class="form-label">الفرع</label>
                     <select name="branch_id" class="form-select">
-                        <option value="">كل الفروع</option>
+                        <option value="" {{ empty($selectedBranch) ? 'selected' : '' }}>كل الفروع</option>
                         @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}" {{ $selectedBranch == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                            <option value="{{ $branch->id }}" {{ (!empty($selectedBranch) && $selectedBranch == $branch->id) ? 'selected' : '' }}>{{ $branch->name }}</option>
                         @endforeach
                     </select>
                 </div>
