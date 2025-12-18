@@ -17,11 +17,11 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">من تاريخ</label>
-                    <input type="date" name="from" class="form-control" value="{{ $from }}">
+                    <input type="date" name="from" class="form-control" value="{{ $from ?? date('Y-m-d') }}">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">إلى تاريخ</label>
-                    <input type="date" name="to" class="form-control" value="{{ $to }}">
+                    <input type="date" name="to" class="form-control" value="{{ $to ?? date('Y-m-d') }}">
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-primary w-100">تطبيق</button>
