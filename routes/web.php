@@ -60,6 +60,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('api/sales/search', [SaleController::class, 'searchByInvoice'])->name('api.sales.search');
     Route::get('branch/daily-sales', [SaleController::class, 'dailySales'])->name('branch.daily-sales');
 
+
+    // Branches sales summary
+    Route::get('branches/sales-summary', [\App\Http\Controllers\BranchSalesController::class, 'index'])->name('branches.sales-summary');
+
     // Returns dashboard
     Route::get('returns', [SaleController::class, 'returns'])->name('sales.returns');
 

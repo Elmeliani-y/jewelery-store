@@ -39,6 +39,12 @@
                             <span> الرئيسية </span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('branches.sales-summary') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-store"></i></span>
+                            <span> إجمالي مبيعات الفروع </span>
+                        </a>
+                    </li>
                 @endif
 
                 <li class="menu-title mt-2">إدارة المبيعات</li>
