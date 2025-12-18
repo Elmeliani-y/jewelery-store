@@ -39,6 +39,8 @@
                                 <th>الفرع</th>
                                 <th>عدد العمليات</th>
                                 <th>إجمالي المبيعات</th>
+                                <th>إجمالي الأوزان</th>
+                                <th>معدل سعر الجرام</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,9 +49,11 @@
                                     <td>{{ $data['branch']->name }}</td>
                                     <td>{{ $data['count'] }}</td>
                                     <td class="fw-bold text-success">{{ number_format($data['total'], 2) }} ريال</td>
+                                    <td class="fw-bold">{{ number_format($data['weight'], 3) }} جم</td>
+                                    <td class="fw-bold text-info">{{ number_format($data['avg_gram'], 2) }} ريال</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="3">لا توجد بيانات</td></tr>
+                                <tr><td colspan="5">لا توجد بيانات</td></tr>
                             @endforelse
                         </tbody>
                     </table>

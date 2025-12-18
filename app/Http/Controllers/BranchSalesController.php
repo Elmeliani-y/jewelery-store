@@ -29,9 +29,16 @@ class BranchSalesController extends Controller
         $grouped = $sales->groupBy('branch_id');
         $totals = [];
         foreach ($grouped as $branchId => $branchSales) {
+            $totalAmount = $branchSales->sum('total_amount');
+            $totalWeight = $branchSales->sum(function($sale) {
+                return is_numeric($sale->weight) ? $sale->weight : 0;
+            });
+            $avgGram = $totalWeight > 0 ? $totalAmount / $totalWeight : 0;
             $totals[$branchId] = [
                 'branch' => $branchSales->first()->branch,
-                'total' => $branchSales->sum('total_amount'),
+                'total' => $totalAmount,
+                'weight' => $totalWeight,
+                'avg_gram' => $avgGram,
                 'count' => $branchSales->count(),
             ];
         }
