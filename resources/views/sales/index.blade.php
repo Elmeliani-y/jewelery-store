@@ -92,11 +92,31 @@
         </div>
     @endif
 
-    <!-- Search by Invoice Number -->
-    <form method="GET" class="mb-3" style="max-width:300px">
-        <div class="input-group">
-            <input type="number" name="invoice_number" class="form-control" placeholder="بحث برقم الفاتورة" value="{{ request('invoice_number') }}">
-            <button class="btn btn-primary" type="submit">بحث</button>
+    <!-- Filters: Branch, Dates, Invoice Number -->
+    <form method="GET" class="mb-3 row g-2 align-items-end">
+        <div class="col-md-2">
+            <label for="branch_id" class="form-label mb-1">الفرع</label>
+            <select name="branch_id" id="branch_id" class="form-select">
+                <option value="">كل الفروع</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}" {{ request('branch_id', '') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="date_from" class="form-label mb-1">من تاريخ</label>
+            <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request('date_from', now()->format('Y-m-d')) }}">
+        </div>
+        <div class="col-md-2">
+            <label for="date_to" class="form-label mb-1">إلى تاريخ</label>
+            <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to', now()->format('Y-m-d')) }}">
+        </div>
+        <div class="col-md-2">
+            <label for="invoice_number" class="form-label mb-1">رقم الفاتورة</label>
+            <input type="number" name="invoice_number" id="invoice_number" class="form-control" placeholder="بحث برقم الفاتورة" value="{{ request('invoice_number') }}">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" type="submit" style="margin-top: 2px;">بحث</button>
         </div>
     </form>
 

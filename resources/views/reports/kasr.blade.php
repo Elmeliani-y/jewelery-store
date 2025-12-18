@@ -308,6 +308,26 @@
         }, 0);
     };
     ['date_from','date_to','branch_id'].forEach(id => {
+                        @media print {
+                            .calibers-2by2-grid {
+                                display: grid !important;
+                                grid-template-columns: 1fr 1fr !important;
+                                gap: 8px !important;
+                                width: 100% !important;
+                                max-width: 100% !important;
+                                margin: 0 !important;
+                            }
+                            .calibers-2by2-grid > div {
+                                min-width: 0 !important;
+                                padding: 6px 6px !important;
+                                box-shadow: none !important;
+                                border-radius: 0 !important;
+                                margin: 0 !important;
+                                width: 100% !important;
+                                max-width: 100% !important;
+                                background: #fff !important;
+                            }
+                        }
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('change', submitKasrFilters);
@@ -492,20 +512,31 @@
         <div style="border-top:1.5px dashed #cbd5e1;margin:18px 0 18px 0;"></div>
         <div style="margin-bottom:18px;">
             <div style="font-size:1.2rem;font-weight:700;color:#222;margin-bottom:8px;">تفاصيل العيارات</div>
-            <div style="display:flex;flex-wrap:wrap;gap:18px;">
-                @foreach($reportData['calibers'] as $caliber)
-                    @if(($caliber['cash'] ?? 0) > 0 || ($caliber['weight'] ?? 0) > 0)
-                    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px #e0e7ef;padding:18px 16px;min-width:180px;flex:1 1 220px;">
-                        <div style="font-size:1.1rem;color:#6366f1;font-weight:700;margin-bottom:6px;"><i class="mdi mdi-gold"></i> {{ $caliber['name'] }}</div>
-                        <div style="font-size:1.05rem;color:#64748b;font-weight:600;">مبيعات بدون ضريبة</div>
-                        <div style="font-size:1.2rem;color:#16a34a;font-weight:700;">{{ number_format($caliber['cash'] ?? 0, 2) }}</div>
-                        <div style="font-size:1.05rem;color:#64748b;font-weight:600;">ذهب (وزن)</div>
-                        <div style="font-size:1.2rem;color:#eab308;font-weight:700;">{{ number_format($caliber['weight'], 2) }}</div>
-                        <div style="font-size:1.05rem;color:#64748b;font-weight:600;">معدل الجرام</div>
-                        <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;">{{ number_format($caliber['avg_price_per_gram'] ?? 0, 2) }}</div>
-                    </div>
+            <div class="calibers-2by2-grid">
+                @php
+                    $caliberCards = collect($reportData['calibers'] ?? [])->filter(function($caliber) {
+                        return ($caliber['cash'] ?? 0) > 0 || ($caliber['weight'] ?? 0) > 0;
+                    })->values();
+                    $count = $caliberCards->count();
+                    $cols = 2;
+                    $rows = ceil($count / $cols);
+                @endphp
+                @for($i = 0; $i < $rows * $cols; $i++)
+                    @if($i < $count)
+                        @php $caliber = $caliberCards[$i]; @endphp
+                        <div class="caliber-card" style="background:#fff;border-radius:12px;box-shadow:0 2px 8px #e0e7ef;padding:18px 16px;">
+                            <div style="font-size:1.1rem;color:#6366f1;font-weight:700;margin-bottom:6px;"><i class="mdi mdi-gold"></i> {{ $caliber['name'] }}</div>
+                            <div style="font-size:1.05rem;color:#64748b;font-weight:600;">مبيعات بدون ضريبة</div>
+                            <div style="font-size:1.2rem;color:#16a34a;font-weight:700;">{{ number_format($caliber['cash'] ?? 0, 2) }}</div>
+                            <div style="font-size:1.05rem;color:#64748b;font-weight:600;">ذهب (وزن)</div>
+                            <div style="font-size:1.2rem;color:#eab308;font-weight:700;">{{ number_format($caliber['weight'], 2) }}</div>
+                            <div style="font-size:1.05rem;color:#64748b;font-weight:600;">معدل الجرام</div>
+                            <div style="font-size:1.2rem;color:#0ea5e9;font-weight:700;">{{ number_format($caliber['avg_price_per_gram'] ?? 0, 2) }}</div>
+                        </div>
+                    @else
+                        <div class="caliber-card" style="background:transparent;box-shadow:none;border:none;"></div>
                     @endif
-                @endforeach
+                @endfor
             </div>
         </div>
         @endif

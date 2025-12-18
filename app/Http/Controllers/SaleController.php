@@ -630,7 +630,16 @@ class SaleController extends Controller
             ->where('is_returned', true)
             ->orderBy('returned_at', 'desc');
 
-        // Apply invoice_number filter if present
+        // Apply filters
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('returned_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('returned_at', '<=', $request->date_to);
+        }
         if ($request->filled('invoice_number')) {
             $query->where('invoice_number', 'like', '%'.$request->invoice_number.'%');
         }

@@ -51,11 +51,40 @@
         </div>
     @endif
 
-    <!-- Search by Expense ID -->
-    <form method="GET" class="mb-3" style="max-width:300px">
-        <div class="input-group">
-            <input type="number" name="id" class="form-control" placeholder="بحث برقم المصروف" value="{{ request('id') }}">
-            <button class="btn btn-primary" type="submit">بحث</button>
+    <!-- Filters: Branch, Dates, Expense ID -->
+    <form method="GET" class="mb-3 row g-2 align-items-end">
+        <div class="col-md-2">
+            <label for="branch_id" class="form-label mb-1">الفرع</label>
+            <select name="branch_id" id="branch_id" class="form-select">
+                <option value="">كل الفروع</option>
+                @foreach($branches as $branch)
+                    <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="expense_type_id" class="form-label mb-1">نوع المصروف</label>
+            <select name="expense_type_id" id="expense_type_id" class="form-select">
+                <option value="">كل الأنواع</option>
+                @foreach($expenseTypes as $type)
+                    <option value="{{ $type->id }}" {{ request('expense_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="date_from" class="form-label mb-1">من تاريخ</label>
+            <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request('date_from') }}">
+        </div>
+        <div class="col-md-2">
+            <label for="date_to" class="form-label mb-1">إلى تاريخ</label>
+            <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to') }}">
+        </div>
+        <div class="col-md-2">
+            <label for="id" class="form-label mb-1">رقم المصروف</label>
+            <input type="number" name="id" id="id" class="form-control" placeholder="بحث برقم المصروف" value="{{ request('id') }}">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" type="submit" style="margin-top: 2px;">بحث</button>
         </div>
     </form>
 
