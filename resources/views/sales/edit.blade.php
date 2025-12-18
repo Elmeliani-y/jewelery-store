@@ -213,6 +213,12 @@
                         <label class="form-label">المبلغ الإجمالي</label>
                         <div class="form-control bg-light text-mono fw-bold text-success" id="live-total-amount" readonly>{{ number_format($sale->total_amount,2) }} ريال</div>
                     </div>
+                    <div class="mb-3" id="total-mismatch-warning" style="display:none;">
+                        <div class="alert alert-warning p-2 mb-0" role="alert">
+                            <i class="mdi mdi-alert-outline me-1"></i>
+                            <span>تحذير: مجموع مبالغ المنتجات لا يطابق المبلغ الإجمالي المدخل. يرجى التحقق!</span>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">الضريبة</label>
                         <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->tax_amount,2) }} ريال</div>
@@ -260,12 +266,32 @@ function updateLiveTotalAmount() {
         if (!isNaN(val)) total += val;
     });
     document.getElementById('live-total-amount').innerText = total.toFixed(2) + ' ريال';
+
+    // Check for mismatch with the original total_amount (if an input exists for it)
+    let originalTotalInput = document.querySelector('input[name="total_amount"]');
+    let originalTotal = originalTotalInput ? parseFloat(originalTotalInput.value) : null;
+    // If no input, try to get from blade variable
+    if (originalTotal === null || isNaN(originalTotal)) {
+        originalTotal = parseFloat({{ $sale->total_amount ?? 0 }});
+    }
+    // Show warning if mismatch (allowing 0.01 rounding difference)
+    let warning = document.getElementById('total-mismatch-warning');
+    if (originalTotal !== null && Math.abs(total - originalTotal) > 0.01) {
+        warning.style.display = '';
+    } else {
+        warning.style.display = 'none';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name^="products"][name$="[amount]"]').forEach(function(input) {
         input.addEventListener('input', updateLiveTotalAmount);
     });
+    // Also check on total_amount input change if it exists
+    let originalTotalInput = document.querySelector('input[name="total_amount"]');
+    if (originalTotalInput) {
+        originalTotalInput.addEventListener('input', updateLiveTotalAmount);
+    }
     updateLiveTotalAmount();
 });
 </script>
