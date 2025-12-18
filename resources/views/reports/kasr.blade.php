@@ -6,7 +6,7 @@
     @media print {
         @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 5mm;
         }
         body {
             background: #fff !important;
@@ -14,38 +14,32 @@
         .kasr-filters-form, .kasr-filters-form * {
             display: none !important;
         }
-        .kasr-receipt {
-            width: 100% !important;
-            max-width: 100% !important;
+        .kasr-receipt, .kasr-receipt *, .kasr-receipt .kasr-card, .kasr-receipt .kasr-grid-2by2 {
+            font-size: 10px !important;
             margin: 0 !important;
-            padding: 10mm 8mm 8mm 8mm !important;
+            padding: 0 !important;
             box-shadow: none !important;
             border-radius: 0 !important;
             background: #fff !important;
-            font-size: 12px !important;
             page-break-inside: avoid !important;
-            page-break-before: avoid !important;
-            page-break-after: avoid !important;
+            page-break-before: auto !important;
+            page-break-after: auto !important;
             break-inside: avoid !important;
-            break-before: avoid !important;
-            break-after: avoid !important;
+            break-before: auto !important;
+            break-after: auto !important;
         }
-        .kasr-receipt * {
-            font-size: 12px !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+        .kasr-receipt {
+            width: 100% !important;
+            max-width: 100% !important;
         }
         .kasr-receipt .kasr-grid-2by2 {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important;
-            gap: 6px !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+            gap: 2px !important;
         }
-        .kasr-receipt .row-line,
         .kasr-receipt .kasr-card {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+            min-width: 0 !important;
+            padding: 2px 2px !important;
         }
         .kasr-receipt .muted {
             color: #888 !important;
