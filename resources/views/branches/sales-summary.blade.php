@@ -9,9 +9,10 @@
                 <div class="col-md-3">
                     <label class="form-label">الفرع</label>
                     <select name="branch_id" class="form-select">
-                        <option value="" {{ empty($selectedBranch) ? 'selected' : '' }}>كل الفروع</option>
+                        <!-- Always show 'كل الفروع' as selected if branch_id is empty string, null, or not set -->
+                        <option value="" style="font-weight:bold;color:#0dcaf0;" {{ (request('branch_id', '') === '' || !isset($selectedBranch) || $selectedBranch === '' || $selectedBranch === null) ? 'selected' : '' }}>كل الفروع (عرض الجميع)</option>
                         @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}" {{ (!empty($selectedBranch) && $selectedBranch == $branch->id) ? 'selected' : '' }}>{{ $branch->name }}</option>
+                            <option value="{{ $branch->id }}" {{ (request('branch_id') == $branch->id) ? 'selected' : '' }}>{{ $branch->name }}</option>
                         @endforeach
                     </select>
                 </div>
