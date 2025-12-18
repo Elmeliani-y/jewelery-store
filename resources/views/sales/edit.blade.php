@@ -110,7 +110,7 @@
                             <label class="form-label required">الموظف</label>
                             <select name="employee_id" class="form-select @error('employee_id') is-invalid @enderror" id="employee_id">
                                 @foreach($employees as $employee)
-                                    <option value="{{ $employee->id }}" {{ old('employee_id', $sale->employee_id)==$employee->id?'selected':'' }}>{{ $employee->name }}</option>
+                                    <option value="{{ $employee->id }}" data-is-snap="{{ $employee->is_snap ? 1 : 0 }}" {{ old('employee_id', $sale->employee_id)==$employee->id?'selected':'' }}>{{ $employee->name }}</option>
                                 @endforeach
                             </select>
                             @error('employee_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -177,7 +177,7 @@
                         </div>
                         <div class="col-md-6 payment-group" id="cash_group">
                             <label class="form-label">المبلغ النقدي <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ old('cash_amount', $sale->cash_amount) }}" class="form-control @error('cash_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ $sale->cash_amount ?? '' }}" class="form-control @error('cash_amount') is-invalid @enderror" placeholder="0.00">
                             @error('cash_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-calculator-variant me-1"></i>سيتم حساب مبلغ الشبكة تلقائياً
@@ -185,7 +185,7 @@
                         </div>
                         <div class="col-md-6 payment-group" id="network_group">
                             <label class="form-label">مبلغ الشبكة <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="network_amount" id="network_amount_input" value="{{ old('network_amount', $sale->network_amount) }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="network_amount" id="network_amount_input" value="{{ old('network_amount', $sale->network_amount ?? '') }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0.00">
                             @error('network_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-calculator-variant me-1"></i>سيتم حساب المبلغ النقدي تلقائياً
@@ -193,7 +193,7 @@
                         </div>
                         <div class="col-md-6 payment-group" id="transfer_group" style="display:none;">
                             <label class="form-label">مبلغ التحويل <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', $sale->cash_amount) }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', $sale->transfer_amount ?? '') }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
                             @error('transfer_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-bank-transfer me-1"></i>أدخل مبلغ التحويل إذا كان الدفع عبر سناب
@@ -211,7 +211,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">المبلغ الإجمالي</label>
-                        <div class="form-control bg-light text-mono fw-bold text-success" readonly>{{ number_format($sale->total_amount,2) }} ريال</div>
+                        <div class="form-control bg-light text-mono fw-bold text-success" id="live-total-amount" readonly>{{ number_format($sale->total_amount,2) }} ريال</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">الضريبة</label>
@@ -249,6 +249,26 @@
     <div class="alert alert-danger mt-3"><i class="mdi mdi-backup-restore me-1"></i> هذه الفاتورة مرتجع</div>
     @endif
 </div>
+@endsection
+
+@section('script')
+<script>
+function updateLiveTotalAmount() {
+    let total = 0;
+    document.querySelectorAll('input[name^="products"][name$="[amount]"]').forEach(function(input) {
+        let val = parseFloat(input.value);
+        if (!isNaN(val)) total += val;
+    });
+    document.getElementById('live-total-amount').innerText = total.toFixed(2) + ' ريال';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name^="products"][name$="[amount]"]').forEach(function(input) {
+        input.addEventListener('input', updateLiveTotalAmount);
+    });
+    updateLiveTotalAmount();
+});
+</script>
 @endsection
 
 @section('script-bottom')
