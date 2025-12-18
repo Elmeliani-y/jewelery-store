@@ -299,12 +299,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     updateLiveTotalAmount();
 
-    // Prevent form submit if mismatch
-    // Attach check to the save button only
-    var saveBtn = document.querySelector('button[type="submit"]');
+    // Prevent form submit if mismatch (always, not just button click)
     var form = document.getElementById('sale-edit-form');
-    if (saveBtn && form) {
-        saveBtn.addEventListener('click', function(e) {
+    if (form) {
+        form.addEventListener('submit', function(e) {
             let total = getProductsTotal();
             let originalTotal = getOriginalTotal();
             if (originalTotal !== null && total !== originalTotal) {
