@@ -40,7 +40,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('sales.update', $sale) }}" novalidate>
+    <form method="POST" action="{{ route('sales.update', $sale) }}" novalidate id="sale-edit-form">
         @csrf
         @method('PUT')
 
@@ -259,22 +259,28 @@
 
 @section('script')
 <script>
-function updateLiveTotalAmount() {
+function getProductsTotal() {
     let total = 0;
     document.querySelectorAll('input[name^="products"][name$="[amount]"]').forEach(function(input) {
         let val = parseFloat(input.value);
         if (!isNaN(val)) total += val;
     });
-    document.getElementById('live-total-amount').innerText = total.toFixed(2) + ' ريال';
+    return total;
+}
 
-    // Check for mismatch with the original total_amount (if an input exists for it)
+function getOriginalTotal() {
     let originalTotalInput = document.querySelector('input[name="total_amount"]');
     let originalTotal = originalTotalInput ? parseFloat(originalTotalInput.value) : null;
-    // If no input, try to get from blade variable
     if (originalTotal === null || isNaN(originalTotal)) {
         originalTotal = parseFloat({{ $sale->total_amount ?? 0 }});
     }
-    // Show warning if mismatch (allowing 0.01 rounding difference)
+    return originalTotal;
+}
+
+function updateLiveTotalAmount() {
+    let total = getProductsTotal();
+    document.getElementById('live-total-amount').innerText = total.toFixed(2) + ' ريال';
+    let originalTotal = getOriginalTotal();
     let warning = document.getElementById('total-mismatch-warning');
     if (originalTotal !== null && Math.abs(total - originalTotal) > 0.01) {
         warning.style.display = '';
@@ -287,12 +293,24 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name^="products"][name$="[amount]"]').forEach(function(input) {
         input.addEventListener('input', updateLiveTotalAmount);
     });
-    // Also check on total_amount input change if it exists
     let originalTotalInput = document.querySelector('input[name="total_amount"]');
     if (originalTotalInput) {
         originalTotalInput.addEventListener('input', updateLiveTotalAmount);
     }
     updateLiveTotalAmount();
+
+    // Prevent form submit if mismatch
+    var form = document.getElementById('sale-edit-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let total = getProductsTotal();
+            let originalTotal = getOriginalTotal();
+            if (originalTotal !== null && Math.abs(total - originalTotal) > 0.01) {
+                e.preventDefault();
+                alert('تحذير: مجموع مبالغ المنتجات لا يطابق المبلغ الإجمالي المدخل. يرجى التحقق!');
+            }
+        });
+    }
 });
 </script>
 @endsection
