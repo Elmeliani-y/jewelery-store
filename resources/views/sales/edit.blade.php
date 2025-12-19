@@ -79,7 +79,7 @@
                 <div class="col-md-3">
                     <label class="form-label">الوزن (جم) <span class="text-danger">*</span></label>
                     <input type="number" step="0.001" name="products[{{ $index }}][weight]" 
-                           value="{{ $product['weight'] }}" class="form-control" required>
+                           value="{{ old('products.'.$index.'.weight', $product['weight']) }}" class="form-control" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
@@ -143,7 +143,7 @@
                                 <option value="cash" {{ $pm=='cash'?'selected':'' }}>نقداً</option>
                                 <option value="network" {{ $pm=='network'?'selected':'' }}>شبكة</option>
                                 <option value="mixed" {{ $pm=='mixed'?'selected':'' }}>مختلط (نقدي + شبكة)</option>
-                                <option value="transfer" {{ $pm=='transfer'?'selected':'' }} id="transfer-option" style="display:none;">تحويل (Snap)</option>
+                                <option value="transfer" {{ $pm=='transfer'?'selected':'' }} id="transfer-option">تحويل (Snap)</option>
                             </select>
                             @error('payment_method')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
