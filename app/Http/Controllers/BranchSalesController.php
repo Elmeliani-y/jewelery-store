@@ -13,7 +13,9 @@ class BranchSalesController extends Controller
         // Filter by date range and branch if provided
         $branches = Branch::all();
         $branchId = $request->get('branch_id');
-        $from = $request->get('from') ?: now()->format('Y-m-d');
+        // Default 'from' to first day of current month if not set
+        $from = $request->get('from') ?: now()->startOfMonth()->format('Y-m-d');
+        // Default 'to' to today if not set
         $to = $request->get('to') ?: now()->format('Y-m-d');
 
         $query = Sale::query()->where('is_returned', false);

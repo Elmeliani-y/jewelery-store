@@ -34,7 +34,7 @@
                                 @endif
                 <div class="col-md-3">
                     <label class="form-label">من تاريخ</label>
-                    <input type="date" name="from" class="form-control" value="{{ $from ?? date('Y-m-d') }}">
+                    <input type="date" name="from" class="form-control" value="{{ $from ?? date('Y-m-01') }}">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">إلى تاريخ</label>

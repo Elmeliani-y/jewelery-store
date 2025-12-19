@@ -14,8 +14,56 @@
     .payment-group {display:none;}
     .payment-visible {display:block !important;}
     .text-mono {font-family:ui-monospace,SFMono-Regular,Menlo,monospace; direction:ltr;}
+    #cash_group { display: none; }
 </style>
 @endsection
+
+@push('scripts')
+<script>
+function updatePaymentFields() {
+    let sum = 0;
+    document.querySelectorAll('input[name^="products"][name$="[amount]"]')
+        .forEach(function(input) {
+            let val = parseFloat(input.value);
+            if (!isNaN(val)) sum += val;
+        });
+    let pm = document.getElementById('payment_method')?.value;
+    let cashInput = document.getElementById('cash_amount_input');
+    let netInput = document.getElementById('network_amount_input');
+    let transferInput = document.getElementById('transfer_amount_input');
+    if (pm === 'network') {
+        if (netInput) netInput.value = sum.toFixed(2);
+        if (cashInput) cashInput.value = '0';
+        if (transferInput) transferInput.value = '0';
+    } else if (pm === 'cash') {
+        if (cashInput) cashInput.value = sum.toFixed(2);
+        if (netInput) netInput.value = '0';
+        if (transferInput) transferInput.value = '0';
+    } else if (pm === 'transfer') {
+        if (transferInput) transferInput.value = sum.toFixed(2);
+        if (cashInput) cashInput.value = '0';
+        if (netInput) netInput.value = '0';
+    } else if (pm === 'mixed') {
+        if (cashInput && netInput) {
+            cashInput.value = (sum / 2).toFixed(2);
+            netInput.value = (sum / 2).toFixed(2);
+        }
+        if (transferInput) transferInput.value = '0';
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name^="products"][name$="[amount]"]')
+        .forEach(function(input) {
+            input.addEventListener('input', updatePaymentFields);
+        });
+    let pmSelect = document.getElementById('payment_method');
+    if (pmSelect) {
+        pmSelect.addEventListener('change', updatePaymentFields);
+    }
+    updatePaymentFields();
+});
+</script>
+@endpush
 
 @section('content')
 <div class="container-fluid">
@@ -161,31 +209,24 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fw-semibold">المبلغ المدفوع حالياً:</span>
                                     <div class="text-end">
-                                        @if($sale->payment_method === 'mixed')
+                                        @php($pm = old('payment_method', $sale->payment_method))
+                                        @if($pm === 'mixed')
                                             <div><small class="text-muted">نقدي:</small> <span class="text-success fw-bold">{{ number_format($sale->cash_amount, 2) }}</span> ريال</div>
                                             <div><small class="text-muted">شبكة:</small> <span class="text-info fw-bold">{{ number_format($sale->network_amount, 2) }}</span> ريال</div>
-                                        @elseif($sale->payment_method === 'cash')
+                                        @elseif($pm === 'cash')
                                             <span class="text-success fw-bold">{{ number_format($sale->cash_amount, 2) }}</span> ريال <small class="text-muted">(نقدي)</small>
-                                        @elseif($sale->payment_method === 'transfer')
-                                            <span class="text-primary fw-bold">{{ number_format($sale->cash_amount, 2) }}</span> ريال <small class="text-muted">(تحويل)</small>
-                                        @else
+                                        @elseif($pm === 'transfer')
+                                            <span class="text-primary fw-bold">{{ number_format($sale->transfer_amount, 2) }}</span> ريال <small class="text-muted">(تحويل)</small>
+                                        @elseif($pm === 'network')
                                             <span class="text-info fw-bold">{{ number_format($sale->network_amount, 2) }}</span> ريال <small class="text-muted">(شبكة)</small>
                                         @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 payment-group" id="cash_group">
-                            <label class="form-label">المبلغ النقدي <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ $sale->cash_amount ?? '' }}" class="form-control @error('cash_amount') is-invalid @enderror" placeholder="0.00">
-                            @error('cash_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="form-text text-muted">
-                                <i class="mdi mdi-calculator-variant me-1"></i>سيتم حساب مبلغ الشبكة تلقائياً
-                            </small>
-                        </div>
                         <div class="col-md-6 payment-group" id="network_group">
                             <label class="form-label">مبلغ الشبكة <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="network_amount" id="network_amount_input" value="{{ old('network_amount', $sale->network_amount ?? '') }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="network_amount" id="network_amount_input" value="{{ old('network_amount', array_sum(array_column($sale->products ?? [], 'amount')) ?: ($sale->network_amount ?? '')) }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0.00">
                             @error('network_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-calculator-variant me-1"></i>سيتم حساب المبلغ النقدي تلقائياً
@@ -193,12 +234,58 @@
                         </div>
                         <div class="col-md-6 payment-group" id="transfer_group" style="display:none;">
                             <label class="form-label">مبلغ التحويل <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', $sale->transfer_amount ?? '') }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', array_sum(array_column($sale->products ?? [], 'amount')) ?: ($sale->transfer_amount ?? '')) }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
                             @error('transfer_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-bank-transfer me-1"></i>أدخل مبلغ التحويل إذا كان الدفع عبر سناب
                             </small>
                         </div>
+                        <div class="col-md-6 payment-group" id="cash_group" style="display:none;">
+                            <label class="form-label">المبلغ النقدي</label>
+                            <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ array_sum(array_column($sale->products ?? [], 'amount')) ?: ($sale->cash_amount ?? '') }}" class="form-control" placeholder="0.00">
+                        </div>
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        function toggleCashInput() {
+                            var paymentMethod = document.getElementById('payment_method');
+                            var cashGroup = document.getElementById('cash_group');
+                            if (paymentMethod && cashGroup) {
+                                if (['mixed', 'network', 'transfer'].includes(paymentMethod.value)) {
+                                    cashGroup.style.display = '';
+                                } else {
+                                    cashGroup.style.display = 'none';
+                                }
+                            }
+                        }
+                        function autofillCashNetworkTransfer() {
+                            var cashInput = document.getElementById('cash_amount_input');
+                            var networkInput = document.getElementById('network_amount_input');
+                            var transferInput = document.getElementById('transfer_amount_input');
+                            var productInputs = document.querySelectorAll('input[name^="products"][name$="[amount]"]');
+                            var sum = 0;
+                            productInputs.forEach(function(input) {
+                                var val = parseFloat(input.value);
+                                if (!isNaN(val)) sum += val;
+                            });
+                            if (cashInput) cashInput.value = sum.toFixed(2);
+                            if (networkInput) networkInput.value = sum.toFixed(2);
+                            if (transferInput) transferInput.value = sum.toFixed(2);
+                        }
+                        var paymentMethod = document.getElementById('payment_method');
+                        if (paymentMethod) {
+                            paymentMethod.addEventListener('change', function() {
+                                toggleCashInput();
+                                autofillCash();
+                            });
+                            toggleCashInput();
+                        }
+                        document.querySelectorAll('input[name^="products"][name$="[amount]"]')
+                            .forEach(function(input) {
+                                input.addEventListener('input', autofillCashNetworkTransfer);
+                            });
+                        autofillCashNetworkTransfer();
+                    });
+                    </script>
                     </div>
                 </div>
             </div>
@@ -213,12 +300,7 @@
                         <label class="form-label">المبلغ الإجمالي</label>
                         <div class="form-control bg-light text-mono fw-bold text-success" id="live-total-amount" readonly>{{ number_format($sale->total_amount,2) }} ريال</div>
                     </div>
-                    <div class="mb-3" id="total-mismatch-warning" style="display:none;">
-                        <div class="alert alert-warning p-2 mb-0" role="alert">
-                            <i class="mdi mdi-alert-outline me-1"></i>
-                            <span>تحذير: مجموع مبالغ المنتجات لا يطابق المبلغ الإجمالي المدخل. يرجى التحقق!</span>
-                        </div>
-                    </div>
+                    <!-- total-mismatch-warning removed -->
                     <div class="mb-3">
                         <label class="form-label">الضريبة</label>
                         <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->tax_amount,2) }} ريال</div>
@@ -281,7 +363,25 @@ function updateLiveTotalAmount() {
     let total = getProductsTotal();
     document.getElementById('live-total-amount').innerText = total.toFixed(2) + ' ريال';
     let originalTotal = getOriginalTotal();
-    let warning = document.getElementById('total-mismatch-warning');
+    // let warning = document.getElementById('total-mismatch-warning');
+
+            // Show transfer input only if payment method is 'transfer'
+            function toggleTransferInput() {
+                var paymentMethod = document.getElementById('payment_method');
+                var transferGroup = document.getElementById('transfer_group');
+                if (paymentMethod && transferGroup) {
+                    if (paymentMethod.value === 'transfer') {
+                        transferGroup.style.display = '';
+                    } else {
+                        transferGroup.style.display = 'none';
+                    }
+                }
+            }
+            var paymentMethod = document.getElementById('payment_method');
+            if (paymentMethod) {
+                paymentMethod.addEventListener('change', toggleTransferInput);
+                toggleTransferInput();
+            }
     if (originalTotal !== null && Math.abs(total - originalTotal) > 0.01) {
         warning.style.display = '';
     } else {
@@ -307,7 +407,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let originalTotal = getOriginalTotal();
             if (originalTotal !== null && total !== originalTotal) {
                 e.preventDefault();
-                alert('تحذير: مجموع مبالغ المنتجات لا يطابق المبلغ الإجمالي المدخل. يرجى التحقق!');
+                // Optionally, scroll to the warning
+                // let warning = document.getElementById('total-mismatch-warning');
+                if (warning) {
+                    warning.style.display = '';
+                    warning.scrollIntoView({behavior: 'smooth', block: 'center'});
+                }
             }
         });
     }
@@ -320,178 +425,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalAmount = {{ $sale->total_amount }};
     let isAutoCalculating = false; // Flag to prevent infinite loops
     
-    function togglePaymentGroups(){
-        const pm = document.getElementById('payment_method').value;
-        const cash = document.getElementById('cash_group');
-        const net = document.getElementById('network_group');
-        const cashInput = document.getElementById('cash_amount_input');
-        const netInput = document.getElementById('network_amount_input');
-        
-        cash.classList.remove('payment-visible');
-        net.classList.remove('payment-visible');
-        
-        // Reset required attributes
-        cashInput.removeAttribute('required');
-        netInput.removeAttribute('required');
-        
-        if(pm === 'cash'){ 
-            cash.classList.add('payment-visible');
-            cashInput.setAttribute('required', 'required');
-            netInput.value = '0';
-        }
-        else if(pm === 'network'){ 
-            net.classList.add('payment-visible');
-            netInput.setAttribute('required', 'required');
-            cashInput.value = '0';
-        }
-        else if(pm === 'mixed'){ 
-            cash.classList.add('payment-visible');
-            net.classList.add('payment-visible');
-            cashInput.setAttribute('required', 'required');
-            netInput.setAttribute('required', 'required');
-        }
-    }
-    
-    // Auto-calculate other amount when one is entered (for mixed payment)
-    function autoCalculateAmounts() {
-        const pm = document.getElementById('payment_method').value;
-        if (pm !== 'mixed' || isAutoCalculating) return;
-        
-        const cashInput = document.getElementById('cash_amount_input');
-        const netInput = document.getElementById('network_amount_input');
-        
-        const cashVal = parseFloat(cashInput.value) || 0;
-        const netVal = parseFloat(netInput.value) || 0;
-        
-        // Check which input was last modified
-        if (document.activeElement === cashInput && cashVal > 0) {
-            isAutoCalculating = true;
-            const remaining = totalAmount - cashVal;
-            netInput.value = remaining > 0 ? remaining.toFixed(2) : '0.00';
-            netInput.classList.remove('is-invalid');
-            isAutoCalculating = false;
-        } else if (document.activeElement === netInput && netVal > 0) {
-            isAutoCalculating = true;
-            const remaining = totalAmount - netVal;
-            cashInput.value = remaining > 0 ? remaining.toFixed(2) : '0.00';
-            cashInput.classList.remove('is-invalid');
-            isAutoCalculating = false;
-        }
-        
-        // Validate total doesn't exceed
-        const total = parseFloat(cashInput.value || 0) + parseFloat(netInput.value || 0);
-        if (total > totalAmount) {
-            if (document.activeElement === cashInput) {
-                cashInput.classList.add('is-invalid');
-                showTemporaryMessage('المبلغ النقدي يتجاوز المبلغ الإجمالي');
-            } else if (document.activeElement === netInput) {
-                netInput.classList.add('is-invalid');
-                showTemporaryMessage('مبلغ الشبكة يتجاوز المبلغ الإجمالي');
-            }
-        }
-    }
-    
-    // Show temporary message
-    function showTemporaryMessage(message) {
-        const existingMsg = document.querySelector('.temp-error-msg');
-        if (existingMsg) existingMsg.remove();
-        
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'alert alert-danger alert-dismissible fade show temp-error-msg mt-2';
-        msgDiv.innerHTML = `<i class="mdi mdi-alert-circle-outline me-1"></i>${message}`;
-        msgDiv.style.fontSize = '0.875rem';
-        
-        const form = document.querySelector('form');
-        form.insertBefore(msgDiv, form.firstChild);
-        
-        setTimeout(() => msgDiv.remove(), 3000);
-    }
-    
-    // Validate form before submission
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const pm = document.getElementById('payment_method').value;
-        const cashInput = document.getElementById('cash_amount_input');
-        const netInput = document.getElementById('network_amount_input');
-        
-        if (pm === 'mixed') {
-            const cashVal = parseFloat(cashInput.value) || 0;
-            const netVal = parseFloat(netInput.value) || 0;
-            const total = cashVal + netVal;
-            
-            if (cashVal <= 0 || netVal <= 0) {
-                e.preventDefault();
-                alert('عند اختيار الدفع المختلط، يجب إدخال كلا المبلغين (نقدي وشبكة)');
-                
-                if (cashVal <= 0) {
-                    cashInput.classList.add('is-invalid');
-                    cashInput.focus();
-                }
-                if (netVal <= 0) {
-                    netInput.classList.add('is-invalid');
-                }
-                return false;
-            }
-            
-            // Check if total matches (with small tolerance for rounding)
-            if (Math.abs(total - totalAmount) > 0.02) {
-                e.preventDefault();
-                alert(`مجموع المبالغ (${total.toFixed(2)}) يجب أن يساوي المبلغ الإجمالي (${totalAmount.toFixed(2)})`);
-                return false;
-            }
-            
-            // Remove invalid class if values are valid
-            cashInput.classList.remove('is-invalid');
-            netInput.classList.remove('is-invalid');
-        } else if (pm === 'cash') {
-            const cashVal = parseFloat(cashInput.value) || 0;
-            if (cashVal <= 0) {
-                e.preventDefault();
-                alert('يجب إدخال المبلغ النقدي');
-                cashInput.classList.add('is-invalid');
-                cashInput.focus();
-                return false;
-            }
-        } else if (pm === 'network') {
-            const netVal = parseFloat(netInput.value) || 0;
-            if (netVal <= 0) {
-                e.preventDefault();
-                alert('يجب إدخال مبلغ الشبكة');
-                netInput.classList.add('is-invalid');
-                netInput.focus();
-                return false;
-            }
-        }
-    });
-    
-    // Add input listeners for auto-calculation
-    document.getElementById('cash_amount_input').addEventListener('input', function() {
-        this.classList.remove('is-invalid');
-        autoCalculateAmounts();
-    });
-    
-    document.getElementById('network_amount_input').addEventListener('input', function() {
-        this.classList.remove('is-invalid');
-        autoCalculateAmounts();
-    });
-    
-    // Show/hide transfer option based on selected employee
-    function updateTransferOptionVisibility() {
-        const employeeSelect = document.getElementById('employee_id');
-        const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
-        const isSnap = selectedOption && selectedOption.getAttribute('data-is-snap') == '1';
-        const transferOption = document.querySelector('#payment_method option[value="transfer"]');
-        if (isSnap) {
-            transferOption.style.display = '';
-        } else {
-            if(document.getElementById('payment_method').value === 'transfer') {
-                document.getElementById('payment_method').value = 'cash';
-            }
-            transferOption.style.display = 'none';
-        }
-        togglePaymentGroups();
-    }
-
-    // Extend togglePaymentGroups to handle transfer
     function togglePaymentGroups(){
         const pm = document.getElementById('payment_method').value;
         const cash = document.getElementById('cash_group');
@@ -538,8 +471,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('payment_method').addEventListener('change', togglePaymentGroups);
-    document.getElementById('employee_id').addEventListener('change', updateTransferOptionVisibility);
     // On page load
-    updateTransferOptionVisibility();
+    togglePaymentGroups();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        function updatePaymentSummary() {
+            var paymentMethod = document.getElementById('payment_method');
+            var summaryDiv = document.getElementById('payment_summary');
+            if (!paymentMethod || !summaryDiv) return;
+            var cash = parseFloat(document.getElementById('cash_amount_input')?.value || 0).toFixed(2);
+            var network = parseFloat(document.getElementById('network_amount_input')?.value || 0).toFixed(2);
+            var transfer = parseFloat(document.getElementById('transfer_amount_input')?.value || 0).toFixed(2);
+            var html = '';
+            if (paymentMethod.value === 'mixed') {
+                html += '<div><small class="text-muted">نقدي:</small> <span class="text-success fw-bold">' + cash + '</span> ريال</div>';
+                html += '<div><small class="text-muted">شبكة:</small> <span class="text-info fw-bold">' + network + '</span> ريال</div>';
+            } else if (paymentMethod.value === 'cash') {
+                html += '<span class="text-success fw-bold">' + cash + '</span> ريال <small class="text-muted">(نقدي)</small>';
+            } else if (paymentMethod.value === 'transfer') {
+                html += '<span class="text-primary fw-bold">' + transfer + '</span> ريال <small class="text-muted">(تحويل)</small>';
+            } else if (paymentMethod.value === 'network') {
+                html += '<span class="text-info fw-bold">' + network + '</span> ريال <small class="text-muted">(شبكة)</small>';
+            }
+            var target = summaryDiv.querySelector('.text-end');
+            if (target) target.innerHTML = html;
+        }
+        var paymentMethod = document.getElementById('payment_method');
+        if (paymentMethod) {
+            paymentMethod.addEventListener('change', updatePaymentSummary);
+        }
+        // Also update on input changes
+        ['cash_amount_input','network_amount_input','transfer_amount_input'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', updatePaymentSummary);
+        });
+        updatePaymentSummary();
+    });
 </script>
 @endsection
