@@ -243,24 +243,48 @@ class DashboardController extends Controller
             ];
         });
 
-        // Monthly revenue data (last 12 months)
+        // Monthly revenue data (either from provided date range, or last 12 months)
         $monthlyRevenue = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
-            $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
-            $salesQuery = Sale::notReturned()->whereBetween('created_at', [$monthStart, $monthEnd]);
-            $expensesQuery = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')]);
-            if ($branchId) {
-                $salesQuery->where('branch_id', $branchId);
-                $expensesQuery->where('branch_id', $branchId);
+        if ($start && $end) {
+            // Build months between start and end inclusive
+            $cursor = $start->copy()->startOfMonth();
+            $endMonth = $end->copy()->endOfMonth();
+            while ($cursor->lte($endMonth)) {
+                $monthStart = $cursor->copy()->startOfMonth();
+                $monthEnd = $cursor->copy()->endOfMonth();
+                $salesQuery = Sale::notReturned()->whereBetween('created_at', [$monthStart, $monthEnd]);
+                $expensesQuery = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')]);
+                if ($branchId) {
+                    $salesQuery->where('branch_id', $branchId);
+                    $expensesQuery->where('branch_id', $branchId);
+                }
+                $sales = $salesQuery->sum('total_amount');
+                $expenses = $expensesQuery->sum('amount');
+                $monthlyRevenue[] = [
+                    'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),
+                    'sales' => $sales,
+                    'expenses' => $expenses,
+                ];
+                $cursor->addMonth();
             }
-            $sales = $salesQuery->sum('total_amount');
-            $expenses = $expensesQuery->sum('amount');
-            $monthlyRevenue[] = [
-                'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),
-                'sales' => $sales,
-                'expenses' => $expenses,
-            ];
+        } else {
+            for ($i = 11; $i >= 0; $i--) {
+                $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
+                $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
+                $salesQuery = Sale::notReturned()->whereBetween('created_at', [$monthStart, $monthEnd]);
+                $expensesQuery = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')]);
+                if ($branchId) {
+                    $salesQuery->where('branch_id', $branchId);
+                    $expensesQuery->where('branch_id', $branchId);
+                }
+                $sales = $salesQuery->sum('total_amount');
+                $expenses = $expensesQuery->sum('amount');
+                $monthlyRevenue[] = [
+                    'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),
+                    'sales' => $sales,
+                    'expenses' => $expenses,
+                ];
+            }
         }
 
         // Sales by caliber - skip sales without caliber (multi-product sales)

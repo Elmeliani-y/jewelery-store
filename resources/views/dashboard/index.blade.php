@@ -325,20 +325,30 @@
                 </div>
                 <div class="card-body">
                     <div id="revenueCharts" class="apex-charts"></div>
-                    <div class="row border border-dashed border-1 rounded-2 mt-3">
-                        <div class="col col-xl-6">
-                            <div class="p-2 border-end border-inline-end-dashed text-center">
-                                <h3 class="mb-0 fs-18 text-dark me-1" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
-                                <div class="d-flex align-items-center justify-content-center mt-2">
-                                    <p class="mb-0 fs-14 text-muted me-1">المبيعات</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col col-xl-6">
-                            <div class="p-2 text-center">
-                                <h3 class="mb-0 fs-18 text-dark me-1" dir="ltr">{{ number_format($metrics['total_expenses'], 0, ',', '.') }}</h3>
-                                <div class="d-flex align-items-center justify-content-center mt-2">
-                                    <p class="mb-0 fs-14 text-muted me-1">المصروفات</p>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="p-2 rounded-2" style="background:linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0.00));">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <div class="text-center flex-fill">
+                                        <div class="fs-13 text-muted">عدد الفواتير</div>
+                                        <div class="fw-bold fs-16 text-dark" dir="ltr">{{ number_format($metrics['sales_count'], 0, ',', '.') }}</div>
+                                    </div>
+                                    <div class="text-center flex-fill">
+                                        <div class="fs-13 text-muted">إجمالي المبيعات</div>
+                                        <div class="fw-bold fs-16 text-success" dir="ltr">{{ number_format($metrics['total_sales'], 2, ',', '.') }} ريال</div>
+                                    </div>
+                                    <div class="text-center flex-fill">
+                                        <div class="fs-13 text-muted">معدل سعر الجرام</div>
+                                        <div class="fw-bold fs-16 text-info" dir="ltr">{{ number_format($metrics['price_per_gram'], 2, ',', '.') }} د/جرام</div>
+                                    </div>
+                                    <div class="text-center flex-fill">
+                                        <div class="fs-13 text-muted">إجمالي المصروفات</div>
+                                        <div class="fw-bold fs-16 text-danger" dir="ltr">{{ number_format($metrics['total_expenses'], 2, ',', '.') }} ريال</div>
+                                    </div>
+                                    <div class="text-center flex-fill">
+                                        <div class="fs-13 text-muted">صافي الربح</div>
+                                        <div class="fw-bold fs-16" dir="ltr" style="color: {{ $metrics['net_profit'] >= 0 ? '#198754' : '#dc3545' }};">{{ number_format($metrics['net_profit'], 2, ',', '.') }} ريال</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

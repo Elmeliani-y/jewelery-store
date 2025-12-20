@@ -256,8 +256,21 @@
 								@empty
 								<tr><td colspan="10" class="text-center text-muted">لا توجد بيانات مبيعات</td></tr>
 								@endforelse
-							</tbody>
-						</table>
+								</tbody>
+								@if($sales->count())
+								<tfoot>
+									<tr class="fw-bold">
+										<td colspan="4" class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td dir="ltr">{{ number_format($sales->sum('weight'), 2) }}</td>
+										<td></td>
+										<td></td>
+										<td dir="ltr">{{ number_format($sales->sum('total_amount'), 2) }}</td>
+										<td dir="ltr">{{ number_format($sales->sum('tax_amount'), 2) }}</td>
+										<td></td>
+									</tr>
+								</tfoot>
+								@endif
+							</table>
 					</div>
 					<div class="card-footer">
 						{{ $sales->appends(request()->except('sales_page'))->links() }}
@@ -325,8 +338,21 @@
 									<td>{{ $sale->notes ?: '-' }}</td>
 								</tr>
 								@endforeach
-							</tbody>
-						</table>
+								</tbody>
+								@if($returnedSales->count())
+								<tfoot>
+									<tr class="fw-bold">
+										<td colspan="4" class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td dir="ltr">{{ number_format($returnedSales->sum('weight'), 2) }}</td>
+										<td></td>
+										<td></td>
+										<td dir="ltr">{{ number_format($returnedSales->sum('total_amount'), 2) }}</td>
+										<td dir="ltr">{{ number_format($returnedSales->sum('tax_amount'), 2) }}</td>
+										<td></td>
+									</tr>
+								</tfoot>
+								@endif
+							</table>
 					</div>
 				</div>
 			</div>
@@ -360,8 +386,17 @@
 								@empty
 								<tr><td colspan="5" class="text-center text-muted">لا توجد بيانات مصروفات</td></tr>
 								@endforelse
-							</tbody>
-						</table>
+								</tbody>
+								@if($expenses->count())
+								<tfoot>
+									<tr class="fw-bold">
+										<td colspan="3" class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td dir="ltr">{{ number_format($expenses->sum('amount'), 2) }}</td>
+										<td></td>
+									</tr>
+								</tfoot>
+								@endif
+							</table>
 					</div>
 					<div class="card-footer">
 						{{ $expenses->appends(request()->except('expenses_page'))->links() }}
@@ -420,8 +455,21 @@
 								@empty
 								<tr><td colspan="7" class="text-center text-muted">لا توجد بيانات فروع</td></tr>
 								@endforelse
-							</tbody>
-						</table>
+								</tbody>
+								@if($branchData->count())
+								<tfoot>
+									<tr class="fw-bold">
+										<td class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td>{{ $branchData->sum('sales_count') }}</td>
+										<td dir="ltr">{{ number_format($branchData->sum('total_sales'),2) }}</td>
+										<td dir="ltr">{{ number_format($branchData->sum('total_weight'),2) }}</td>
+										<td></td>
+										<td dir="ltr">{{ number_format($branchData->sum('total_expenses'),2) }}</td>
+										<td dir="ltr">{{ number_format($branchData->sum('net_profit'),2) }}</td>
+									</tr>
+								</tfoot>
+								@endif
+							</table>
 					</div>
 				</div>
 			</div>
@@ -474,8 +522,21 @@
 								@empty
 								<tr><td colspan="7" class="text-center text-muted">لا توجد بيانات موظفين</td></tr>
 								@endforelse
-							</tbody>
-						</table>
+								</tbody>
+								@if($employeesData->count())
+								<tfoot>
+									<tr class="fw-bold">
+										<td class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td></td>
+										<td>{{ $employeesData->sum('sales_count') }}</td>
+										<td dir="ltr">{{ number_format($employeesData->sum('total_sales'),2) }}</td>
+										<td dir="ltr">{{ number_format($employeesData->sum('total_weight'),2) }}</td>
+										<td></td>
+										<td dir="ltr">{{ number_format($employeesData->sum('net_profit'),2) }}</td>
+									</tr>
+								</tfoot>
+								@endif
+							</table>
 					</div>
 				</div>
 			</div>
