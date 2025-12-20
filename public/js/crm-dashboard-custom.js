@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var totalSalesOptions = {
     series: [{
         name: "Sales",
-        data: [10, 15, 9, 18, 22, 17, 25, 20, 15, 10, 12, 8]
+        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales)) : [10, 15, 9, 18, 22, 17, 25, 20, 15, 10, 12, 8]
     }],
     chart: {
         height: 45,
@@ -53,7 +53,7 @@ if(document.querySelector("#total_sales")) {
 var totalOrdersOptions = {
     series: [{
         name: "Orders",
-        data: [15, 20, 16, 27, 34, 27, 35, 28, 20, 27, 32, 15]
+        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales) - parseFloat(m.expenses)) : [15, 20, 16, 27, 34, 27, 35, 28, 20, 27, 32, 15]
     }],
     chart: {
         height: 45,
@@ -99,7 +99,7 @@ if(document.querySelector("#total_orders")) {
 var newCustomersOptions = {
     series: [{
         name: "Customers",
-        data: [12, 25, 18, 40, 28, 35, 21, 38, 32, 15, 45, 29]
+        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales)) : [12, 25, 18, 40, 28, 35, 21, 38, 32, 15, 45, 29]
     }],
     chart: {
         height: 45,
@@ -145,7 +145,7 @@ if(document.querySelector("#new_customers")) {
 var totalIncomeOptions = {
     series: [{
         name: "Income",
-        data: [14, 19, 12, 24, 30, 21, 27, 23, 18, 13, 16, 11]
+        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales) - parseFloat(m.expenses)) : [14, 19, 12, 24, 30, 21, 27, 23, 18, 13, 16, 11]
     }],
     chart: {
         height: 45,
@@ -191,7 +191,7 @@ if(document.querySelector("#total_income")) {
 var totalReturnsOptions = {
     series: [{
         name: "Returns",
-        data: [25, 30, 23, 30, 36, 27, 32, 45, 34, 34, 30, 19]
+        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(() => (typeof salesAmount !== 'undefined' ? (parseFloat(salesAmount) * 0.02) : 0)) : [25, 30, 23, 30, 36, 27, 32, 45, 34, 34, 30, 19]
     }],
     chart: {
         height: 45,

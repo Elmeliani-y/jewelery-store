@@ -195,42 +195,67 @@ class DashboardController extends Controller
      */
     private function getChartsData($startDate, $endDate, $branchId = null)
     {
-        // Daily sales chart
-        $dailySales = Sale::notReturned()
+        // Normalize date inputs if provided
+        if ($startDate && $endDate) {
+            $start = is_string($startDate) ? Carbon::parse($startDate)->startOfDay() : $startDate->startOfDay();
+            $end = is_string($endDate) ? Carbon::parse($endDate)->endOfDay() : $endDate->endOfDay();
+        } else {
+            $start = null;
+            $end = null;
+        }
+
+        // Daily sales chart (apply date range and branch filters when available)
+        $dailyQuery = Sale::notReturned()
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as amount')
             ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->map(function ($sale) {
-                // Sum weights from products JSON for each day
-                $salesForDay = Sale::notReturned()
-                    ->whereDate('created_at', $sale->date)
-                    ->get();
-                $weight = 0;
-                foreach ($salesForDay as $s) {
-                    $products = is_array($s->products) ? $s->products : json_decode($s->products, true);
-                    if ($products) {
-                        foreach ($products as $product) {
-                            if (isset($product['weight'])) {
-                                $weight += (float)$product['weight'];
-                            }
+            ->orderBy('date');
+        if ($start && $end) {
+            $dailyQuery->whereBetween('created_at', [$start, $end]);
+        }
+        if ($branchId) {
+            $dailyQuery->where('branch_id', $branchId);
+        }
+        $dailySales = $dailyQuery->get()->map(function ($sale) use ($start, $end, $branchId) {
+            // Sum weights from products JSON for each day with same filters
+            $salesForDayQuery = Sale::notReturned()->whereDate('created_at', $sale->date);
+            if ($start && $end) {
+                $salesForDayQuery->whereBetween('created_at', [$start, $end]);
+            }
+            if ($branchId) {
+                $salesForDayQuery->where('branch_id', $branchId);
+            }
+            $salesForDay = $salesForDayQuery->get();
+            $weight = 0;
+            foreach ($salesForDay as $s) {
+                $products = is_array($s->products) ? $s->products : json_decode($s->products, true);
+                if ($products) {
+                    foreach ($products as $product) {
+                        if (isset($product['weight'])) {
+                            $weight += (float)$product['weight'];
                         }
                     }
                 }
-                return [
-                    'date' => $sale->date,
-                    'amount' => $sale->amount,
-                    'weight' => $weight,
-                ];
-            });
+            }
+            return [
+                'date' => $sale->date,
+                'amount' => $sale->amount,
+                'weight' => $weight,
+            ];
+        });
 
         // Monthly revenue data (last 12 months)
         $monthlyRevenue = [];
         for ($i = 11; $i >= 0; $i--) {
             $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
             $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
-            $sales = Sale::notReturned()->whereBetween('created_at', [$monthStart, $monthEnd])->sum('total_amount');
-            $expenses = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])->sum('amount');
+            $salesQuery = Sale::notReturned()->whereBetween('created_at', [$monthStart, $monthEnd]);
+            $expensesQuery = Expense::whereBetween('expense_date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')]);
+            if ($branchId) {
+                $salesQuery->where('branch_id', $branchId);
+                $expensesQuery->where('branch_id', $branchId);
+            }
+            $sales = $salesQuery->sum('total_amount');
+            $expenses = $expensesQuery->sum('amount');
             $monthlyRevenue[] = [
                 'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),
                 'sales' => $sales,
@@ -241,7 +266,14 @@ class DashboardController extends Controller
         // Sales by caliber - skip sales without caliber (multi-product sales)
         $salesByCaliber = collect();
         $calibers = \App\Models\Caliber::all();
-        $sales = Sale::notReturned()->whereNotNull('products')->get();
+        $salesQuery = Sale::notReturned()->whereNotNull('products');
+        if ($start && $end) {
+            $salesQuery->whereBetween('created_at', [$start, $end]);
+        }
+        if ($branchId) {
+            $salesQuery->where('branch_id', $branchId);
+        }
+        $sales = $salesQuery->get();
         foreach ($calibers as $caliber) {
             $amount = 0;
             $weight = 0;
@@ -268,10 +300,16 @@ class DashboardController extends Controller
         $categories = \App\Models\Category::all();
         
         foreach ($categories as $category) {
-            $sales = Sale::notReturned()->whereNotNull('products')->get();
+            $salesQuery = Sale::notReturned()->whereNotNull('products');
+            if ($start && $end) {
+                $salesQuery->whereBetween('created_at', [$start, $end]);
+            }
+            if ($branchId) {
+                $salesQuery->where('branch_id', $branchId);
+            }
+            $sales = $salesQuery->get();
             $totalAmount = 0;
             $count = 0;
-            
             foreach ($sales as $sale) {
                 $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
                 if ($products) {
@@ -283,7 +321,6 @@ class DashboardController extends Controller
                     }
                 }
             }
-            
             if ($count > 0) {
                 $salesByCategory->push([
                     'category' => $category->name,
@@ -294,31 +331,40 @@ class DashboardController extends Controller
         }
 
         // Sales by branch
-        $salesByBranch = Sale::notReturned()
-            ->with('branch')
+        $salesByBranchQuery = Sale::notReturned()->with('branch')
             ->selectRaw('branch_id, SUM(total_amount) as amount, COUNT(*) as count')
-            ->groupBy('branch_id')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'branch' => $item->branch?->name ?? 'غير محدد',
-                    'amount' => $item->amount,
-                    'count' => $item->count,
-                ];
-            });
+            ->groupBy('branch_id');
+        if ($start && $end) {
+            $salesByBranchQuery->whereBetween('created_at', [$start, $end]);
+        }
+        if ($branchId) {
+            $salesByBranchQuery->where('branch_id', $branchId);
+        }
+        $salesByBranch = $salesByBranchQuery->get()->map(function ($item) {
+            return [
+                'branch' => $item->branch?->name ?? 'غير محدد',
+                'amount' => $item->amount,
+                'count' => $item->count,
+            ];
+        });
 
         // Expenses by type
-        $expensesByType = Expense::with('expenseType')
+        $expensesQuery = Expense::with('expenseType')
             ->selectRaw('expense_type_id, SUM(amount) as amount, COUNT(*) as count')
-            ->groupBy('expense_type_id')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'type' => $item->expenseType?->name ?? 'غير محدد',
-                    'amount' => $item->amount,
-                    'count' => $item->count,
-                ];
-            });
+            ->groupBy('expense_type_id');
+        if ($start && $end) {
+            $expensesQuery->whereBetween('expense_date', [$start->format('Y-m-d'), $end->format('Y-m-d')]);
+        }
+        if ($branchId) {
+            $expensesQuery->where('branch_id', $branchId);
+        }
+        $expensesByType = $expensesQuery->get()->map(function ($item) {
+            return [
+                'type' => $item->expenseType?->name ?? 'غير محدد',
+                'amount' => $item->amount,
+                'count' => $item->count,
+            ];
+        });
 
         return [
             'daily_sales' => $dailySales,
@@ -500,8 +546,9 @@ class DashboardController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
         $chartType = $request->get('chart_type');
+        $branchId = $request->get('branch_id');
 
-        $chartsData = $this->getChartsData($startDate, $endDate);
+        $chartsData = $this->getChartsData($startDate, $endDate, $branchId);
 
         return response()->json($chartsData[$chartType] ?? []);
     }
