@@ -147,7 +147,7 @@
                                     <a href="{{ route('reports.all') }}" class="tp-link">تقرير الكل</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('reports.kasr') }}" class="tp-link">تقرير الكسر (صافي الربح)</a>
+                                    <a href="{{ route('reports.kasr') }}" class="tp-link">تقرير صافي الربح</a>
                                 </li>
                                 <li>
                                     <a href="{{ route('reports.speed') }}" class="tp-link">تقرير السرعة</a>
