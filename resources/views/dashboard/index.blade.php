@@ -186,11 +186,11 @@
             <div class="card overflow-hidden">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
-                        <h5 class="card-title text-dark mb-0">المبيعات حسب الفئة</h5>
+                        <h5 class="card-title text-dark mb-0">مبيعات حسب صنف</h5>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="categories_chart" class="apex-charts"></div>
+                    <div id="categories_chart"></div>
                     <div class="device-view text-center mt-3">
                         <p class="text-uppercase mb-1 fw-medium text-muted">إجمالي المبيعات</p>
                         <h3 class="mb-0 text-dark fw-semibold" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
@@ -360,4 +360,5 @@ const salesAmount = {{ $metrics['total_sales'] }};
 const expensesAmount = {{ $metrics['total_expenses'] }};
 </script>
 <script src="{{ asset('js/crm-dashboard-custom.js') }}"></script>
+<script src="{{ asset('js/category-bars.js') }}"></script>
 @endsection

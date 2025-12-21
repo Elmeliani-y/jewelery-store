@@ -283,6 +283,26 @@
                 const data = await response.json();
 
                 if (data && data.success) {
+                    // Clear form fields after successful save
+                    form.reset();
+                    // Restore default date to today
+                    const dateInput = document.getElementById('expense_date');
+                    if (dateInput) {
+                        const today = new Date();
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        dateInput.value = `${yyyy}-${mm}-${dd}`;
+                    }
+                    // Restore default branch if needed
+                    const branchInput = document.getElementById('branch_id');
+                    if (branchInput && branchInput.hasAttribute('disabled')) {
+                        // If branch is fixed, set it back to selectedBranchId
+                        const hiddenBranch = form.querySelector('input[name="branch_id"][type="hidden"]');
+                        if (hiddenBranch) {
+                            branchInput.value = hiddenBranch.value;
+                        }
+                    }
                     // Show success modal without redirect
                     const modalEl = document.getElementById('expenseSuccessModal');
                     const idEl = document.getElementById('expenseSuccessId');

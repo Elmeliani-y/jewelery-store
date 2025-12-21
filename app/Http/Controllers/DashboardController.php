@@ -353,6 +353,7 @@ class DashboardController extends Controller
             }
             $sales = $salesQuery->get();
             $totalAmount = 0;
+            $totalWeight = 0;
             $count = 0;
             foreach ($sales as $sale) {
                 $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
@@ -360,6 +361,7 @@ class DashboardController extends Controller
                     foreach ($products as $product) {
                         if (isset($product['category_id']) && $product['category_id'] == $category->id) {
                             $totalAmount += $product['amount'] ?? 0;
+                            $totalWeight += $product['weight'] ?? 0;
                             $count++;
                         }
                     }
@@ -367,8 +369,9 @@ class DashboardController extends Controller
             }
             if ($count > 0) {
                 $salesByCategory->push([
-                    'category' => $category->name,
-                    'amount' => $totalAmount,
+                    'name' => $category->name,
+                    'value' => $totalAmount,
+                    'weight' => $totalWeight,
                     'count' => $count,
                 ]);
             }

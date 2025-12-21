@@ -202,10 +202,10 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, Expense $expense)
     {
-        // Check if branch user is trying to access another branch's expense
+        // Block all updates for branch accounts
         $user = auth()->user();
-        if ($user->isBranch() && $expense->branch_id != $user->branch_id) {
-            abort(403, 'غير مصرح لك بتعديل هذا المصروف');
+        if ($user->isBranch()) {
+            abort(403, 'غير مسموح لحساب الفرع بتعديل المصروفات');
         }
 
         $validated = $request->validate([
@@ -256,6 +256,11 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
+        $user = auth()->user();
+        // Block all deletes for branch accounts
+        if ($user->isBranch()) {
+            abort(403, 'غير مسموح لحساب الفرع بحذف المصروفات');
+        }
         try {
             $expense->delete();
 

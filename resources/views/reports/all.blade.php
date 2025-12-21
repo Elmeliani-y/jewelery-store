@@ -22,6 +22,22 @@
         <p class="text-muted mb-0">عرض تفصيلي لجميع المبيعات والمصروفات مع الإحصائيات</p>
     </div>
 
+	<!-- Summary Card: Total Price Per Gram -->
+	<div class="row mb-3">
+		<div class="col-md-4">
+			<div class="card border-info">
+				<div class="card-body text-center">
+					<div class="text-muted small mb-1">سعر الجرام الإجمالي (إجمالي المبيعات / إجمالي الوزن)</div>
+					@php
+						$totalSales = $sales->sum('total_amount');
+						$totalWeight = $sales->sum('weight');
+						$totalPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
+					@endphp
+					<div class="fs-4 fw-bold text-info">{{ number_format($totalPricePerGram, 2) }} <span class="fs-6">د/جرام</span></div>
+				</div>
+			</div>
+		</div>
+	</div>
     <!-- Print Title (only visible when printing) -->
     <div class="print-title" style="display: none;">
         <h2>تقرير شامل - المبيعات والمصروفات</h2>
@@ -260,12 +276,26 @@
 								@if($sales->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td colspan="4" class="text-end">الإجمالي</td>
-										<td dir="ltr">{{ number_format($sales->sum('weight'), 2) }}</td>
+										<td colspan="4"></td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي الوزن</span></div>
+											<div>{{ number_format($sales->sum('weight'), 2) }}</div>
+										</td>
+										<td dir="ltr">
+											@php
+												$totalSales = $sales->sum('total_amount');
+												$totalWeight = $sales->sum('weight');
+												$totalPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
+											@endphp
+											<div><span class="text-muted small">إجمالي سعر الجرام</span></div>
+											<div style="font-weight:700; color:#facc15;">{{ number_format($totalPricePerGram, 2) }}</div>
+										</td>
 										<td></td>
-										<td></td>
-										<td dir="ltr">{{ number_format($sales->sum('total_amount'), 2) }}</td>
-										<td dir="ltr">{{ number_format($sales->sum('tax_amount'), 2) }}</td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي المبيعات</span></div>
+											<div>{{ number_format($sales->sum('total_amount'), 2) }}</div>
+										</td>
+
 										<td></td>
 									</tr>
 								</tfoot>
@@ -347,7 +377,7 @@
 										<td></td>
 										<td></td>
 										<td dir="ltr">{{ number_format($returnedSales->sum('total_amount'), 2) }}</td>
-										<td dir="ltr">{{ number_format($returnedSales->sum('tax_amount'), 2) }}</td>
+
 										<td></td>
 									</tr>
 								</tfoot>
@@ -390,7 +420,7 @@
 								@if($expenses->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td colspan="3" class="text-end">الإجمالي</td>
+										<td colspan="3" class="text-end">إجمالي المصروفات</td>
 										<td dir="ltr">{{ number_format($expenses->sum('amount'), 2) }}</td>
 										<td></td>
 									</tr>
@@ -423,7 +453,6 @@
 									<th>إجمالي الوزن</th>
 									<th>سعر الجرام</th>
 									<th>إجمالي المصروفات</th>
-									<th>صافي الربح</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -450,7 +479,6 @@
 									</span>
 								</td>
 									<td dir="ltr">{{ number_format($row['total_expenses'],2) }}</td>
-									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
 								</tr>
 								@empty
 								<tr><td colspan="7" class="text-center text-muted">لا توجد بيانات فروع</td></tr>
@@ -459,13 +487,32 @@
 								@if($branchData->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td class="text-end">الإجمالي</td>
-										<td>{{ $branchData->sum('sales_count') }}</td>
-										<td dir="ltr">{{ number_format($branchData->sum('total_sales'),2) }}</td>
-										<td dir="ltr">{{ number_format($branchData->sum('total_weight'),2) }}</td>
 										<td></td>
-										<td dir="ltr">{{ number_format($branchData->sum('total_expenses'),2) }}</td>
-										<td dir="ltr">{{ number_format($branchData->sum('net_profit'),2) }}</td>
+										<td>
+											<div><span class="text-muted small">إجمالي عدد المبيعات</span></div>
+											<div>{{ $branchData->sum('sales_count') }}</div>
+										</td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي المبيعات</span></div>
+											<div>{{ number_format($branchData->sum('total_sales'),2) }}</div>
+										</td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي الوزن</span></div>
+											<div>{{ number_format($branchData->sum('total_weight'),2) }}</div>
+										</td>
+										<td dir="ltr">
+											@php
+												$totalSales = $branchData->sum('total_sales');
+												$totalWeight = $branchData->sum('total_weight');
+												$totalPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
+											@endphp
+											<div><span class="text-muted small">إجمالي سعر الجرام</span></div>
+											<div style="font-weight:700; color:#facc15;">{{ number_format($totalPricePerGram, 2) }}</div>
+										</td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي المصروفات</span></div>
+											<div>{{ number_format($branchData->sum('total_expenses'),2) }}</div>
+										</td>
 									</tr>
 								</tfoot>
 								@endif
@@ -490,7 +537,6 @@
 									<th>إجمالي المبيعات</th>
 									<th>إجمالي الوزن</th>
 									<th>سعر الجرام</th>
-									<th>صافي الربح</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -517,7 +563,7 @@
 										@endif
 									</span>
 								</td>
-									<td dir="ltr">{{ number_format($row['net_profit'],2) }}</td>
+
 								</tr>
 								@empty
 								<tr><td colspan="7" class="text-center text-muted">لا توجد بيانات موظفين</td></tr>
@@ -526,13 +572,29 @@
 								@if($employeesData->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td class="text-end">الإجمالي</td>
 										<td></td>
-										<td>{{ $employeesData->sum('sales_count') }}</td>
-										<td dir="ltr">{{ number_format($employeesData->sum('total_sales'),2) }}</td>
-										<td dir="ltr">{{ number_format($employeesData->sum('total_weight'),2) }}</td>
 										<td></td>
-										<td dir="ltr">{{ number_format($employeesData->sum('net_profit'),2) }}</td>
+										<td>
+											<div><span class="text-muted small">إجمالي عدد المبيعات</span></div>
+											<div>{{ $employeesData->sum('sales_count') }}</div>
+										</td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي المبيعات</span></div>
+											<div>{{ number_format($employeesData->sum('total_sales'),2) }}</div>
+										</td>
+										<td dir="ltr">
+											<div><span class="text-muted small">إجمالي الوزن</span></div>
+											<div>{{ number_format($employeesData->sum('total_weight'),2) }}</div>
+										</td>
+										<td dir="ltr">
+											@php
+												$totalSales = $employeesData->sum('total_sales');
+												$totalWeight = $employeesData->sum('total_weight');
+												$totalPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
+											@endphp
+											<div><span class="text-muted small">إجمالي سعر الجرام</span></div>
+											<div style="font-weight:700; color:#facc15;">{{ number_format($totalPricePerGram, 2) }}</div>
+										</td>
 									</tr>
 								</tfoot>
 								@endif

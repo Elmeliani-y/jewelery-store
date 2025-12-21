@@ -170,12 +170,14 @@
                                             </td>
                                             <td>{{ $expense->description ?? 'بدون وصف' }}</td>
                                             <td class="fw-semibold text-danger">{{ number_format($expense->amount, 2) }} ر.س</td>
-                                            <td>{{ $expense->expense_date->format('h:i A') }}</td>
+                                            <td>{{ $expense->expense_date->format('Y-m-d H:i') }}</td>
                                             <td>
                                                 <div class="d-flex gap-1">
-                                                    <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
-                                                        <iconify-icon icon="solar:pen-bold"></iconify-icon>
-                                                    </a>
+                                                    @if(!auth()->user() || !auth()->user()->isBranch())
+                                                        <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
+                                                            <iconify-icon icon="solar:pen-bold"></iconify-icon>
+                                                        </a>
+                                                    @endif
                                                     <a href="{{ route('expenses.show', $expense) }}" class="btn btn-sm btn-info edit-btn" title="عرض">
                                                         <iconify-icon icon="solar:eye-bold"></iconify-icon>
                                                     </a>

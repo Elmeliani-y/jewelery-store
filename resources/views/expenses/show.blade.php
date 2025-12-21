@@ -83,17 +83,23 @@
                 <div class="card-body">
                     <h5 class="card-title">الإجراءات</h5>
                     <div class="d-grid gap-2">
-                        <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-warning">
-                            <i class="mdi mdi-pencil-outline me-1"></i> تعديل
-                        </a>
-                        <form action="{{ route('expenses.destroy', $expense) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">
-                                <i class="mdi mdi-delete-outline me-1"></i> حذف
-                            </button>
-                        </form>
-                        <a href="{{ route('expenses.index') }}" class="btn btn-light">عودة إلى المصروفات</a>
+                        @if(!auth()->user() || !auth()->user()->isBranch())
+                            <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-warning">
+                                <i class="mdi mdi-pencil-outline me-1"></i> تعديل
+                            </a>
+                            <form action="{{ route('expenses.destroy', $expense) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="mdi mdi-delete-outline me-1"></i> حذف
+                                </button>
+                            </form>
+                        @endif
+                        @if(auth()->user() && auth()->user()->isBranch())
+                            <a href="{{ route('branch.daily-expenses') }}" class="btn btn-light">عودة إلى المصروفات اليومية</a>
+                        @else
+                            <a href="{{ route('expenses.index') }}" class="btn btn-light">عودة إلى المصروفات</a>
+                        @endif
                     </div>
                 </div>
             </div>
