@@ -139,6 +139,18 @@
                                     </td>
                                 </tr>
                                 @endforeach
+                                @php
+                                    $ijmaliCount = $expenses->count();
+                                    $ijmaliMabalegh = $expenses->sum('amount');
+                                @endphp
+                                <tfoot class="table-light">
+                                    <tr class="fw-semibold">
+                                        <td colspan="4">الإجماليات</td>
+                                        <td class="text-end">{{ number_format($ijmaliMabalegh, 2) }} <small class="text-muted">ريال</small></td>
+                                        <td></td>
+                                        <td class="text-end">عدد المصروفات: {{ $ijmaliCount }}</td>
+                                    </tr>
+                                </tfoot
                             </tbody>
                         </table>
                     </div>
@@ -147,9 +159,6 @@
                             <small class="text-muted">
                                 عرض {{ $expenses->firstItem() }}–{{ $expenses->lastItem() }} من أصل {{ $expenses->total() }}
                             </small>
-                            <span class="badge bg-info text-dark ms-md-3">
-                                الإجمالي: {{ number_format($totalExpenses, 2, '.', ',') }} ريال
-                            </span>
                         </div>
                         {{ $expenses->links('pagination::bootstrap-5') }}
                     </div>

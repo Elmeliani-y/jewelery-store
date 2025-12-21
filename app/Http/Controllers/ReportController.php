@@ -102,6 +102,9 @@ class ReportController extends Controller
         $to1 = $request->get('to1');
         $from2 = $request->get('from2');
         $to2 = $request->get('to2');
+        // For annual mode, prefer from1_year/from2_year if present
+        $from1_year = $request->get('from1_year');
+        $from2_year = $request->get('from2_year');
 
         // Set defaults if not provided
         $now = Carbon::now();
@@ -115,15 +118,19 @@ class ReportController extends Controller
         if ($periodType === 'annual') {
             $thisYear = $now->year;
             $lastYear = $now->copy()->subYear()->year;
-            $from1 = $from1 ?: $thisYear;
-            $to1 = $to1 ?: $thisYear;
-            $from2 = $from2 ?: $lastYear;
-            $to2 = $to2 ?: $lastYear;
+            $from1_val = $from1_year ?: $from1;
+            $from2_val = $from2_year ?: $from2;
+            $to1_val = $from1_year ?: $to1;
+            $to2_val = $from2_year ?: $to2;
+            $from1_val = $from1_val ?: $thisYear;
+            $to1_val = $to1_val ?: $thisYear;
+            $from2_val = $from2_val ?: $lastYear;
+            $to2_val = $to2_val ?: $lastYear;
             // Convert to full date ranges
-            $from1_date = Carbon::create($from1, 1, 1);
-            $to1_date = Carbon::create($to1, 12, 31);
-            $from2_date = Carbon::create($from2, 1, 1);
-            $to2_date = Carbon::create($to2, 12, 31);
+            $from1_date = Carbon::create($from1_val, 1, 1);
+            $to1_date = Carbon::create($to1_val, 12, 31);
+            $from2_date = Carbon::create($from2_val, 1, 1);
+            $to2_date = Carbon::create($to2_val, 12, 31);
         } elseif ($periodType === 'monthly') {
             $thisYear = $now->year;
             $thisMonth = $now->month;
@@ -254,6 +261,11 @@ class ReportController extends Controller
         foreach ($groupTypes as $type => $info) {
             $all = $info['model']::all();
             $data = [];
+            // Always use full day for end date
+            $from1_str = $from1_date ? (is_object($from1_date) ? $from1_date->format('Y-m-d') : (string)$from1_date) : null;
+            $to1_str = $to1_date ? (is_object($to1_date) ? $to1_date->format('Y-m-d') : (string)$to1_date) : null;
+            $from2_str = $from2_date ? (is_object($from2_date) ? $from2_date->format('Y-m-d') : (string)$from2_date) : null;
+            $to2_str = $to2_date ? (is_object($to2_date) ? $to2_date->format('Y-m-d') : (string)$to2_date) : null;
             foreach ($all as $item) {
                 $id = $item->id;
                 $name = $item->{$info['name']};
@@ -266,7 +278,7 @@ class ReportController extends Controller
                     $sales1 = \App\Models\Sale::notReturned()
                         ->where('employee_id', $id)
                         ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-                        ->inDateRange($from1_date, $to1_date)
+                        ->whereBetween('created_at', [$from1_str . ' 00:00:00', $to1_str . ' 23:59:59'])
                         ->get();
                     foreach ($sales1 as $sale) {
                         $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
@@ -280,7 +292,7 @@ class ReportController extends Controller
                     $sales2 = \App\Models\Sale::notReturned()
                         ->where('employee_id', $id)
                         ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-                        ->inDateRange($from2_date, $to2_date)
+                        ->whereBetween('created_at', [$from2_str . ' 00:00:00', $to2_str . ' 23:59:59'])
                         ->get();
                     foreach ($sales2 as $sale) {
                         $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
@@ -295,7 +307,7 @@ class ReportController extends Controller
                     // For calibers/categories, get all sales in range and filter products in PHP
                     $sales1 = \App\Models\Sale::notReturned()
                         ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-                        ->inDateRange($from1_date, $to1_date)
+                        ->whereBetween('created_at', [$from1_str . ' 00:00:00', $to1_str . ' 23:59:59'])
                         ->get();
                     foreach ($sales1 as $sale) {
                         $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
@@ -313,7 +325,7 @@ class ReportController extends Controller
                     }
                     $sales2 = \App\Models\Sale::notReturned()
                         ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
-                        ->inDateRange($from2_date, $to2_date)
+                        ->whereBetween('created_at', [$from2_str . ' 00:00:00', $to2_str . ' 23:59:59'])
                         ->get();
                     foreach ($sales2 as $sale) {
                         $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;

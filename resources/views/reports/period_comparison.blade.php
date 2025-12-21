@@ -57,34 +57,32 @@
         return (new Date().getMonth() + 1).toString().padStart(2, '0');
     }
     function renderInputs(periodType) {
-        // Use actual GET params for monthly mode
+        // Use actual GET params for all modes
         const filters = {
-            from1: "{{ request('from1_year') && request('from1_month') ? request('from1_year') . '-' . request('from1_month') : (old('from1', $filters['from1'] ?? '')) }}",
-            to1: "{{ request('to1_year') && request('to1_month') ? request('to1_year') . '-' . request('to1_month') : (old('to1', $filters['to1'] ?? '')) }}",
-            from2: "{{ request('from2_year') && request('from2_month') ? request('from2_year') . '-' . request('from2_month') : (old('from2', $filters['from2'] ?? '')) }}",
-            to2: "{{ request('to2_year') && request('to2_month') ? request('to2_year') . '-' . request('to2_month') : (old('to2', $filters['to2'] ?? '')) }}"
+            from1: "{{ request('from1') ? request('from1') : (old('from1', $filters['from1'] ?? '')) }}",
+            to1: "{{ request('to1') ? request('to1') : (old('to1', $filters['to1'] ?? '')) }}",
+            from2: "{{ request('from2') ? request('from2') : (old('from2', $filters['from2'] ?? '')) }}",
+            to2: "{{ request('to2') ? request('to2') : (old('to2', $filters['to2'] ?? '')) }}",
+            from1_year: "{{ request('from1_year') ? request('from1_year') : (old('from1_year', '')) }}",
+            from2_year: "{{ request('from2_year') ? request('from2_year') : (old('from2_year', '')) }}"
         };
         let yThis = getDefaultYear();
         let yLast = getDefaultYear(-1);
         let mThis = getDefaultMonth();
         // Annual: year dropdowns (calendar style)
-        if (periodType === 'annual') {
-            let yearOptions = '';
-            for (let y = yThis + 1; y >= 2000; y--) {
-                yearOptions += `<option value='${y}'>${y}</option>`;
-            }
-            document.getElementById('from1-group').innerHTML = `<label class='form-label'>من (الفترة 1)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from1_year' class='form-select'>${yearOptions}</select></div>`;
-            document.getElementById('to1-group').innerHTML = '';
-            document.getElementById('from2-group').innerHTML = `<label class='form-label'>من (الفترة 2)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from2_year' class='form-select'>${yearOptions}</select></div>`;
-            document.getElementById('to2-group').innerHTML = '';
-            setTimeout(function() {
-                const from1y = document.querySelector("select[name='from1_year']");
-                const from2y = document.querySelector("select[name='from2_year']");
-                let f1y = filters.from1 ? filters.from1.split('-')[0] : yThis;
-                let f2y = filters.from2 ? filters.from2.split('-')[0] : yLast;
-                from1y.value = f1y;
-                from2y.value = f2y;
-            }, 50);
+            if (periodType === 'annual') {
+                let f1y = filters.from1_year || filters.from1 || yThis;
+                let f2y = filters.from2_year || filters.from2 || yLast;
+                let yearOptions1 = '';
+                let yearOptions2 = '';
+                for (let y = yThis + 1; y >= 2000; y--) {
+                    yearOptions1 += `<option value='${y}'${y == f1y ? ' selected' : ''}>${y}</option>`;
+                    yearOptions2 += `<option value='${y}'${y == f2y ? ' selected' : ''}>${y}</option>`;
+                }
+                document.getElementById('from1-group').innerHTML = `<label class='form-label'>من (الفترة 1)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from1_year' class='form-select'>${yearOptions1}</select></div>`;
+                document.getElementById('to1-group').innerHTML = '';
+                document.getElementById('from2-group').innerHTML = `<label class='form-label'>من (الفترة 2)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from2_year' class='form-select'>${yearOptions2}</select></div>`;
+                document.getElementById('to2-group').innerHTML = '';
         } else if (periodType === 'monthly') {
             // Monthly: month/year dropdowns only for each period
             let monthOptions = '';
@@ -140,36 +138,21 @@
         document.getElementById('mo9aranaForm').addEventListener('submit', function(e) {
             const periodType = document.getElementById('periodTypeSelect').value;
             if (periodType === 'monthly') {
-                // Remove any previous hidden fields
+                // ...existing code...
+            }
+            if (periodType === 'special') {
+                // Convert all date inputs to YYYY-MM-DD before submit
                 ['from1','to1','from2','to2'].forEach(function(name) {
                     let el = document.querySelector(`input[name='${name}']`);
-                    if (el) el.remove();
-                });
-                // Assemble values from dropdowns
-                function val(sel) {
-                    let s = document.querySelector(sel);
-                    return s ? s.value : '';
-                }
-                // Helper to get last day of month
-                function lastDayOfMonth(year, month) {
-                    return new Date(year, month, 0).getDate().toString().padStart(2, '0');
-                }
-                let fy1 = val("select[name='from1_year']");
-                let fm1 = val("select[name='from1_month']");
-                let fy2 = val("select[name='from2_year']");
-                let fm2 = val("select[name='from2_month']");
-                let from1 = fy1 + '-' + fm1 + '-01';
-                let to1 = fy1 + '-' + fm1 + '-' + lastDayOfMonth(fy1, fm1);
-                let from2 = fy2 + '-' + fm2 + '-01';
-                let to2 = fy2 + '-' + fm2 + '-' + lastDayOfMonth(fy2, fm2);
-                // Add hidden fields
-                ['from1','to1','from2','to2'].forEach(function(name, i) {
-                    let v = [from1, to1, from2, to2][i];
-                    let input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = v;
-                    document.getElementById('mo9aranaForm').appendChild(input);
+                    if (el && el.value) {
+                        // Try to parse and reformat if needed
+                        let v = el.value;
+                        // If value is MM/DD/YYYY, convert to YYYY-MM-DD
+                        if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) {
+                            let parts = v.split('/');
+                            el.value = `${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`;
+                        }
+                    }
                 });
             }
         });

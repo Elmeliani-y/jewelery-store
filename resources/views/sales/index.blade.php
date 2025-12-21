@@ -193,6 +193,21 @@
                                 </tr>
                                 @endforeach
                             </tbody>
+                            @php
+                                $ijmaliWazn = $sales->sum('weight');
+                                $ijmaliCount = $sales->count();
+                                $ijmaliMabalegh = $sales->sum('total_amount');
+                            @endphp
+                            <tfoot class="table-light">
+                                <tr class="fw-semibold">
+                                    <td colspan="3">الإجماليات</td>
+                                    <td class="text-end">{{ number_format($ijmaliWazn, 2) }}</td>
+                                    <td></td>
+                                    <td class="text-end">{{ number_format($ijmaliMabalegh, 2) }}</td>
+                                    <td class="text-end">عدد المبيعات: {{ $ijmaliCount }}</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                     <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
@@ -200,9 +215,6 @@
                             <small class="text-muted">
                                 عرض {{ $sales->firstItem() }}–{{ $sales->lastItem() }} من أصل {{ $sales->total() }}
                             </small>
-                            <span class="badge bg-info text-dark ms-md-3">
-                                الإجمالي: {{ number_format($totalSales, 2, '.', ',') }} ريال
-                            </span>
                         </div>
                         {{ $sales->links('pagination::bootstrap-5') }}
                     </div>
