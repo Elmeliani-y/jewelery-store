@@ -88,6 +88,245 @@ class ReportController extends Controller
     }
 
     /**
+     * Comparative by periods report (mo9arana bi l moda).
+     * Accepts two date ranges: from1/to1 and from2/to2, a branch_id and a period type filter.
+     */
+    public function mo9arana(Request $request)
+    {
+        $branches = Branch::active()->get();
+
+        // Inputs: from1/to1, from2/to2, branch_id, period_type
+        $periodType = $request->get('period_type', 'annual'); // annual|monthly|weekly|special
+        $branchId = $request->get('branch_id');
+        $from1 = $request->get('from1');
+        $to1 = $request->get('to1');
+        $from2 = $request->get('from2');
+        $to2 = $request->get('to2');
+
+        // Set defaults if not provided
+        $now = Carbon::now();
+        if (!$periodType) $periodType = 'annual';
+        if (!$branchId) $branchId = null;
+
+        if ($periodType === 'annual') {
+            $thisYear = $now->year;
+            $lastYear = $now->copy()->subYear()->year;
+            $from1 = $from1 ?: $thisYear;
+            $to1 = $to1 ?: $thisYear;
+            $from2 = $from2 ?: $lastYear;
+            $to2 = $to2 ?: $lastYear;
+            // Convert to full date ranges
+            $from1_date = Carbon::create($from1, 1, 1);
+            $to1_date = Carbon::create($to1, 12, 31);
+            $from2_date = Carbon::create($from2, 1, 1);
+            $to2_date = Carbon::create($to2, 12, 31);
+        } elseif ($periodType === 'monthly') {
+            $thisYear = $now->year;
+            $thisMonth = $now->month;
+            $lastYear = $now->copy()->subYear()->year;
+            $from1 = $from1 ?: ($thisYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-01');
+            $to1 = $to1 ?: ($thisYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-' . Carbon::create($thisYear, $thisMonth, 1)->endOfMonth()->format('d'));
+            $from2 = $from2 ?: ($lastYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-01');
+            $to2 = $to2 ?: ($lastYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-' . Carbon::create($lastYear, $thisMonth, 1)->endOfMonth()->format('d'));
+            // Accept Y-m-d directly
+            $from1_date = Carbon::parse($from1);
+            $to1_date = Carbon::parse($to1);
+            $from2_date = Carbon::parse($from2);
+            $to2_date = Carbon::parse($to2);
+        } elseif ($periodType === 'weekly') {
+            // Use week of selected date (show week range for the selected day)
+            $from1 = $from1 ?: $now->toDateString();
+            $from2 = $from2 ?: $now->copy()->subYear()->toDateString();
+            $from1_date = Carbon::parse($from1)->startOfWeek();
+            $to1_date = Carbon::parse($from1)->endOfWeek();
+            $from2_date = Carbon::parse($from2)->startOfWeek();
+            $to2_date = Carbon::parse($from2)->endOfWeek();
+        } else {
+            // Special: use as is (full date pickers)
+            $from1_date = $from1 ? Carbon::parse($from1) : null;
+            $to1_date = $to1 ? Carbon::parse($to1) : null;
+            $from2_date = $from2 ? Carbon::parse($from2) : null;
+            $to2_date = $to2 ? Carbon::parse($to2) : null;
+        }
+
+        // helper to compute totals for a range, with pretty period label
+        $computeTotals = function($start, $end, $branchId = null) use ($periodType) {
+
+            $result = [
+                'period' => ($start && $end) ? ($start . ' - ' . $end) : 'N/A',
+                'total_sales' => 0,
+                'total_weight' => 0,
+                'price_per_gram' => 0,
+                'sales_count' => 0,
+                'total_expenses' => 0,
+            ];
+
+            if (!$start || !$end) return $result;
+
+            // Format period label nicely, always start-to-end
+            $prettyPeriod = $result['period'];
+            try {
+                if ($periodType === 'monthly') {
+                    // $start and $end are in Y-m format, always use as selected
+                    $startObj = \Carbon\Carbon::createFromFormat('Y-m', $start)->startOfMonth();
+                    $endObj = \Carbon\Carbon::createFromFormat('Y-m', $end)->endOfMonth();
+                    $prettyPeriod = $startObj->format('d-m-Y') . ' - ' . $endObj->format('d-m-Y');
+                } elseif ($periodType === 'annual') {
+                    $startObj = \Carbon\Carbon::parse($start);
+                    $endObj = \Carbon\Carbon::parse($end);
+                    if ($startObj->gt($endObj)) {
+                        [$startObj, $endObj] = [$endObj, $startObj];
+                    }
+                    $prettyPeriod = $startObj->format('Y') . ' - ' . $endObj->format('Y');
+                } elseif ($periodType === 'weekly' || $periodType === 'special') {
+                    $startObj = \Carbon\Carbon::parse($start);
+                    $endObj = \Carbon\Carbon::parse($end);
+                    if ($startObj->gt($endObj)) {
+                        [$startObj, $endObj] = [$endObj, $startObj];
+                    }
+                    $prettyPeriod = $startObj->format('d-m-Y') . ' - ' . $endObj->format('d-m-Y');
+                }
+            } catch (\Exception $e) {}
+
+            $salesQuery = Sale::notReturned()->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
+            if ($branchId) $salesQuery->where('branch_id', $branchId);
+            $sales = $salesQuery->get();
+
+            $totalSales = 0;
+            $totalWeight = 0;
+            $salesCount = 0;
+            foreach ($sales as $sale) {
+                $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                if ($products) {
+                    foreach ($products as $product) {
+                        $totalSales += $product['amount'] ?? 0;
+                        $totalWeight += $product['weight'] ?? 0;
+                        $salesCount++;
+                    }
+                }
+            }
+
+            $expensesQuery = Expense::whereBetween('expense_date', [$start, $end]);
+            if ($branchId) $expensesQuery->where('branch_id', $branchId);
+            $totalExpenses = $expensesQuery->sum('amount');
+
+            $pricePerGram = $totalWeight > 0 ? ($totalSales / $totalWeight) : 0;
+
+            return [
+                'period' => $prettyPeriod,
+                'total_sales' => $totalSales,
+                'total_weight' => $totalWeight,
+                'price_per_gram' => $pricePerGram,
+                'sales_count' => $salesCount,
+                'total_expenses' => $totalExpenses,
+            ];
+        };
+
+
+        $period1 = $computeTotals(
+            $from1_date ? $from1_date->toDateString() : null,
+            $to1_date ? $to1_date->toDateString() : null,
+            $branchId
+        );
+        $period2 = $computeTotals(
+            $from2_date ? $from2_date->toDateString() : null,
+            $to2_date ? $to2_date->toDateString() : null,
+            $branchId
+        );
+
+        // --- New: Aggregation for employees, calibers, categories ---
+        $groupAggregates = [];
+        $groupTypes = [
+            'employees' => ['model' => \App\Models\Employee::class, 'field' => 'employee_id', 'name' => 'name'],
+            'calibers' => ['model' => \App\Models\Caliber::class, 'field' => 'caliber_id', 'name' => 'name'],
+            'categories' => ['model' => \App\Models\Category::class, 'field' => 'category_id', 'name' => 'name'],
+        ];
+        foreach ($groupTypes as $type => $info) {
+            $all = $info['model']::all();
+            $data = [];
+            foreach ($all as $item) {
+                $id = $item->id;
+                $name = $item->{$info['name']};
+                // Period 1
+                $sales1 = \App\Models\Sale::notReturned()
+                    ->where($info['field'], $id)
+                    ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                    ->inDateRange($from1_date, $to1_date)
+                    ->get();
+                $totalSales1 = 0;
+                $totalWeight1 = 0;
+                foreach ($sales1 as $sale) {
+                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                    if ($products) {
+                        foreach ($products as $product) {
+                            if (
+                                ($type === 'calibers' && isset($product['caliber_id']) && $product['caliber_id'] == $id) ||
+                                ($type === 'categories' && isset($product['category_id']) && $product['category_id'] == $id) ||
+                                ($type === 'employees' && $sale->employee_id == $id)
+                            ) {
+                                $totalSales1 += $product['amount'] ?? 0;
+                                $totalWeight1 += $product['weight'] ?? 0;
+                            }
+                        }
+                    }
+                }
+                // Period 2
+                $sales2 = \App\Models\Sale::notReturned()
+                    ->where($info['field'], $id)
+                    ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                    ->inDateRange($from2_date, $to2_date)
+                    ->get();
+                $totalSales2 = 0;
+                $totalWeight2 = 0;
+                foreach ($sales2 as $sale) {
+                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                    if ($products) {
+                        foreach ($products as $product) {
+                            if (
+                                ($type === 'calibers' && isset($product['caliber_id']) && $product['caliber_id'] == $id) ||
+                                ($type === 'categories' && isset($product['category_id']) && $product['category_id'] == $id) ||
+                                ($type === 'employees' && $sale->employee_id == $id)
+                            ) {
+                                $totalSales2 += $product['amount'] ?? 0;
+                                $totalWeight2 += $product['weight'] ?? 0;
+                            }
+                        }
+                    }
+                }
+                // Difference %
+                $salesDiff = $totalSales2 - $totalSales1;
+                $weightDiff = $totalWeight2 - $totalWeight1;
+                $salesDiffPct = $totalSales1 != 0 ? round(($salesDiff / $totalSales1) * 100, 2) : null;
+                $weightDiffPct = $totalWeight1 != 0 ? round(($weightDiff / $totalWeight1) * 100, 2) : null;
+                // Only add if there is sales in either period
+                if ($totalSales1 != 0 || $totalSales2 != 0) {
+                    $data[] = [
+                        'name' => $name,
+                        'total_sales_1' => $totalSales1,
+                        'total_sales_2' => $totalSales2,
+                        'total_weight_1' => $totalWeight1,
+                        'total_weight_2' => $totalWeight2,
+                        'sales_diff_pct' => $salesDiffPct,
+                        'weight_diff_pct' => $weightDiffPct,
+                    ];
+                }
+            }
+            $groupAggregates[$type] = $data;
+        }
+
+        $filters = [
+            'from1' => $from1,
+            'to1' => $to1,
+            'from2' => $from2,
+            'to2' => $to2,
+            'branch_id' => $branchId,
+            'period_type' => $periodType,
+        ];
+
+        return view('reports.mo9arana', compact('branches', 'filters', 'period1', 'period2', 'groupAggregates'));
+    }
+
+    /**
      * Generate report by branch (sales and expenses grouped by branch).
      */
     public function byBranch(Request $request)

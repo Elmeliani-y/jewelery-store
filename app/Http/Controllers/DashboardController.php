@@ -258,7 +258,17 @@ class DashboardController extends Controller
                     $salesQuery->where('branch_id', $branchId);
                     $expensesQuery->where('branch_id', $branchId);
                 }
-                $sales = $salesQuery->sum('total_amount');
+                // Calculate sales as the sum of product amounts (consistent with getKeyMetrics)
+                $sales = $salesQuery->get()->reduce(function($carry, $sale) {
+                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                    $sum = 0;
+                    if ($products) {
+                        foreach ($products as $product) {
+                            $sum += isset($product['amount']) ? (float)$product['amount'] : 0;
+                        }
+                    }
+                    return $carry + $sum;
+                }, 0);
                 $expenses = $expensesQuery->sum('amount');
                 $monthlyRevenue[] = [
                     'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),
@@ -277,7 +287,17 @@ class DashboardController extends Controller
                     $salesQuery->where('branch_id', $branchId);
                     $expensesQuery->where('branch_id', $branchId);
                 }
-                $sales = $salesQuery->sum('total_amount');
+                // Calculate sales as the sum of product amounts (consistent with getKeyMetrics)
+                $sales = $salesQuery->get()->reduce(function($carry, $sale) {
+                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                    $sum = 0;
+                    if ($products) {
+                        foreach ($products as $product) {
+                            $sum += isset($product['amount']) ? (float)$product['amount'] : 0;
+                        }
+                    }
+                    return $carry + $sum;
+                }, 0);
                 $expenses = $expensesQuery->sum('amount');
                 $monthlyRevenue[] = [
                     'month' => $monthStart->locale('ar')->isoFormat('MMM YYYY'),

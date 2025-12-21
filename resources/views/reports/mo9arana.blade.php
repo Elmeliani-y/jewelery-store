@@ -1,0 +1,380 @@
+@extends('layouts.vertical', ['title' => 'مقارنة بالفترات'])
+
+@section('content')
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-flex align-items-center justify-content-between">
+                <h4 class="page-title text-primary-emphasis">مقارنة بالفترات</h4>
+                <div>
+                    <a href="{{ route('reports.all') }}" class="btn btn-secondary">عودة للتقارير</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="GET" action="{{ route('reports.mo9arana') }}" class="card mb-4" id="mo9aranaForm">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3" id="from1-group"></div>
+                <div class="col-md-3" id="to1-group"></div>
+                <div class="col-md-3" id="from2-group"></div>
+                <div class="col-md-3" id="to2-group"></div>
+
+                <div class="col-md-3">
+                    <label class="form-label">الفرع</label>
+                    <select name="branch_id" class="form-select">
+                        <option value="">كل الفروع</option>
+                        @foreach($branches as $b)
+                        <option value="{{ $b->id }}" {{ (string)($filters['branch_id'] ?? '') === (string)$b->id ? 'selected' : '' }}>{{ $b->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">نوع المدة</label>
+                    <select name="period_type" class="form-select" id="periodTypeSelect">
+                        <option value="annual" {{ ($filters['period_type'] ?? 'annual') === 'annual' ? 'selected' : '' }}>سنوي</option>
+                        <option value="monthly" {{ ($filters['period_type'] ?? '') === 'monthly' ? 'selected' : '' }}>شهري</option>
+                        <option value="weekly" {{ ($filters['period_type'] ?? '') === 'weekly' ? 'selected' : '' }}>أسبوعي</option>
+                        <option value="special" {{ ($filters['period_type'] ?? '') === 'special' ? 'selected' : '' }}>مخصص</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" type="submit">عرض المقارنة</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script>
+    // Helper to get default years
+    function getDefaultYear(offset = 0) {
+        const d = new Date();
+        return d.getFullYear() + offset;
+    }
+    function getDefaultMonth() {
+        return (new Date().getMonth() + 1).toString().padStart(2, '0');
+    }
+    function renderInputs(periodType) {
+        // Use actual GET params for monthly mode
+        const filters = {
+            from1: "{{ request('from1_year') && request('from1_month') ? request('from1_year') . '-' . request('from1_month') : (old('from1', $filters['from1'] ?? '')) }}",
+            to1: "{{ request('to1_year') && request('to1_month') ? request('to1_year') . '-' . request('to1_month') : (old('to1', $filters['to1'] ?? '')) }}",
+            from2: "{{ request('from2_year') && request('from2_month') ? request('from2_year') . '-' . request('from2_month') : (old('from2', $filters['from2'] ?? '')) }}",
+            to2: "{{ request('to2_year') && request('to2_month') ? request('to2_year') . '-' . request('to2_month') : (old('to2', $filters['to2'] ?? '')) }}"
+        };
+        let yThis = getDefaultYear();
+        let yLast = getDefaultYear(-1);
+        let mThis = getDefaultMonth();
+        // Annual: year dropdowns (calendar style)
+        if (periodType === 'annual') {
+            let yearOptions = '';
+            for (let y = yThis + 1; y >= 2000; y--) {
+                yearOptions += `<option value='${y}'>${y}</option>`;
+            }
+            document.getElementById('from1-group').innerHTML = `<label class='form-label'>من (الفترة 1)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from1_year' class='form-select'>${yearOptions}</select></div>`;
+            document.getElementById('to1-group').innerHTML = '';
+            document.getElementById('from2-group').innerHTML = `<label class='form-label'>من (الفترة 2)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from2_year' class='form-select'>${yearOptions}</select></div>`;
+            document.getElementById('to2-group').innerHTML = '';
+            setTimeout(function() {
+                const from1y = document.querySelector("select[name='from1_year']");
+                const from2y = document.querySelector("select[name='from2_year']");
+                let f1y = filters.from1 ? filters.from1.split('-')[0] : yThis;
+                let f2y = filters.from2 ? filters.from2.split('-')[0] : yLast;
+                from1y.value = f1y;
+                from2y.value = f2y;
+            }, 50);
+        } else if (periodType === 'monthly') {
+            // Monthly: month/year dropdowns only for each period
+            let monthOptions = '';
+            for (let m = 1; m <= 12; m++) {
+                let mm = m.toString().padStart(2, '0');
+                monthOptions += `<option value='${mm}'>${mm}</option>`;
+            }
+            let yearOptions = '';
+            for (let y = yThis + 1; y >= 2000; y--) {
+                yearOptions += `<option value='${y}'>${y}</option>`;
+            }
+            document.getElementById('from1-group').innerHTML = `<label class='form-label'>الفترة 1 (شهر/سنة)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from1_year' class='form-select'>${yearOptions}</select><select name='from1_month' class='form-select'>${monthOptions}</select></div>`;
+            document.getElementById('to1-group').innerHTML = '';
+            document.getElementById('from2-group').innerHTML = `<label class='form-label'>الفترة 2 (شهر/سنة)</label><div class='input-group'><span class='input-group-text'><i class='mdi mdi-calendar'></i></span><select name='from2_year' class='form-select'>${yearOptions}</select><select name='from2_month' class='form-select'>${monthOptions}</select></div>`;
+            document.getElementById('to2-group').innerHTML = '';
+            setTimeout(function() {
+                // Set initial values robustly
+                const from1y = document.querySelector("select[name='from1_year']");
+                const from1m = document.querySelector("select[name='from1_month']");
+                const from2y = document.querySelector("select[name='from2_year']");
+                const from2m = document.querySelector("select[name='from2_month']");
+                let f1y = filters.from1 ? filters.from1.split('-')[0] : yThis;
+                let f1m = filters.from1 ? filters.from1.split('-')[1] : mThis;
+                let f2y = filters.from2 ? filters.from2.split('-')[0] : yThis;
+                let f2m = filters.from2 ? filters.from2.split('-')[1] : mThis;
+                from1y.value = f1y;
+                from1m.value = f1m;
+                from2y.value = f2y;
+                from2m.value = f2m;
+            }, 50);
+        } else if (periodType === 'weekly') {
+            // Weekly: single date picker for each period, backend will use week of selected date
+            document.getElementById('from1-group').innerHTML = `<label class='form-label'>الفترة 1 (اختر يومًا)</label><input type='date' name='from1' class='form-control' value='${filters.from1 || ''}'>`;
+            document.getElementById('to1-group').innerHTML = '';
+            document.getElementById('from2-group').innerHTML = `<label class='form-label'>الفترة 2 (اختر يومًا)</label><input type='date' name='from2' class='form-control' value='${filters.from2 || ''}'>`;
+            document.getElementById('to2-group').innerHTML = '';
+        } else {
+            // Special: full date pickers
+            document.getElementById('from1-group').innerHTML = `<label class='form-label'>من (الفترة 1)</label><input type='date' name='from1' class='form-control' value='${filters.from1 || ''}'>`;
+            document.getElementById('to1-group').innerHTML = `<label class='form-label'>إلى (الفترة 1)</label><input type='date' name='to1' class='form-control' value='${filters.to1 || ''}'>`;
+            document.getElementById('from2-group').innerHTML = `<label class='form-label'>من (الفترة 2)</label><input type='date' name='from2' class='form-control' value='${filters.from2 || ''}'>`;
+            document.getElementById('to2-group').innerHTML = `<label class='form-label'>إلى (الفترة 2)</label><input type='date' name='to2' class='form-control' value='${filters.to2 || ''}'>`;
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const select = document.getElementById('periodTypeSelect');
+        renderInputs(select.value);
+        select.addEventListener('change', function() {
+            renderInputs(this.value);
+        });
+
+        // Fix: On form submit, assemble YYYY-MM for monthly mode
+        document.getElementById('mo9aranaForm').addEventListener('submit', function(e) {
+            const periodType = document.getElementById('periodTypeSelect').value;
+            if (periodType === 'monthly') {
+                // Remove any previous hidden fields
+                ['from1','to1','from2','to2'].forEach(function(name) {
+                    let el = document.querySelector(`input[name='${name}']`);
+                    if (el) el.remove();
+                });
+                // Assemble values from dropdowns
+                function val(sel) {
+                    let s = document.querySelector(sel);
+                    return s ? s.value : '';
+                }
+                // Helper to get last day of month
+                function lastDayOfMonth(year, month) {
+                    return new Date(year, month, 0).getDate().toString().padStart(2, '0');
+                }
+                let fy1 = val("select[name='from1_year']");
+                let fm1 = val("select[name='from1_month']");
+                let fy2 = val("select[name='from2_year']");
+                let fm2 = val("select[name='from2_month']");
+                let from1 = fy1 + '-' + fm1 + '-01';
+                let to1 = fy1 + '-' + fm1 + '-' + lastDayOfMonth(fy1, fm1);
+                let from2 = fy2 + '-' + fm2 + '-01';
+                let to2 = fy2 + '-' + fm2 + '-' + lastDayOfMonth(fy2, fm2);
+                // Add hidden fields
+                ['from1','to1','from2','to2'].forEach(function(name, i) {
+                    let v = [from1, to1, from2, to2][i];
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = v;
+                    document.getElementById('mo9aranaForm').appendChild(input);
+                });
+            }
+        });
+    });
+    </script
+    </form>
+
+    <div class="row mb-3">
+        <div class="col-12 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary" onclick="window.print()"><i class="mdi mdi-printer"></i> طباعة</button>
+            <button class="btn btn-outline-danger" onclick="exportTableToPDF()"><i class="mdi mdi-file-pdf"></i> PDF</button>
+            <button class="btn btn-outline-success" onclick="exportTableToCSV()"><i class="mdi mdi-file-excel"></i> CSV</button>
+        </div>
+    </div>
+
+    <style>
+    @media print {
+        body * { visibility: hidden; }
+        .table, .table * { visibility: visible; }
+        .table { page-break-inside: avoid; }
+        .card, .card-header, .card-body, .table-responsive { visibility: visible !important; }
+        .btn, .form-control, .form-select, .page-title-box, .navbar, .sidebar, .footer, .row.mt-3, .row.mb-3 { display: none !important; }
+        .table { width: 100% !important; font-size: 12pt; }
+        th, td { padding: 6px !important; }
+    }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js"></script>
+    <script>
+    function exportTableToCSV() {
+        let csv = '';
+        document.querySelectorAll('.table-bordered').forEach(function(table) {
+            let rows = table.querySelectorAll('tr');
+            rows.forEach(function(row) {
+                let cols = row.querySelectorAll('th,td');
+                let rowData = [];
+                cols.forEach(function(col) { rowData.push('"' + col.innerText.replace(/"/g, '""') + '"'); });
+                csv += rowData.join(',') + '\n';
+            });
+            csv += '\n';
+        });
+        let blob = new Blob([csv], { type: 'text/csv' });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'report.csv';
+        link.click();
+    }
+    function exportTableToPDF() {
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF('l', 'pt', 'a4');
+        let y = 20;
+        document.querySelectorAll('.card').forEach(function(card, idx) {
+            let title = card.querySelector('.card-header')?.innerText || '';
+            let table = card.querySelector('table');
+            if (table) {
+                if (title) doc.text(title, 40, y + 20);
+                window.jspdf.autoTable(doc, { html: table, startY: y + 30, theme: 'grid', styles: { fontSize: 10 } });
+                y = doc.lastAutoTable.finalY + 30;
+            }
+        });
+        doc.save('report.pdf');
+    }
+    </script>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">الفترة 1: {{ $period1['period'] }}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>المقياس</th>
+                                <th class="text-end">القيمة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>إجمالي المبيعات</td>
+                                <td class="text-end">{{ number_format($period1['total_sales'] ?? 0, 2) }} ريال</td>
+                            </tr>
+                            <tr>
+                                <td>إجمالي الوزن</td>
+                                <td class="text-end">{{ number_format($period1['total_weight'] ?? 0, 3) }} جرام</td>
+                            </tr>
+                            <tr>
+                                <td>معدل سعر الجرام</td>
+                                <td class="text-end">{{ number_format($period1['price_per_gram'] ?? 0, 2) }} د/جرام</td>
+                            </tr>
+                            <tr>
+                                <td>عدد المبيعات</td>
+                                <td class="text-end">{{ number_format($period1['sales_count'] ?? 0, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr>
+                                <td>إجمالي المصروفات</td>
+                                <td class="text-end">{{ number_format($period1['total_expenses'] ?? 0, 2) }} ريال</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">الفترة 2: {{ $period2['period'] }}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>المقياس</th>
+                                <th class="text-end">القيمة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>إجمالي المبيعات</td>
+                                <td class="text-end">{{ number_format($period2['total_sales'] ?? 0, 2) }} ريال</td>
+                            </tr>
+                            <tr>
+                                <td>إجمالي الوزن</td>
+                                <td class="text-end">{{ number_format($period2['total_weight'] ?? 0, 3) }} جرام</td>
+                            </tr>
+                            <tr>
+                                <td>معدل سعر الجرام</td>
+                                <td class="text-end">{{ number_format($period2['price_per_gram'] ?? 0, 2) }} د/جرام</td>
+                            </tr>
+                            <tr>
+                                <td>عدد المبيعات</td>
+                                <td class="text-end">{{ number_format($period2['sales_count'] ?? 0, 0, ',', '.') }}</td>
+                            </tr>
+                            <tr>
+                                <td>إجمالي المصروفات</td>
+                                <td class="text-end">{{ number_format($period2['total_expenses'] ?? 0, 2) }} ريال</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <h5 class="mb-3">جدول تفصيلي حسب الموظف / العيار / الصنف</h5>
+            @foreach(['employees' => 'الموظف', 'calibers' => 'العيار', 'categories' => 'الصنف'] as $type => $label)
+                <div class="card mb-4">
+                    <div class="card-header bg-light"><b>حسب {{ $label }}</b></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{{ $label }}</th>
+                                        <th>مبيعات الفترة 1</th>
+                                        <th>مبيعات الفترة 2</th>
+                                        <th>وزن الفترة 1</th>
+                                        <th>وزن الفترة 2</th>
+                                        <th>نسبة الفرق بالمبيعات</th>
+                                        <th>نسبة الفرق بالوزن</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($groupAggregates[$type] as $row)
+                                        <tr>
+                                            <td>{{ $row['name'] }}</td>
+                                            <td class="text-end">{{ number_format($row['total_sales_1'], 2) }}</td>
+                                            <td class="text-end">{{ number_format($row['total_sales_2'], 2) }}</td>
+                                            <td class="text-end">{{ number_format($row['total_weight_1'], 3) }}</td>
+                                            <td class="text-end">{{ number_format($row['total_weight_2'], 3) }}</td>
+                                            <td class="text-end">
+                                                @if($row['sales_diff_pct'] !== null)
+                                                    <span class="fw-bold {{ $row['sales_diff_pct'] > 0 ? 'text-success' : ($row['sales_diff_pct'] < 0 ? 'text-danger' : '') }}">
+                                                        @if($row['sales_diff_pct'] > 0)+@endif{{ $row['sales_diff_pct'] }}%
+                                                    </span>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td class="text-end">
+                                                @if($row['weight_diff_pct'] !== null)
+                                                    <span class="fw-bold {{ $row['weight_diff_pct'] > 0 ? 'text-success' : ($row['weight_diff_pct'] < 0 ? 'text-danger' : '') }}">
+                                                        @if($row['weight_diff_pct'] > 0)+@endif{{ $row['weight_diff_pct'] }}%
+                                                    </span>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+</div>
+@endsection

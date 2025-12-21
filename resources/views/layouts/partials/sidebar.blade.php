@@ -118,6 +118,7 @@
                 @if(!auth()->user()->isBranch())
 
                     <li class="menu-title mt-2">التقارير</li>
+                    <li class="menu-title mt-2">التقارير</li>
                     <li>
                         <a href="#sidebarReports" data-bs-toggle="collapse" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-chart-line"></i></span>
@@ -133,7 +134,21 @@
                                     <a href="{{ route('reports.kasr') }}" class="tp-link">تقرير الكسر (صافي الربح)</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير المقارن</a>
+                                    <a href="#sidebarComparisons" data-bs-toggle="collapse" class="tp-link">
+                                        <span class="nav-icon"><i class="mdi mdi-compare"></i></span>
+                                        <span>مقارنات</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <div class="collapse" id="sidebarComparisons">
+                                        <ul class="nav-second-level">
+                                            <li>
+                                                <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير المقارن</a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ route('reports.mo9arana') }}" class="tp-link">تقرير مقارنة بالمدة</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </li>
                                 <li>
                                     <a href="{{ route('reports.speed') }}" class="tp-link">تقرير السرعة</a>

@@ -414,8 +414,8 @@ if(typeof monthlyRevenueData !== 'undefined') {
     }
     var revenueOptions = {
         series: [
-            { name: 'المبيعات', type: 'line', data: data.map(item => item.sales) },
-            { name: 'المصروفات', type: 'line', data: data.map(item => item.expenses) }
+            { name: 'المبيعات', type: 'line', data: data.map(item => parseFloat(item.sales) || 0) },
+            { name: 'المصروفات', type: 'line', data: data.map(item => parseFloat(item.expenses) || 0) }
         ],
         chart: { type: 'line', height: 200, toolbar: { show: false } },
         grid: { borderColor: '#f1f1f1', strokeDashArray: 3 },
@@ -440,16 +440,16 @@ if(typeof monthlyRevenueData !== 'undefined') {
         },
         xaxis: {
             categories: data.map(item => item.month),
-            labels: { style: { colors: '#9aa0ac' }, rotate: -45, rotateAlways: false }
+                labels: { style: { colors: '#9aa0ac' }, rotate: -45, rotateAlways: false }
         },
         tooltip: {
             shared: true,
             intersect: false,
             theme: "light",
             y: {
-                formatter: function(val) {
-                    return val.toLocaleString('fr-MA') + '';
-                }
+                    formatter: function(val) {
+                        try { return Number(val).toLocaleString('ar-EG'); } catch(e) { return val; }
+                    }
             }
         }
     };
