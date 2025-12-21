@@ -119,24 +119,6 @@
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-6 col-xl">
-            <div class="card">
-                <div class="card-body">
-                    <div class="widget-first">
-                        <div class="d-flex align-items-center mb-2">
-                            <p class="mb-0 text-dark fs-16 fw-medium">صافي الربح</p>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['net_profit'], 0, ',', '.') }}</h3>
-                            <div id="total_income" class="apex-charts"></div>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-{{ $metrics['net_profit'] >= 0 ? 'success' : 'danger' }}-subtle text-{{ $metrics['net_profit'] >= 0 ? 'success' : 'danger' }} fs-13">{{ $metrics['net_profit'] >= 0 ? 'ربح' : 'خسارة' }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="col-md-6 col-lg-4 col-xl">
             <div class="card">

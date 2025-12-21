@@ -263,7 +263,7 @@
                             </tr>
                             <tr>
                                 <td>إجمالي الوزن</td>
-                                <td class="text-end">{{ number_format($period1['total_weight'] ?? 0, 3) }} جرام</td>
+                                <td class="text-end">{{ number_format($period1['total_weight'] ?? 0, 2) }} جرام</td>
                             </tr>
                             <tr>
                                 <td>معدل سعر الجرام</td>
@@ -303,7 +303,7 @@
                             </tr>
                             <tr>
                                 <td>إجمالي الوزن</td>
-                                <td class="text-end">{{ number_format($period2['total_weight'] ?? 0, 3) }} جرام</td>
+                                <td class="text-end">{{ number_format($period2['total_weight'] ?? 0, 2) }} جرام</td>
                             </tr>
                             <tr>
                                 <td>معدل سعر الجرام</td>
@@ -352,8 +352,8 @@
                                             <td>{{ $row['name'] }}</td>
                                             <td class="text-end">{{ number_format($row['total_sales_1'], 2) }}</td>
                                             <td class="text-end">{{ number_format($row['total_sales_2'], 2) }}</td>
-                                            <td class="text-end">{{ number_format($row['total_weight_1'], 3) }}</td>
-                                            <td class="text-end">{{ number_format($row['total_weight_2'], 3) }}</td>
+                                            <td class="text-end">{{ number_format($row['total_weight_1'], 2) }}</td>
+                                            <td class="text-end">{{ number_format($row['total_weight_2'], 2) }}</td>
                                             <td class="text-end">
                                                 @if($row['sales_diff_pct'] !== null)
                                                     <span class="fw-bold {{ $row['sales_diff_pct'] > 0 ? 'text-success' : ($row['sales_diff_pct'] < 0 ? 'text-danger' : '') }}">
@@ -382,8 +382,8 @@
                                         <td>الإجماليات</td>
                                         <td class="text-end">{{ number_format($rows->sum('total_sales_1'), 2) }}</td>
                                         <td class="text-end">{{ number_format($rows->sum('total_sales_2'), 2) }}</td>
-                                        <td class="text-end">{{ number_format($rows->sum('total_weight_1'), 3) }}</td>
-                                        <td class="text-end">{{ number_format($rows->sum('total_weight_2'), 3) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('total_weight_1'), 2) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('total_weight_2'), 2) }}</td>
                                         <td class="text-end">
                                             @php
                                                 $salesDiffs = $rows->pluck('sales_diff_pct')->filter(fn($v) => $v !== null);

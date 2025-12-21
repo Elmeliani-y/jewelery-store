@@ -98,7 +98,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $product['category_name'] ?? '' }}</td>
                                     <td>{{ $product['caliber_name'] ?? '' }}</td>
-                                    <td>{{ number_format($product['weight'], 3) }}</td>
+                                    <td>{{ number_format($product['weight'], 2) }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($product['amount'], 2) }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($product['tax_amount'], 0, ',', '.') }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($product['net_amount'], 0, ',', '.') }}</td>
@@ -106,7 +106,7 @@
                                 @endforeach
                                 <tr class="table-secondary fw-semibold">
                                     <td colspan="3" class="text-end">المجموع:</td>
-                                    <td>{{ number_format($sale->weight, 3) }}</td>
+                                    <td>{{ number_format($sale->weight, 2) }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($sale->total_amount, 2) }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($sale->tax_amount, 0, ',', '.') }}</td>
                                     <td class="text-mono" dir="ltr">{{ number_format($sale->net_amount, 0, ',', '.') }}</td>

@@ -81,7 +81,7 @@
                                         @endif
                                     </td>
                                     <td class="fw-bold">
-                                        {{ number_format($data['weight'], 3) }}
+                                        {{ number_format($data['weight'], 2) }}
                                         @if(!empty($branchCaliberSales[$branchId]))
                                             <div class="d-flex flex-wrap mt-1" style="gap:0.25rem;">
                                                 @php
@@ -89,7 +89,7 @@
                                                 @endphp
                                                 @foreach($branchCaliberSales[$branchId] as $i => $caliber)
                                                     <span style="background:{{$badgeColors[$i%count($badgeColors)]}};color:#fff;padding:2px 10px;border-radius:12px;font-size:0.95em;display:inline-block;min-width:38px;text-align:center;">
-                                                        {{ $caliber['name'] }}: {{ number_format($caliber['weight'], 3) }}
+                                                        {{ $caliber['name'] }}: {{ number_format($caliber['weight'], 2) }}
                                                     </span>
                                                 @endforeach
                                             </div>

@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <h6>ملخص الفاتورة</h6>
                     <div class="mb-3">
                         <label class="form-label">الوزن الكلي</label>
-                        <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->weight,3) }} جرام</div>
+                        <div class="form-control bg-light text-mono" readonly>{{ number_format($sale->weight,2) }} جرام</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">المبلغ الإجمالي</label>

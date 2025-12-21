@@ -124,7 +124,7 @@
                                         <select class="form-select product-category" name="products[INDEX][category_id]" required>
                                             <option value="" disabled selected hidden>اختر الصنف</option>
                                             @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" data-default-caliber="{{ $category->default_caliber_id }}">{{ $category->name }}</option>
+                                                <option value="{{ $category->id }}" data-default-caliber="{{ $category->default_caliber_id ?? '' }}">{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -548,6 +548,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (data && data.success) {
+                // Reset form and products immediately after success
+                const form = document.getElementById('sale-create-form');
+                if (form) {
+                    form.reset();
+                    const productsContainer = document.getElementById('products-container');
+                    productsContainer.innerHTML = '';
+                    if (typeof window.productIndex !== 'undefined') window.productIndex = 0;
+                    if (typeof window.addProduct === 'function') {
+                        window.addProduct();
+                    } else if (typeof addProduct === 'function') {
+                        addProduct();
+                    }
+                }
                 // Populate modal details and show
                 const modalEl = document.getElementById('saleSuccessModal');
                 const invoiceEl = document.getElementById('saleSuccessInvoice');
@@ -679,12 +692,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Auto-select caliber based on category default
         productItem.find('.product-category').on('change', function() {
             const selectedOption = $(this).find(':selected');
-            const defaultCaliberId = selectedOption.data('default-caliber');
+            let defaultCaliberId = selectedOption.attr('data-default-caliber');
             const caliberSelect = productItem.find('.product-caliber');
-            
-            // If category has a default caliber, select it
-            if (defaultCaliberId) {
-                caliberSelect.val(defaultCaliberId).trigger('change');
+            // Debug: log available options and defaultCaliberId
+            console.log('DefaultCaliberId:', defaultCaliberId, 'Options:', caliberSelect.find('option').map(function(){return $(this).val();}).get());
+            if (defaultCaliberId && defaultCaliberId !== '' && defaultCaliberId !== '0') {
+                caliberSelect.val(defaultCaliberId.toString()).trigger('change');
+            } else {
+                caliberSelect.val('');
             }
         });
         
@@ -925,8 +940,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Clear dynamic products and add a fresh one
                 const productsContainer = document.getElementById('products-container');
                 productsContainer.innerHTML = '';
-                // Reset counters in current scope
-                window.location.reload(); // simplest way to reset dynamic state
+                if (typeof window.productIndex !== 'undefined') window.productIndex = 0;
+                if (typeof window.addProduct === 'function') {
+                    window.addProduct();
+                } else if (typeof addProduct === 'function') {
+                    addProduct();
+                }
             }
         });
 
