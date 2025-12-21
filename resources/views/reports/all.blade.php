@@ -260,7 +260,7 @@
 								@if($sales->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td colspan="4" class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td colspan="4" class="text-end">الإجمالي</td>
 										<td dir="ltr">{{ number_format($sales->sum('weight'), 2) }}</td>
 										<td></td>
 										<td></td>
@@ -342,7 +342,7 @@
 								@if($returnedSales->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td colspan="4" class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td colspan="4" class="text-end">الإجمالي</td>
 										<td dir="ltr">{{ number_format($returnedSales->sum('weight'), 2) }}</td>
 										<td></td>
 										<td></td>
@@ -390,7 +390,7 @@
 								@if($expenses->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td colspan="3" class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td colspan="3" class="text-end">الإجمالي</td>
 										<td dir="ltr">{{ number_format($expenses->sum('amount'), 2) }}</td>
 										<td></td>
 									</tr>
@@ -459,7 +459,7 @@
 								@if($branchData->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td class="text-end">الإجمالي</td>
 										<td>{{ $branchData->sum('sales_count') }}</td>
 										<td dir="ltr">{{ number_format($branchData->sum('total_sales'),2) }}</td>
 										<td dir="ltr">{{ number_format($branchData->sum('total_weight'),2) }}</td>
@@ -526,7 +526,7 @@
 								@if($employeesData->count())
 								<tfoot>
 									<tr class="fw-bold">
-										<td class="text-end">الإجمالي (الصفحة الحالية)</td>
+										<td class="text-end">الإجمالي</td>
 										<td></td>
 										<td>{{ $employeesData->sum('sales_count') }}</td>
 										<td dir="ltr">{{ number_format($employeesData->sum('total_sales'),2) }}</td>

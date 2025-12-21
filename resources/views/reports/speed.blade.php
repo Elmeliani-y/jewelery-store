@@ -233,6 +233,17 @@
                                 </tr>
                                 @endforelse
                             </tbody>
+                                @php $empRows = $topEmployees instanceof \Illuminate\Pagination\LengthAwarePaginator ? collect($topEmployees->items()) : collect($topEmployees); @endphp
+                                @if($empRows->count())
+                                <tfoot class="table-light">
+                                    <tr class="fw-semibold">
+                                        <td colspan="2">الإجماليات</td>
+                                        <td class="text-center">{{ $empRows->sum('sales_count') }}</td>
+                                        <td class="text-end">{{ number_format($empRows->sum('total_sales'), 0) }}</td>
+                                        <td class="text-end">{{ number_format($empRows->sum('total_weight'), 2) }}</td>
+                                    </tr>
+                                </tfoot>
+                                @endif
                         </table>
                     </div>
                 </div>
@@ -270,6 +281,17 @@
                                 </tr>
                                 @endforelse
                             </tbody>
+                                @php $caliberRows = collect($salesByCaliber); @endphp
+                                @if($caliberRows->count())
+                                <tfoot class="table-light">
+                                    <tr class="fw-semibold">
+                                        <td>الإجماليات</td>
+                                        <td class="text-center">{{ $caliberRows->sum('count') }}</td>
+                                        <td class="text-end">{{ number_format($caliberRows->sum('amount'), 0) }}</td>
+                                        <td class="text-end">{{ number_format($caliberRows->sum('weight'), 2) }}</td>
+                                    </tr>
+                                </tfoot>
+                                @endif
                         </table>
                     </div>
                 </div>
@@ -315,6 +337,16 @@
                                 </tr>
                                 @endforelse
                             </tbody>
+                                @php $methodRows = collect($paymentMethods); @endphp
+                                @if($methodRows->count())
+                                <tfoot class="table-light">
+                                    <tr class="fw-semibold">
+                                        <td>الإجماليات</td>
+                                        <td class="text-center">{{ $methodRows->sum('count') }}</td>
+                                        <td class="text-end">{{ number_format($methodRows->sum('amount'), 0) }}</td>
+                                    </tr>
+                                </tfoot>
+                                @endif
                         </table>
                     </div>
                 </div>
@@ -350,6 +382,16 @@
                                 </tr>
                                 @endforelse
                             </tbody>
+                                @php $expenseRows = collect($topExpenseTypes); @endphp
+                                @if($expenseRows->count())
+                                <tfoot class="table-light">
+                                    <tr class="fw-semibold">
+                                        <td>الإجماليات</td>
+                                        <td class="text-center">{{ $expenseRows->sum('count') }}</td>
+                                        <td class="text-end text-danger fw-bold">{{ number_format($expenseRows->sum('total'), 0) }}</td>
+                                    </tr>
+                                </tfoot>
+                                @endif
                         </table>
                     </div>
                 </div>

@@ -88,10 +88,10 @@ class ReportController extends Controller
     }
 
     /**
-     * Comparative by periods report (mo9arana bi l moda).
+     * Comparative by periods report (period comparison).
      * Accepts two date ranges: from1/to1 and from2/to2, a branch_id and a period type filter.
      */
-    public function mo9arana(Request $request)
+    public function periodComparison(Request $request)
     {
         $branches = Branch::active()->get();
 
@@ -105,8 +105,12 @@ class ReportController extends Controller
 
         // Set defaults if not provided
         $now = Carbon::now();
-        if (!$periodType) $periodType = 'annual';
-        if (!$branchId) $branchId = null;
+        if (! $periodType) {
+            $periodType = 'annual';
+        }
+        if (! $branchId) {
+            $branchId = null;
+        }
 
         if ($periodType === 'annual') {
             $thisYear = $now->year;
@@ -124,10 +128,10 @@ class ReportController extends Controller
             $thisYear = $now->year;
             $thisMonth = $now->month;
             $lastYear = $now->copy()->subYear()->year;
-            $from1 = $from1 ?: ($thisYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-01');
-            $to1 = $to1 ?: ($thisYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-' . Carbon::create($thisYear, $thisMonth, 1)->endOfMonth()->format('d'));
-            $from2 = $from2 ?: ($lastYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-01');
-            $to2 = $to2 ?: ($lastYear . '-' . str_pad($thisMonth, 2, '0', STR_PAD_LEFT) . '-' . Carbon::create($lastYear, $thisMonth, 1)->endOfMonth()->format('d'));
+            $from1 = $from1 ?: ($thisYear.'-'.str_pad($thisMonth, 2, '0', STR_PAD_LEFT).'-01');
+            $to1 = $to1 ?: ($thisYear.'-'.str_pad($thisMonth, 2, '0', STR_PAD_LEFT).'-'.Carbon::create($thisYear, $thisMonth, 1)->endOfMonth()->format('d'));
+            $from2 = $from2 ?: ($lastYear.'-'.str_pad($thisMonth, 2, '0', STR_PAD_LEFT).'-01');
+            $to2 = $to2 ?: ($lastYear.'-'.str_pad($thisMonth, 2, '0', STR_PAD_LEFT).'-'.Carbon::create($lastYear, $thisMonth, 1)->endOfMonth()->format('d'));
             // Accept Y-m-d directly
             $from1_date = Carbon::parse($from1);
             $to1_date = Carbon::parse($to1);
@@ -150,10 +154,10 @@ class ReportController extends Controller
         }
 
         // helper to compute totals for a range, with pretty period label
-        $computeTotals = function($start, $end, $branchId = null) use ($periodType) {
+        $computeTotals = function ($start, $end, $branchId = null) use ($periodType) {
 
             $result = [
-                'period' => ($start && $end) ? ($start . ' - ' . $end) : 'N/A',
+                'period' => ($start && $end) ? ($start.' - '.$end) : 'N/A',
                 'total_sales' => 0,
                 'total_weight' => 0,
                 'price_per_gram' => 0,
@@ -161,7 +165,9 @@ class ReportController extends Controller
                 'total_expenses' => 0,
             ];
 
-            if (!$start || !$end) return $result;
+            if (! $start || ! $end) {
+                return $result;
+            }
 
             // Format period label nicely, always start-to-end
             $prettyPeriod = $result['period'];
@@ -170,26 +176,29 @@ class ReportController extends Controller
                     // $start and $end are in Y-m format, always use as selected
                     $startObj = \Carbon\Carbon::createFromFormat('Y-m', $start)->startOfMonth();
                     $endObj = \Carbon\Carbon::createFromFormat('Y-m', $end)->endOfMonth();
-                    $prettyPeriod = $startObj->format('d-m-Y') . ' - ' . $endObj->format('d-m-Y');
+                    $prettyPeriod = $startObj->format('d-m-Y').' - '.$endObj->format('d-m-Y');
                 } elseif ($periodType === 'annual') {
                     $startObj = \Carbon\Carbon::parse($start);
                     $endObj = \Carbon\Carbon::parse($end);
                     if ($startObj->gt($endObj)) {
                         [$startObj, $endObj] = [$endObj, $startObj];
                     }
-                    $prettyPeriod = $startObj->format('Y') . ' - ' . $endObj->format('Y');
+                    $prettyPeriod = $startObj->format('Y').' - '.$endObj->format('Y');
                 } elseif ($periodType === 'weekly' || $periodType === 'special') {
                     $startObj = \Carbon\Carbon::parse($start);
                     $endObj = \Carbon\Carbon::parse($end);
                     if ($startObj->gt($endObj)) {
                         [$startObj, $endObj] = [$endObj, $startObj];
                     }
-                    $prettyPeriod = $startObj->format('d-m-Y') . ' - ' . $endObj->format('d-m-Y');
+                    $prettyPeriod = $startObj->format('d-m-Y').' - '.$endObj->format('d-m-Y');
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
 
-            $salesQuery = Sale::notReturned()->whereBetween('created_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
-            if ($branchId) $salesQuery->where('branch_id', $branchId);
+            $salesQuery = Sale::notReturned()->whereBetween('created_at', [$start.' 00:00:00', $end.' 23:59:59']);
+            if ($branchId) {
+                $salesQuery->where('branch_id', $branchId);
+            }
             $sales = $salesQuery->get();
 
             $totalSales = 0;
@@ -207,7 +216,9 @@ class ReportController extends Controller
             }
 
             $expensesQuery = Expense::whereBetween('expense_date', [$start, $end]);
-            if ($branchId) $expensesQuery->where('branch_id', $branchId);
+            if ($branchId) {
+                $expensesQuery->where('branch_id', $branchId);
+            }
             $totalExpenses = $expensesQuery->sum('amount');
 
             $pricePerGram = $totalWeight > 0 ? ($totalSales / $totalWeight) : 0;
@@ -221,7 +232,6 @@ class ReportController extends Controller
                 'total_expenses' => $totalExpenses,
             ];
         };
-
 
         $period1 = $computeTotals(
             $from1_date ? $from1_date->toDateString() : null,
@@ -255,7 +265,7 @@ class ReportController extends Controller
                     // Filter by employee_id in SQL
                     $sales1 = \App\Models\Sale::notReturned()
                         ->where('employee_id', $id)
-                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
                         ->inDateRange($from1_date, $to1_date)
                         ->get();
                     foreach ($sales1 as $sale) {
@@ -269,7 +279,7 @@ class ReportController extends Controller
                     }
                     $sales2 = \App\Models\Sale::notReturned()
                         ->where('employee_id', $id)
-                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
                         ->inDateRange($from2_date, $to2_date)
                         ->get();
                     foreach ($sales2 as $sale) {
@@ -284,7 +294,7 @@ class ReportController extends Controller
                 } else {
                     // For calibers/categories, get all sales in range and filter products in PHP
                     $sales1 = \App\Models\Sale::notReturned()
-                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
                         ->inDateRange($from1_date, $to1_date)
                         ->get();
                     foreach ($sales1 as $sale) {
@@ -302,7 +312,7 @@ class ReportController extends Controller
                         }
                     }
                     $sales2 = \App\Models\Sale::notReturned()
-                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
                         ->inDateRange($from2_date, $to2_date)
                         ->get();
                     foreach ($sales2 as $sale) {
@@ -350,7 +360,7 @@ class ReportController extends Controller
             'period_type' => $periodType,
         ];
 
-        return view('reports.mo9arana', compact('branches', 'filters', 'period1', 'period2', 'groupAggregates'));
+        return view('reports.period_comparison', compact('branches', 'filters', 'period1', 'period2', 'groupAggregates'));
     }
 
     /**

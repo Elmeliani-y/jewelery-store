@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <form method="GET" action="{{ route('reports.mo9arana') }}" class="card mb-4" id="mo9aranaForm">
+    <form method="GET" action="{{ route('reports.period_comparison') }}" class="card mb-4" id="mo9aranaForm">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3" id="from1-group"></div>
@@ -392,6 +392,44 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                @php $rows = collect($groupAggregates[$type]); @endphp
+                                @if($rows->count())
+                                <tfoot class="table-light">
+                                    <tr class="fw-semibold">
+                                        <td>الإجماليات</td>
+                                        <td class="text-end">{{ number_format($rows->sum('total_sales_1'), 2) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('total_sales_2'), 2) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('total_weight_1'), 3) }}</td>
+                                        <td class="text-end">{{ number_format($rows->sum('total_weight_2'), 3) }}</td>
+                                        <td class="text-end">
+                                            @php
+                                                $salesDiffs = $rows->pluck('sales_diff_pct')->filter(fn($v) => $v !== null);
+                                                $avgSalesDiff = $salesDiffs->count() ? round($salesDiffs->avg(), 2) : null;
+                                            @endphp
+                                            @if($avgSalesDiff !== null)
+                                                <span class="fw-bold {{ $avgSalesDiff > 0 ? 'text-success' : ($avgSalesDiff < 0 ? 'text-danger' : '') }}">
+                                                    @if($avgSalesDiff > 0)+@endif{{ $avgSalesDiff }}%
+                                                </span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td class="text-end">
+                                            @php
+                                                $weightDiffs = $rows->pluck('weight_diff_pct')->filter(fn($v) => $v !== null);
+                                                $avgWeightDiff = $weightDiffs->count() ? round($weightDiffs->avg(), 2) : null;
+                                            @endphp
+                                            @if($avgWeightDiff !== null)
+                                                <span class="fw-bold {{ $avgWeightDiff > 0 ? 'text-success' : ($avgWeightDiff < 0 ? 'text-danger' : '') }}">
+                                                    @if($avgWeightDiff > 0)+@endif{{ $avgWeightDiff }}%
+                                                </span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                                @endif
                             </table>
                         </div>
                     </div>

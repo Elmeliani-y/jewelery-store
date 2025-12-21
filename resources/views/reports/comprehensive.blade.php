@@ -50,6 +50,20 @@
                     <tr><td colspan="9" class="text-center text-muted">لا توجد بيانات</td></tr>
                     @endforelse
                 </tbody>
+                    @php
+                        $salesRows = $sales instanceof \Illuminate\Pagination\LengthAwarePaginator ? collect($sales->items()) : $sales;
+                    @endphp
+                    @if($salesRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td colspan="4">الإجماليات</td>
+                            <td dir="ltr">{{ number_format($salesRows->sum('weight'),2) }}</td>
+                            <td dir="ltr">{{ number_format($salesRows->sum('total_amount'),2) }}</td>
+                            <td dir="ltr">{{ number_format($salesRows->sum('net_amount'),2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
         @if(method_exists($sales, 'hasPages') && $sales->hasPages())
@@ -76,6 +90,18 @@
                     <tr><td colspan="5" class="text-center text-muted">لا توجد بيانات</td></tr>
                     @endforelse
                 </tbody>
+                    @php
+                        $expenseRows = $expenses instanceof \Illuminate\Pagination\LengthAwarePaginator ? collect($expenses->items()) : $expenses;
+                    @endphp
+                    @if($expenseRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td colspan="3">الإجماليات</td>
+                            <td dir="ltr">{{ number_format($expenseRows->sum('amount'),2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
         @if(method_exists($expenses, 'hasPages') && $expenses->hasPages())

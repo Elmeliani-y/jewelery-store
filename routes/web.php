@@ -86,7 +86,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
         Route::get('net-profit', [ReportController::class, 'netProfit'])->name('net-profit');
         Route::get('by-branch', [ReportController::class, 'byBranch'])->name('by-branch');
         Route::get('comparative', [ReportController::class, 'comparative'])->name('comparative');
-        Route::match(['get','post'], 'comparative-by-time', [ReportController::class, 'mo9arana'])->name('mo9arana');
+        Route::match(['get','post'], 'comparative-by-time', [ReportController::class, 'periodComparison'])->name('period_comparison');
         Route::match(['get', 'post'], 'kasr', [ReportController::class, 'kasr'])->name('kasr');
         Route::get('accounts', [ReportController::class, 'accounts'])->name('accounts');
     });

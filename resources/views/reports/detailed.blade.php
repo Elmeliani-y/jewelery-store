@@ -37,6 +37,17 @@
                     <tr><td>{{ $branch }}</td><td>{{ $rows->count() }}</td><td dir="ltr">{{ number_format($rows->sum('total_amount'),2) }}</td><td dir="ltr">{{ number_format($rows->sum('weight'),2) }}</td></tr>
                     @endforeach
                 </tbody>
+                    @php $branchRows = $groupedData['by_branch']; @endphp
+                    @if($branchRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td>الإجماليات</td>
+                            <td>{{ $branchRows->sum->count() }}</td>
+                            <td dir="ltr">{{ number_format($branchRows->sum->sum('total_amount'),2) }}</td>
+                            <td dir="ltr">{{ number_format($branchRows->sum->sum('weight'),2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
     </div></div>
@@ -50,6 +61,17 @@
                     <tr><td>{{ $emp }}</td><td>{{ $rows->count() }}</td><td dir="ltr">{{ number_format($rows->sum('total_amount'),2) }}</td><td dir="ltr">{{ number_format($rows->sum('weight'),2) }}</td></tr>
                     @endforeach
                 </tbody>
+                    @php $empRows = $groupedData['by_employee']; @endphp
+                    @if($empRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td>الإجماليات</td>
+                            <td>{{ $empRows->sum->count() }}</td>
+                            <td dir="ltr">{{ number_format($empRows->sum->sum('total_amount'),2) }}</td>
+                            <td dir="ltr">{{ number_format($empRows->sum->sum('weight'),2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
     </div></div>
@@ -63,6 +85,16 @@
                     <tr><td>{{ $cat }}</td><td>{{ $rows->count() }}</td><td dir="ltr">{{ number_format($rows->sum('total_amount'),2) }}</td></tr>
                     @endforeach
                 </tbody>
+                    @php $catRows = $groupedData['by_category']; @endphp
+                    @if($catRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td>الإجماليات</td>
+                            <td>{{ $catRows->sum->count() }}</td>
+                            <td dir="ltr">{{ number_format($catRows->sum->sum('total_amount'),2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
     </div></div>
@@ -76,6 +108,17 @@
                     <tr><td>{{ $cal }}</td><td>{{ $rows->count() }}</td><td dir="ltr">{{ number_format($rows->sum('total_amount'),2) }}</td><td dir="ltr">{{ number_format($rows->sum('weight'),2) }}</td></tr>
                     @endforeach
                 </tbody>
+                    @php $calRows = $groupedData['by_caliber']; @endphp
+                    @if($calRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td>الإجماليات</td>
+                            <td>{{ $calRows->sum->count() }}</td>
+                            <td dir="ltr">{{ number_format($calRows->sum->sum('total_amount'),2) }}</td>
+                            <td dir="ltr">{{ number_format($calRows->sum->sum('weight'),2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
     </div></div>
@@ -89,6 +132,16 @@
                     <tr><td>{{ $date }}</td><td>{{ $rows->count() }}</td><td dir="ltr">{{ number_format($rows->sum('total_amount'),2) }}</td></tr>
                     @endforeach
                 </tbody>
+                    @php $dateRows = $groupedData['by_date']; @endphp
+                    @if($dateRows->count())
+                    <tfoot class="table-light">
+                        <tr class="fw-semibold">
+                            <td>الإجماليات</td>
+                            <td>{{ $dateRows->sum->count() }}</td>
+                            <td dir="ltr">{{ number_format($dateRows->sum->sum('total_amount'),2) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
             </table>
         </div>
     </div></div>
