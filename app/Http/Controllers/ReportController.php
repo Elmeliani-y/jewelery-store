@@ -247,48 +247,75 @@ class ReportController extends Controller
             foreach ($all as $item) {
                 $id = $item->id;
                 $name = $item->{$info['name']};
-                // Period 1
-                $sales1 = \App\Models\Sale::notReturned()
-                    ->where($info['field'], $id)
-                    ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-                    ->inDateRange($from1_date, $to1_date)
-                    ->get();
                 $totalSales1 = 0;
                 $totalWeight1 = 0;
-                foreach ($sales1 as $sale) {
-                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
-                    if ($products) {
-                        foreach ($products as $product) {
-                            if (
-                                ($type === 'calibers' && isset($product['caliber_id']) && $product['caliber_id'] == $id) ||
-                                ($type === 'categories' && isset($product['category_id']) && $product['category_id'] == $id) ||
-                                ($type === 'employees' && $sale->employee_id == $id)
-                            ) {
+                $totalSales2 = 0;
+                $totalWeight2 = 0;
+                if ($type === 'employees') {
+                    // Filter by employee_id in SQL
+                    $sales1 = \App\Models\Sale::notReturned()
+                        ->where('employee_id', $id)
+                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->inDateRange($from1_date, $to1_date)
+                        ->get();
+                    foreach ($sales1 as $sale) {
+                        $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                        if ($products) {
+                            foreach ($products as $product) {
                                 $totalSales1 += $product['amount'] ?? 0;
                                 $totalWeight1 += $product['weight'] ?? 0;
                             }
                         }
                     }
-                }
-                // Period 2
-                $sales2 = \App\Models\Sale::notReturned()
-                    ->where($info['field'], $id)
-                    ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-                    ->inDateRange($from2_date, $to2_date)
-                    ->get();
-                $totalSales2 = 0;
-                $totalWeight2 = 0;
-                foreach ($sales2 as $sale) {
-                    $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
-                    if ($products) {
-                        foreach ($products as $product) {
-                            if (
-                                ($type === 'calibers' && isset($product['caliber_id']) && $product['caliber_id'] == $id) ||
-                                ($type === 'categories' && isset($product['category_id']) && $product['category_id'] == $id) ||
-                                ($type === 'employees' && $sale->employee_id == $id)
-                            ) {
+                    $sales2 = \App\Models\Sale::notReturned()
+                        ->where('employee_id', $id)
+                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->inDateRange($from2_date, $to2_date)
+                        ->get();
+                    foreach ($sales2 as $sale) {
+                        $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                        if ($products) {
+                            foreach ($products as $product) {
                                 $totalSales2 += $product['amount'] ?? 0;
                                 $totalWeight2 += $product['weight'] ?? 0;
+                            }
+                        }
+                    }
+                } else {
+                    // For calibers/categories, get all sales in range and filter products in PHP
+                    $sales1 = \App\Models\Sale::notReturned()
+                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->inDateRange($from1_date, $to1_date)
+                        ->get();
+                    foreach ($sales1 as $sale) {
+                        $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                        if ($products) {
+                            foreach ($products as $product) {
+                                if (
+                                    ($type === 'calibers' && isset($product['caliber_id']) && $product['caliber_id'] == $id) ||
+                                    ($type === 'categories' && isset($product['category_id']) && $product['category_id'] == $id)
+                                ) {
+                                    $totalSales1 += $product['amount'] ?? 0;
+                                    $totalWeight1 += $product['weight'] ?? 0;
+                                }
+                            }
+                        }
+                    }
+                    $sales2 = \App\Models\Sale::notReturned()
+                        ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+                        ->inDateRange($from2_date, $to2_date)
+                        ->get();
+                    foreach ($sales2 as $sale) {
+                        $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+                        if ($products) {
+                            foreach ($products as $product) {
+                                if (
+                                    ($type === 'calibers' && isset($product['caliber_id']) && $product['caliber_id'] == $id) ||
+                                    ($type === 'categories' && isset($product['category_id']) && $product['category_id'] == $id)
+                                ) {
+                                    $totalSales2 += $product['amount'] ?? 0;
+                                    $totalWeight2 += $product['weight'] ?? 0;
+                                }
                             }
                         }
                     }
