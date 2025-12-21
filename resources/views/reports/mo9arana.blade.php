@@ -187,15 +187,39 @@
 
     <style>
     @media print {
-        body * { visibility: hidden; }
-        .table, .table * { visibility: visible; }
-        .table { page-break-inside: avoid; }
-        .card, .card-header, .card-body, .table-responsive { visibility: visible !important; }
-        .btn, .form-control, .form-select, .page-title-box, .navbar, .sidebar, .footer, .row.mt-3, .row.mb-3 { display: none !important; }
-        .table { width: 100% !important; font-size: 12pt; }
-        th, td { padding: 6px !important; }
+        body, html { margin: 0 !important; padding: 0 !important; }
+        .container-fluid { width: 100vw !important; margin: 0 !important; padding: 0 !important; }
+        .card, .card-header, .card-body, .table-responsive, .table, .table * { visibility: visible !important; }
+        .card, .table-responsive { page-break-inside: avoid; }
+        .btn, .form-control, .form-select, .navbar, .sidebar, .footer, .row.mb-3 { display: none !important; }
+        .page-title-box, .row.g-3, form { display: block !important; visibility: visible !important; }
+        .table { width: 100vw !important; font-size: 10pt; margin: 0 !important; }
+        th, td { padding: 3px !important; }
+        h4, h5 { font-size: 12pt !important; margin-top: 2px !important; margin-bottom: 2px !important; }
+        .card { border: 1px solid #333 !important; margin-bottom: 2px !important; }
+        .card-header { background: #eee !important; font-weight: bold !important; padding: 2px !important; }
+        .card-body { padding: 2px !important; }
+        .row.mt-4, .row.mt-3 { margin-top: 2px !important; }
+        @page { size: A4 landscape; margin: 5mm; }
+    }
+    .report-title-print {
+        display: block;
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+    .report-date-print {
+        display: block;
+        text-align: center;
+        font-size: 10pt;
+        margin-bottom: 2px;
     }
     </style>
+
+    <div class="report-title-print">مقارنة بالفترات</div>
+    <div class="report-date-print">تاريخ الطباعة: {{ now()->format('Y-m-d H:i') }}</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js"></script>
