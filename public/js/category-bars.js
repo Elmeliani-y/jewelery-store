@@ -87,7 +87,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // Value and percent text
         const valueText = document.createElement('div');
         let valueStr = (!isNaN(valueNum) && valueNum !== 0) ? valueNum.toLocaleString() : '0';
-        valueText.textContent = `${valueStr} | ${percent.toFixed(2)}%`;
+        let countStr = (cat.count !== undefined && !isNaN(cat.count)) ? cat.count : '';
+        if (totalSales > 0) {
+            valueText.textContent = `${valueStr} | ${percent.toFixed(2)}%${countStr !== '' ? ' | ' + countStr : ''}`;
+        } else {
+            valueText.textContent = `${valueStr}${countStr !== '' ? ' | ' + countStr : ''}`;
+        }
         valueText.style.position = 'relative';
         valueText.style.zIndex = 2;
         valueText.style.width = '100%';
