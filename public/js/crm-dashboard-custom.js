@@ -36,7 +36,7 @@ var totalSalesOptions = {
         }
     },
     tooltip: { enabled: false },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, style: { colors: ['#7168EE'] } },
     grid: { show: false },
     xaxis: {
         labels: { show: false },
@@ -82,7 +82,7 @@ var totalOrdersOptions = {
         }
     },
     tooltip: { enabled: false },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, style: { colors: ['#7168EE'] } },
     grid: { show: false },
     xaxis: {
         labels: { show: false },
@@ -128,7 +128,7 @@ var newCustomersOptions = {
         }
     },
     tooltip: { enabled: false },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, style: { colors: ['#7168EE'] } },
     grid: { show: false },
     xaxis: {
         labels: { show: false },
@@ -174,7 +174,7 @@ var totalIncomeOptions = {
         }
     },
     tooltip: { enabled: false },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, style: { colors: ['#7168EE'] } },
     grid: { show: false },
     xaxis: {
         labels: { show: false },
@@ -220,7 +220,7 @@ var totalReturnsOptions = {
         }
     },
     tooltip: { enabled: false },
-    dataLabels: { enabled: false },
+    dataLabels: { enabled: true, style: { colors: ['#7168EE'] } },
     grid: { show: false },
     xaxis: {
         labels: { show: false },
@@ -256,7 +256,7 @@ if(Array.isArray(dailySalesData) && dailySalesData.length > 0) {
             height: 290,
             toolbar: { show: false }
         },
-        colors: ['#7168EE'],
+            colors: ['#7168EE'],
         dataLabels: { enabled: false },
         stroke: {
             curve: 'smooth',
@@ -279,7 +279,7 @@ if(Array.isArray(dailySalesData) && dailySalesData.length > 0) {
             axisBorder: { show: false },
             axisTicks: { show: false },
             labels: {
-                style: { colors: '#9aa0ac' },
+                    style: { colors: '#7168EE' },
                 rotate: -45,
                 rotateAlways: false
             }
@@ -289,7 +289,7 @@ if(Array.isArray(dailySalesData) && dailySalesData.length > 0) {
                 formatter: function (val) {
                     return val.toLocaleString('fr-MA');
                 },
-                style: { colors: '#9aa0ac' }
+                    style: { colors: '#7168EE' }
             }
         },
         tooltip: {
@@ -357,7 +357,7 @@ if(typeof monthlyRevenueData !== 'undefined') {
                 formatter: function(val) {
                     return val.toLocaleString('fr-MA');
                 },
-                style: { colors: '#9aa0ac' }
+                    style: { colors: '#7168EE' }
             }
         },
         xaxis: {

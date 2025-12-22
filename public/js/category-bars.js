@@ -2,29 +2,24 @@
 // This script renders category bars with value, percentage, and total weight
 
 // Custom category bar visualization for dashboard (for "مبيعات حسب صنف" only)
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('categoriesData:', typeof categoriesData, categoriesData);
+function renderCategoryBars() {
     const container = document.getElementById('categories_chart');
     if (!container) return;
-    // Guard: If categoriesData is not an array or empty, show message and return
     if (!Array.isArray(categoriesData) || categoriesData.length === 0) {
         container.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات لعرض الرسم البياني.</div>';
         return;
     }
-    // Defensive: filter out invalid objects
     const validCategories = categoriesData.filter(c => c && typeof c === 'object' && !Array.isArray(c) && (c.value !== undefined || c.amount !== undefined));
     if (validCategories.length === 0) {
         container.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات صالحة لعرض الرسم البياني.</div>';
         return;
     }
     container.innerHTML = '';
-    // Support both 'value' and 'amount' keys for compatibility
     const getValue = c => parseFloat(c.value !== undefined ? c.value : c.amount);
     const getWeight = c => parseFloat(c.weight || 0);
     const totalSales = validCategories.reduce((sum, c) => sum + (getValue(c) || 0), 0);
     const totalWeight = validCategories.reduce((sum, c) => sum + (getWeight(c) || 0), 0);
     const maxWeight = Math.max(...validCategories.map(c => getWeight(c) || 0), 1);
-    // Use CSS variables for colors
     const getVar = (v, fallback) => getComputedStyle(document.documentElement).getPropertyValue(v) || fallback;
     const colors = [
         getVar('--cat-bar-1', '#f59e42'),
@@ -42,9 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const valueNum = getValue(cat) || 0;
         const weightNum = getWeight(cat) || 0;
         const percent = totalSales > 0 ? (valueNum / totalSales * 100) : 0;
-        // Bar width and color intensity based on weight
         const barWidth = (weightNum / maxWeight) * 100;
-        // Color intensity (opacity) based on weight percent
         const baseColor = colors[i % colors.length];
         const opacity = (weightNum > 0 && maxWeight > 0) ? (0.3 + 0.7 * (weightNum / maxWeight)) : 0.3;
         const row = document.createElement('div');
@@ -53,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () {
         row.style.marginBottom = '18px';
         row.style.width = '100%';
         row.style.gap = '0.5em';
-        // Category name
         const name = document.createElement('div');
         name.textContent = cat.name || cat.category || '';
         name.style.width = '20%';
@@ -62,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
         name.style.color = textColor;
         name.style.marginLeft = '0.5em';
         row.appendChild(name);
-        // Bar container
         const barContainer = document.createElement('div');
         barContainer.style.background = 'transparent';
         barContainer.style.border = `3px solid ${borderColor}`;
@@ -72,7 +63,6 @@ document.addEventListener('DOMContentLoaded', function () {
         barContainer.style.position = 'relative';
         barContainer.style.display = 'flex';
         barContainer.style.alignItems = 'center';
-        // Filled bar
         const barFill = document.createElement('div');
         barFill.style.background = baseColor;
         barFill.style.opacity = opacity;
@@ -84,14 +74,12 @@ document.addEventListener('DOMContentLoaded', function () {
         barFill.style.top = 0;
         barFill.style.zIndex = 1;
         barContainer.appendChild(barFill);
-        // Value and percent text
         const valueText = document.createElement('div');
         let valueStr = (!isNaN(valueNum) && valueNum !== 0) ? valueNum.toLocaleString() : '0';
-        let countStr = (cat.count !== undefined && !isNaN(cat.count)) ? cat.count : '';
         if (totalSales > 0) {
-            valueText.textContent = `${valueStr} | ${percent.toFixed(2)}%${countStr !== '' ? ' | ' + countStr : ''}`;
+            valueText.textContent = `${valueStr} | ${percent.toFixed(2)}%`;
         } else {
-            valueText.textContent = `${valueStr}${countStr !== '' ? ' | ' + countStr : ''}`;
+            valueText.textContent = `${valueStr}`;
         }
         valueText.style.position = 'relative';
         valueText.style.zIndex = 2;
@@ -109,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
         valueText.style.alignItems = 'center';
         barContainer.appendChild(valueText);
         row.appendChild(barContainer);
-        // Show weight at the end
         const weight = document.createElement('div');
         let weightStr = (!isNaN(weightNum) && weightNum !== 0) ? weightNum.toLocaleString() + ' جم' : '-';
         weight.textContent = weightStr;
@@ -121,4 +108,21 @@ document.addEventListener('DOMContentLoaded', function () {
         row.appendChild(weight);
         container.appendChild(row);
     });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    renderCategoryBars();
+    // Listen for theme changes and re-render bars
+    const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.type === 'attributes' && (m.attributeName === 'data-theme' || m.attributeName === 'class')) {
+                renderCategoryBars();
+            }
+        }
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderCategoryBars);
+    }
 });

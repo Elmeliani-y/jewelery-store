@@ -13,11 +13,11 @@
     --cat-bar-6: #f43f5e;
     --cat-bar-7: #6366f1;
     --cat-bar-8: #eab308;
-    --cat-bar-text: #000;
+    --cat-bar-text: #7168EE;
     --cat-bar-border: #ccc;
 }
 [data-theme="dark"] {
-    --cat-bar-text: #fff;
+    --cat-bar-text: #7168EE;
     --cat-bar-border: #444;
 }
 @media print { 

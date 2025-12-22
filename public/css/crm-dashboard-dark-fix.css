@@ -1,0 +1,32 @@
+/* Ensure progress bar numbers are dark in light mode */
+.progress-bar span, .progress-bar-label, .progress-bar-value, .progress-bar-inner span, .progress-bar-content {
+    color: #222 !important;
+}
+/* Force progress bar numbers to be white in dark mode */
+
+/* Only apply white color to progress bar numbers in dark mode */
+.dark-mode .progress-bar span,
+.dark-mode .progress-bar-label,
+.dark-mode .progress-bar-value,
+.dark-mode .progress-bar-inner span,
+.dark-mode .progress-bar-content,
+.dashboard-dark .progress-bar span,
+.dashboard-dark .progress-bar-label,
+.dashboard-dark .progress-bar-value,
+.dashboard-dark .progress-bar-inner span,
+.dashboard-dark .progress-bar-content,
+.main-dark .progress-bar span,
+.main-dark .progress-bar-label,
+.main-dark .progress-bar-value,
+.main-dark .progress-bar-inner span,
+.main-dark .progress-bar-content {
+    color: #fff !important;
+    font-weight: bold;
+    text-shadow: 0 1px 2px #222;
+}
+
+/* If your progress bar uses a different class, add it here. */
+
+.dark-bg, .dark-mode, .dashboard-dark, .main-dark {
+    background: #23242a !important;
+}
