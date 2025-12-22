@@ -1,3 +1,4 @@
+console.log('Loaded crm-dashboard-custom.js - version 2025-12-22');
 // CRM Dashboard Charts - Updated Version
 // Include this file after ApexCharts library
 
