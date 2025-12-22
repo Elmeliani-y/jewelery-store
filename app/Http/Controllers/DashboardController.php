@@ -369,8 +369,8 @@ class DashboardController extends Controller
             }
             if ($count > 0) {
                 $salesByCategory->push([
-                    'name' => $category->name,
-                    'value' => $totalAmount,
+                    'category' => $category->name,
+                    'amount' => $totalAmount,
                     'weight' => $totalWeight,
                     'count' => $count,
                 ]);

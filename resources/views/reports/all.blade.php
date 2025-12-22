@@ -33,7 +33,7 @@
 						$totalWeight = $sales->sum('weight');
 						$totalPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
 					@endphp
-					<div class="fs-4 fw-bold text-info">{{ number_format($totalPricePerGram, 2) }} <span class="fs-6">د/جرام</span></div>
+					<div class="fs-4 fw-bold text-info">{{ number_format($totalPricePerGram, 2) }}</div>
 				</div>
 			</div>
 		</div>

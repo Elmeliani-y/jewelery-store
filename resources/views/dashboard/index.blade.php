@@ -3,6 +3,23 @@
 @section('content')
 @section('css')
 <style>
+/* Category bar chart theme variables */
+:root {
+    --cat-bar-1: #f59e42;
+    --cat-bar-2: #3b82f6;
+    --cat-bar-3: #a16207;
+    --cat-bar-4: #be185d;
+    --cat-bar-5: #059669;
+    --cat-bar-6: #f43f5e;
+    --cat-bar-7: #6366f1;
+    --cat-bar-8: #eab308;
+    --cat-bar-text: #000;
+    --cat-bar-border: #ccc;
+}
+[data-theme="dark"] {
+    --cat-bar-text: #fff;
+    --cat-bar-border: #444;
+}
 @media print { 
     @page { size: A4 portrait; margin: 12mm; } 
     .topbar-custom,.app-sidebar-menu,.footer, .btn, form[action*="dashboard"], .apex-charts { display:none !important; } 
@@ -13,6 +30,38 @@
 .dash-filter .form-label{margin-bottom:.25rem;font-size:.8rem;color:var(--bs-secondary-color)}
 .dash-filter .form-select,.dash-filter .form-control{border-radius:10px}
 .dash-filter .btn{border-radius:10px}
+</style>
+<style>
+@media (max-width: 600px) {
+    #categories_chart {
+        min-width: 220px !important;
+        min-height: 120px !important;
+        width: 100vw !important;
+        overflow-x: auto !important;
+    }
+    #categories_chart .apexcharts-canvas {
+        min-width: 220px !important;
+        min-height: 120px !important;
+        width: 100vw !important;
+    }
+    #categories_chart div, #categories_chart span {
+        font-size: clamp(0.8em, 3vw, 1em) !important;
+    }
+}
+</style>
+<style>
+@media (max-width: 600px) {
+    #categories_chart > div {
+        flex-direction: column !important;
+        margin-bottom: 10px !important;
+    }
+    #categories_chart > div > div {
+        height: 1.2em !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        font-size: 1em !important;
+    }
+}
 </style>
 @endsection
 
@@ -166,7 +215,7 @@
                             <p class="mb-0 text-dark fs-16 fw-medium">معدل سعر الجرام</p>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['price_per_gram'], 2, ',', '.') }} د/جرام</h3>
+                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['price_per_gram'], 2, ',', '.') }}</h3>
                             <div class="apex-charts"></div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -190,7 +239,13 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="categories_chart"></div>
+                    <div style="width:100%; max-height:420px; min-height:220px; overflow-y:auto; overflow-x:hidden; direction:rtl; padding-left:8px; padding-right:8px;">
+                        <div id="categories_chart" style="width:100%;"></div>
+                        <noscript><div class="text-danger">الرجاء تفعيل الجافاسكريبت لعرض الرسم البياني.</div></noscript>
+                        @if(empty($chartsData['sales_by_category']) || count($chartsData['sales_by_category']) === 0)
+                        <div class="text-center text-muted py-3">لا توجد بيانات لعرض الرسم البياني.</div>
+                        @endif
+                    </div>
                     <div class="device-view text-center mt-3">
                         <p class="text-uppercase mb-1 fw-medium text-muted">إجمالي المبيعات</p>
                         <h3 class="mb-0 text-dark fw-semibold" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
@@ -242,7 +297,7 @@
                                             <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($branch['amount'], 0, ',', '.') }}</h6>
                                             <span class="fs-13 text-muted" dir="ltr">{{ number_format($branch['weight'], 1, ',', '.') }} جم</span>
                                             @if($branch['weight'] > 0)
-                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($branch['amount'] / $branch['weight'], 2) }} د/جرام</div>
+                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($branch['amount'] / $branch['weight'], 2) }}</div>
                                             @endif
                                         </div>
                                     </div>
@@ -281,7 +336,7 @@
                                             <h6 class="mb-1 text-success fs-14" dir="ltr">{{ number_format($sale['amount'], 0, ',', '.') }}</h6>
                                             <span class="fs-13 text-muted" dir="ltr">{{ number_format($sale['weight'], 1, ',', '.') }} جم</span>
                                             @if($sale['weight'] > 0)
-                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($sale['amount'] / $sale['weight'], 2) }} د/جرام</div>
+                                            <div class="badge bg-warning-subtle text-warning fs-12 mt-1">{{ number_format($sale['amount'] / $sale['weight'], 2) }}</div>
                                             @endif
                                         </div>
                                     </div>
@@ -317,20 +372,13 @@
                                     </div>
                                     <div class="text-center flex-fill">
                                         <div class="fs-13 text-muted">إجمالي المبيعات</div>
-                                        <div class="fw-bold fs-16 text-success" dir="ltr">{{ number_format($metrics['total_sales'], 2, ',', '.') }} ريال</div>
-                                    </div>
-                                    <div class="text-center flex-fill">
-                                        <div class="fs-13 text-muted">معدل سعر الجرام</div>
-                                        <div class="fw-bold fs-16 text-info" dir="ltr">{{ number_format($metrics['price_per_gram'], 2, ',', '.') }} د/جرام</div>
+                                        <div class="fw-bold fs-16 text-success" dir="ltr">{{ number_format($metrics['total_sales'], 2, ',', '.') }}</div>
                                     </div>
                                     <div class="text-center flex-fill">
                                         <div class="fs-13 text-muted">إجمالي المصروفات</div>
-                                        <div class="fw-bold fs-16 text-danger" dir="ltr">{{ number_format($metrics['total_expenses'], 2, ',', '.') }} ريال</div>
+                                        <div class="fw-bold fs-16 text-danger" dir="ltr">{{ number_format($metrics['total_expenses'], 2, ',', '.') }}</div>
                                     </div>
-                                    <div class="text-center flex-fill">
-                                        <div class="fs-13 text-muted">صافي الربح</div>
-                                        <div class="fw-bold fs-16" dir="ltr" style="color: {{ $metrics['net_profit'] >= 0 ? '#198754' : '#dc3545' }};">{{ number_format($metrics['net_profit'], 2, ',', '.') }} ريال</div>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>

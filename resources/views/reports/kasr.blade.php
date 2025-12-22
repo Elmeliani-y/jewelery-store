@@ -54,7 +54,7 @@
             display: none !important;
         }
     }
-        /* Make ta9rir safi rib7 report titles white for dark mode */
+        /* Make ta9rir report titles white for dark mode */
         .kasr-receipt h4,
         .page-title {
             color: #fff !important;

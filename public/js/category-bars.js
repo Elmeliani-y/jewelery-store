@@ -3,46 +3,73 @@
 
 // Custom category bar visualization for dashboard (for "مبيعات حسب صنف" only)
 document.addEventListener('DOMContentLoaded', function () {
-    if (typeof categoriesData === 'undefined' || !Array.isArray(categoriesData)) return;
+    console.log('categoriesData:', typeof categoriesData, categoriesData);
     const container = document.getElementById('categories_chart');
     if (!container) return;
+    // Guard: If categoriesData is not an array or empty, show message and return
+    if (!Array.isArray(categoriesData) || categoriesData.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات لعرض الرسم البياني.</div>';
+        return;
+    }
+    // Defensive: filter out invalid objects
+    const validCategories = categoriesData.filter(c => c && typeof c === 'object' && !Array.isArray(c) && (c.value !== undefined || c.amount !== undefined));
+    if (validCategories.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات صالحة لعرض الرسم البياني.</div>';
+        return;
+    }
     container.innerHTML = '';
-    const totalSales = categoriesData.reduce((sum, c) => sum + (parseFloat(c.value) || 0), 0);
-    const totalWeight = categoriesData.reduce((sum, c) => sum + (parseFloat(c.weight) || 0), 0);
-    const maxWeight = Math.max(...categoriesData.map(c => parseFloat(c.weight) || 0), 1);
-    const colors = ['#f59e42', '#3b82f6', '#a16207', '#be185d', '#059669', '#f43f5e', '#6366f1', '#eab308'];
-    categoriesData.forEach((cat, i) => {
-        const valueNum = parseFloat(cat.value) || 0;
-        const weightNum = parseFloat(cat.weight) || 0;
+    // Support both 'value' and 'amount' keys for compatibility
+    const getValue = c => parseFloat(c.value !== undefined ? c.value : c.amount);
+    const getWeight = c => parseFloat(c.weight || 0);
+    const totalSales = validCategories.reduce((sum, c) => sum + (getValue(c) || 0), 0);
+    const totalWeight = validCategories.reduce((sum, c) => sum + (getWeight(c) || 0), 0);
+    const maxWeight = Math.max(...validCategories.map(c => getWeight(c) || 0), 1);
+    // Use CSS variables for colors
+    const getVar = (v, fallback) => getComputedStyle(document.documentElement).getPropertyValue(v) || fallback;
+    const colors = [
+        getVar('--cat-bar-1', '#f59e42'),
+        getVar('--cat-bar-2', '#3b82f6'),
+        getVar('--cat-bar-3', '#a16207'),
+        getVar('--cat-bar-4', '#be185d'),
+        getVar('--cat-bar-5', '#059669'),
+        getVar('--cat-bar-6', '#f43f5e'),
+        getVar('--cat-bar-7', '#6366f1'),
+        getVar('--cat-bar-8', '#eab308'),
+    ];
+    const textColor = getVar('--cat-bar-text', getVar('--main-text-color', '#222'));
+    const borderColor = getVar('--cat-bar-border', '#ccc');
+    validCategories.forEach((cat, i) => {
+        const valueNum = getValue(cat) || 0;
+        const weightNum = getWeight(cat) || 0;
         const percent = totalSales > 0 ? (valueNum / totalSales * 100) : 0;
         // Bar width and color intensity based on weight
         const barWidth = (weightNum / maxWeight) * 100;
         // Color intensity (opacity) based on weight percent
         const baseColor = colors[i % colors.length];
         const opacity = (weightNum > 0 && maxWeight > 0) ? (0.3 + 0.7 * (weightNum / maxWeight)) : 0.3;
-        const color = baseColor + (baseColor.startsWith('#') ? Math.round(opacity * 255).toString(16).padStart(2, '0') : '');
         const row = document.createElement('div');
         row.style.display = 'flex';
         row.style.alignItems = 'center';
-        row.style.marginBottom = '28px';
+        row.style.marginBottom = '18px';
+        row.style.width = '100%';
+        row.style.gap = '0.5em';
         // Category name
         const name = document.createElement('div');
-        name.textContent = cat.name;
-        name.style.width = '70px';
+        name.textContent = cat.name || cat.category || '';
+        name.style.width = '20%';
         name.style.textAlign = 'right';
-        name.style.fontSize = '1.2em';
-        name.style.color = '#fff';
-        name.style.marginLeft = '18px';
+        name.style.fontSize = 'clamp(0.9em, 2.5vw, 1.1em)';
+        name.style.color = textColor;
+        name.style.marginLeft = '0.5em';
         row.appendChild(name);
         // Bar container
         const barContainer = document.createElement('div');
         barContainer.style.background = 'transparent';
-        barContainer.style.border = '4px solid #fff';
+        barContainer.style.border = `3px solid ${borderColor}`;
         barContainer.style.borderRadius = '22px';
-        barContainer.style.height = '44px';
-        barContainer.style.width = '320px';
+        barContainer.style.height = '2.2em';
+        barContainer.style.width = '100%';
         barContainer.style.position = 'relative';
-        barContainer.style.margin = '0 18px';
         barContainer.style.display = 'flex';
         barContainer.style.alignItems = 'center';
         // Filled bar
@@ -66,18 +93,25 @@ document.addEventListener('DOMContentLoaded', function () {
         valueText.style.width = '100%';
         valueText.style.textAlign = 'center';
         valueText.style.fontWeight = 'bold';
-        valueText.style.color = '#fff';
-        valueText.style.fontSize = '1.3em';
+        valueText.style.color = textColor;
+        valueText.style.fontSize = 'clamp(1em, 3vw, 1.3em)';
+        valueText.style.letterSpacing = '0.01em';
+        valueText.style.wordBreak = 'break-word';
+        valueText.style.lineHeight = '1.1';
+        valueText.style.display = 'flex';
+        valueText.style.flexDirection = 'column';
+        valueText.style.justifyContent = 'center';
+        valueText.style.alignItems = 'center';
         barContainer.appendChild(valueText);
         row.appendChild(barContainer);
-        // Total weight
+        // Show weight at the end
         const weight = document.createElement('div');
         let weightStr = (!isNaN(weightNum) && weightNum !== 0) ? weightNum.toLocaleString() + ' جم' : '-';
         weight.textContent = weightStr;
-        weight.style.width = '80px';
+        weight.style.width = '18%';
         weight.style.textAlign = 'left';
-        weight.style.fontSize = '1.2em';
-        weight.style.color = '#fff';
+        weight.style.fontSize = 'clamp(0.9em, 2.5vw, 1.1em)';
+        weight.style.color = textColor;
         weight.style.marginRight = '18px';
         row.appendChild(weight);
         container.appendChild(row);

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 var totalSalesOptions = {
     series: [{
         name: "Sales",
-        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales)) : [10, 15, 9, 18, 22, 17, 25, 20, 15, 10, 12, 8]
+        data: (Array.isArray(monthlyRevenueData) && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales)) : [10, 15, 9, 18, 22, 17, 25, 20, 15, 10, 12, 8]
     }],
     chart: {
         height: 45,
@@ -53,7 +53,7 @@ if(document.querySelector("#total_sales")) {
 var totalOrdersOptions = {
     series: [{
         name: "Orders",
-        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales) - parseFloat(m.expenses)) : [15, 20, 16, 27, 34, 27, 35, 28, 20, 27, 32, 15]
+        data: (Array.isArray(monthlyRevenueData) && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales) - parseFloat(m.expenses)) : [15, 20, 16, 27, 34, 27, 35, 28, 20, 27, 32, 15]
     }],
     chart: {
         height: 45,
@@ -99,7 +99,7 @@ if(document.querySelector("#total_orders")) {
 var newCustomersOptions = {
     series: [{
         name: "Customers",
-        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales)) : [12, 25, 18, 40, 28, 35, 21, 38, 32, 15, 45, 29]
+        data: (Array.isArray(monthlyRevenueData) && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales)) : [12, 25, 18, 40, 28, 35, 21, 38, 32, 15, 45, 29]
     }],
     chart: {
         height: 45,
@@ -145,7 +145,7 @@ if(document.querySelector("#new_customers")) {
 var totalIncomeOptions = {
     series: [{
         name: "Income",
-        data: (typeof monthlyRevenueData !== 'undefined' && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales) - parseFloat(m.expenses)) : [14, 19, 12, 24, 30, 21, 27, 23, 18, 13, 16, 11]
+        data: (Array.isArray(monthlyRevenueData) && monthlyRevenueData.length) ? monthlyRevenueData.map(m => parseFloat(m.sales) - parseFloat(m.expenses)) : [14, 19, 12, 24, 30, 21, 27, 23, 18, 13, 16, 11]
     }],
     chart: {
         height: 45,
@@ -239,22 +239,33 @@ if(typeof categoriesData !== 'undefined' && categoriesData.length > 0) {
     function isLightMode() {
         return document.documentElement.classList.contains('light') || document.body.classList.contains('light') || window.matchMedia('(prefers-color-scheme: light)').matches;
     }
+    var safeCategoriesData = Array.isArray(categoriesData) ? categoriesData : [];
     var categoriesOptions = {
         series: [{
             name: 'المبيعات',
-            data: categoriesData.map(item => parseFloat(item.amount))
+            data: safeCategoriesData.map(item => parseFloat(item.amount))
         }],
         chart: {
             type: "bar",
             height: 385,
-            toolbar: { show: false }
+            width: '100%',
+            toolbar: { show: false },
+            animations: { enabled: false },
+            fontFamily: 'inherit',
+            responsive: [{
+                breakpoint: 600,
+                options: {
+                    chart: { height: 320 },
+                    plotOptions: { bar: { barHeight: '40%' } }
+                }
+            }]
         },
         plotOptions: {
             bar: {
                 borderRadius: 8,
                 horizontal: true,
                 distributed: true,
-                barHeight: '70%',
+                barHeight: '60%',
                 dataLabels: { position: 'top' }
             }
         },
@@ -271,7 +282,7 @@ if(typeof categoriesData !== 'undefined' && categoriesData.length > 0) {
         },
         colors: ["#7168EE", "#46B277", "#963b68", "#01D4FF", "#E77636"],
         xaxis: {
-            categories: categoriesData.map(item => item.category),
+            categories: safeCategoriesData.map(item => item.category),
             labels: {
                 style: {
                     colors: '#9aa0ac',
@@ -300,21 +311,108 @@ if(typeof categoriesData !== 'undefined' && categoriesData.length > 0) {
             }
         }
     };
-    if(document.querySelector("#categories_chart")) {
-        new ApexCharts(document.querySelector("#categories_chart"), categoriesOptions).render();
-        // Listen for mode change if your app supports toggling
-        if (window.addEventListener) {
-            window.addEventListener('themechange', function() {
-                categoriesOptions.dataLabels.style.colors = [isLightMode() ? "#000000" : "#ffffff"];
-                document.querySelector("#categories_chart").innerHTML = '';
-                new ApexCharts(document.querySelector("#categories_chart"), categoriesOptions).render();
-            });
+    var categoriesChartInstance = null;
+    function renderCategoriesChart() {
+        var chartEl = document.querySelector("#categories_chart");
+        if (!chartEl) return;
+        // Guard: If categoriesData is not an array or empty, or contains invalid items, show message and return
+        if (!Array.isArray(categoriesData) || categoriesData.length === 0) {
+            chartEl.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات لعرض الرسم البياني.</div>';
+            return;
         }
+        // Filter out invalid items (missing amount or category)
+        var safeCategoriesData = categoriesData.filter(function(item) {
+            return item && typeof item === 'object' && !Array.isArray(item) && item.amount !== undefined && item.category !== undefined && !isNaN(parseFloat(item.amount));
+        });
+        if (safeCategoriesData.length === 0) {
+            chartEl.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات صالحة لعرض الرسم البياني.</div>';
+            return;
+        }
+        var options = {
+            series: [{
+                name: 'المبيعات',
+                data: safeCategoriesData.map(item => parseFloat(item.amount))
+            }],
+            chart: {
+                type: "bar",
+                height: 385,
+                width: '100%',
+                toolbar: { show: false },
+                animations: { enabled: false },
+                fontFamily: 'inherit',
+                responsive: [{
+                    breakpoint: 600,
+                    options: {
+                        chart: { height: 320 },
+                        plotOptions: { bar: { barHeight: '40%' } }
+                    }
+                }]
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 8,
+                    horizontal: true,
+                    distributed: true,
+                    barHeight: '60%',
+                    dataLabels: { position: 'top' }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return val.toLocaleString('fr-MA') + "";
+                },
+                offsetX: 30,
+                style: {
+                    fontSize: '12px',
+                    colors: [isLightMode() ? "#000000" : "#ffffff"]
+                }
+            },
+            colors: ["#7168EE", "#46B277", "#963b68", "#01D4FF", "#E77636"],
+            xaxis: {
+                categories: safeCategoriesData.map(item => item.category),
+                labels: {
+                    style: {
+                        colors: '#9aa0ac',
+                        fontSize: '12px'
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#9aa0ac' }
+                }
+            },
+            grid: {
+                borderColor: '#f1f1f1',
+                strokeDashArray: 3,
+                xaxis: { lines: { show: true } },
+                yaxis: { lines: { show: false } }
+            },
+            legend: { show: false },
+            tooltip: {
+                theme: "light",
+                y: {
+                    formatter: function (val) {
+                        return val.toLocaleString('fr-MA') + "";
+                    }
+                }
+            }
+        };
+        if (categoriesChartInstance) {
+            categoriesChartInstance.destroy();
+        }
+        chartEl.innerHTML = '';
+        categoriesChartInstance = new ApexCharts(chartEl, options);
+        categoriesChartInstance.render();
+    }
+    if(document.querySelector("#categories_chart")) {
+        // Disabled ApexCharts for #categories_chart to allow custom graph rendering only
     }
 }
 
 // Sales Overtime - KEPT AS AREA CHART
-if(typeof dailySalesData !== 'undefined' && dailySalesData.length > 0) {
+if(Array.isArray(dailySalesData) && dailySalesData.length > 0) {
     // Helper to reduce x-axis label overlap
     function getXAxisLabels(dates) {
         const maxLabels = 10;
@@ -414,8 +512,8 @@ if(typeof monthlyRevenueData !== 'undefined') {
     }
     var revenueOptions = {
         series: [
-            { name: 'المبيعات', type: 'line', data: data.map(item => parseFloat(item.sales) || 0) },
-            { name: 'المصروفات', type: 'line', data: data.map(item => parseFloat(item.expenses) || 0) }
+            { name: 'المبيعات', type: 'line', data: Array.isArray(data) ? data.map(item => parseFloat(item.sales) || 0) : [] },
+            { name: 'المصروفات', type: 'line', data: Array.isArray(data) ? data.map(item => parseFloat(item.expenses) || 0) : [] }
         ],
         chart: { type: 'line', height: 200, toolbar: { show: false } },
         grid: { borderColor: '#f1f1f1', strokeDashArray: 3 },

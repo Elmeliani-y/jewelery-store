@@ -267,7 +267,7 @@
                             </tr>
                             <tr>
                                 <td>معدل سعر الجرام</td>
-                                <td class="text-end">{{ number_format($period1['price_per_gram'] ?? 0, 2) }} د/جرام</td>
+                                <td class="text-end">{{ number_format($period1['price_per_gram'] ?? 0, 2) }}</td>
                             </tr>
                             <tr>
                                 <td>عدد المبيعات</td>
@@ -307,7 +307,7 @@
                             </tr>
                             <tr>
                                 <td>معدل سعر الجرام</td>
-                                <td class="text-end">{{ number_format($period2['price_per_gram'] ?? 0, 2) }} د/جرام</td>
+                                <td class="text-end">{{ number_format($period2['price_per_gram'] ?? 0, 2) }}</td>
                             </tr>
                             <tr>
                                 <td>عدد المبيعات</td>
