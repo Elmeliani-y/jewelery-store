@@ -6,9 +6,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
-        Schema::table('devices', function (Blueprint $table) {
-            $table->dropColumn('admin_id');
-        });
+        if (Schema::hasColumn('devices', 'admin_id')) {
+            Schema::table('devices', function (Blueprint $table) {
+                $table->dropColumn('admin_id');
+            });
+        }
     }
     public function down()
     {
