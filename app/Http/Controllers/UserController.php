@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Branch;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -16,13 +15,14 @@ class UserController extends Controller
     private function enforceDeviceToken(Request $request)
     {
         $user = auth()->user();
-        if ($user && !$user->isAdmin()) {
+        if ($user && ! $user->isAdmin()) {
             $deviceToken = $request->cookie('device_token');
-            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+            if (! $deviceToken || ! \App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
                 return redirect()->route('pair-device.form')->send();
             }
         }
     }
+
     /**
      * Display a listing of users.
      */
@@ -30,6 +30,7 @@ class UserController extends Controller
     {
         $this->enforceDeviceToken(request());
         $users = User::with('branch')->orderBy('created_at', 'desc')->get();
+
         return view('users.index', compact('users'));
     }
 
@@ -40,6 +41,7 @@ class UserController extends Controller
     {
         $this->enforceDeviceToken(request());
         $branches = Branch::where('is_active', true)->get();
+
         return view('users.create', compact('branches'));
     }
 
@@ -62,11 +64,11 @@ class UserController extends Controller
             User::create($validated);
 
             return redirect()->route('users.index')
-                           ->with('success', 'تم إضافة المستخدم بنجاح');
+                ->with('success', 'تم إضافة المستخدم بنجاح');
 
         } catch (\Exception $e) {
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في إضافة المستخدم: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في إضافة المستخدم: '.$e->getMessage());
         }
     }
 
@@ -77,6 +79,7 @@ class UserController extends Controller
     {
         $this->enforceDeviceToken(request());
         $user->load('branch');
+
         return view('users.show', compact('user'));
     }
 
@@ -87,6 +90,7 @@ class UserController extends Controller
     {
         $this->enforceDeviceToken(request());
         $branches = Branch::where('is_active', true)->get();
+
         return view('users.edit', compact('user', 'branches'));
     }
 
@@ -98,14 +102,14 @@ class UserController extends Controller
         $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'username' => 'required|string|max:255|unique:users,username,'.$user->id,
             'password' => 'nullable|string|min:6|confirmed',
             'role' => 'required|in:admin,accountant,branch',
             'branch_id' => $request->role === 'branch' ? 'required|exists:branches,id' : 'nullable|exists:branches,id',
         ]);
 
         try {
-            if (!empty($validated['password'])) {
+            if (! empty($validated['password'])) {
                 $validated['password'] = bcrypt($validated['password']);
             } else {
                 unset($validated['password']);
@@ -114,11 +118,11 @@ class UserController extends Controller
             $user->update($validated);
 
             return redirect()->route('users.show', $user)
-                           ->with('success', 'تم تحديث المستخدم بنجاح');
+                ->with('success', 'تم تحديث المستخدم بنجاح');
 
         } catch (\Exception $e) {
             return back()->withInput()
-                        ->with('error', 'حدث خطأ في تحديث المستخدم: ' . $e->getMessage());
+                ->with('error', 'حدث خطأ في تحديث المستخدم: '.$e->getMessage());
         }
     }
 
@@ -137,10 +141,10 @@ class UserController extends Controller
             $user->delete();
 
             return redirect()->route('users.index')
-                           ->with('success', 'تم حذف المستخدم بنجاح');
+                ->with('success', 'تم حذف المستخدم بنجاح');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'حدث خطأ في حذف المستخدم: ' . $e->getMessage());
+            return back()->with('error', 'حدث خطأ في حذف المستخدم: '.$e->getMessage());
         }
     }
 }
