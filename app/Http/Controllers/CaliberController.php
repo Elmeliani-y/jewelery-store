@@ -8,10 +8,25 @@ use Illuminate\Http\Request;
 class CaliberController extends Controller
 {
     /**
+     * Check if the current device is trusted (token exists in DB for user).
+     * Redirects to pairing page if not trusted.
+     */
+    private function enforceDeviceToken(Request $request)
+    {
+        $user = auth()->user();
+        if ($user && !$user->isAdmin()) {
+            $deviceToken = $request->cookie('device_token');
+            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+                return redirect()->route('pair-device.form')->send();
+            }
+        }
+    }
+    /**
      * Display a listing of calibers.
      */
     public function index()
     {
+        $this->enforceDeviceToken(request());
         $calibers = Caliber::orderBy('name')->get();
         return view('calibers.index', compact('calibers'));
     }
@@ -21,6 +36,7 @@ class CaliberController extends Controller
      */
     public function create()
     {
+        $this->enforceDeviceToken(request());
         return view('calibers.create');
     }
 
@@ -29,6 +45,7 @@ class CaliberController extends Controller
      */
     public function store(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:calibers,name',
             'tax_rate' => 'required|numeric|min:0|max:100',
@@ -49,6 +66,7 @@ class CaliberController extends Controller
      */
     public function edit(Caliber $caliber)
     {
+        $this->enforceDeviceToken(request());
         return view('calibers.edit', compact('caliber'));
     }
 
@@ -57,6 +75,7 @@ class CaliberController extends Controller
      */
     public function update(Request $request, Caliber $caliber)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:calibers,name,' . $caliber->id,
             'tax_rate' => 'required|numeric|min:0|max:100',
@@ -77,6 +96,7 @@ class CaliberController extends Controller
      */
     public function toggleStatus(Caliber $caliber)
     {
+        $this->enforceDeviceToken(request());
         $caliber->update([
             'is_active' => !$caliber->is_active
         ]);
@@ -90,6 +110,7 @@ class CaliberController extends Controller
      */
     public function destroy(Caliber $caliber)
     {
+        $this->enforceDeviceToken(request());
         // Check if caliber is used in any sales
         if ($caliber->sales()->count() > 0) {
             return back()->with('error', 'لا يمكن حذف العيار لأنه مستخدم في المبيعات');

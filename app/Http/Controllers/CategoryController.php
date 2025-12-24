@@ -9,10 +9,25 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     /**
+     * Check if the current device is trusted (token exists in DB for user).
+     * Redirects to pairing page if not trusted.
+     */
+    private function enforceDeviceToken(Request $request)
+    {
+        $user = auth()->user();
+        if ($user && !$user->isAdmin()) {
+            $deviceToken = $request->cookie('device_token');
+            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+                return redirect()->route('pair-device.form')->send();
+            }
+        }
+    }
+    /**
      * Display a listing of categories.
      */
     public function index()
     {
+        $this->enforceDeviceToken(request());
         $categories = Category::with('defaultCaliber')->orderBy('name')->get();
         // Aggregate sales count per category using products array in sales
         $sales = \App\Models\Sale::notReturned()->get();
@@ -47,6 +62,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
+        $this->enforceDeviceToken(request());
         $calibers = Caliber::active()->orderBy('name')->get();
         return view('categories.create', compact('calibers'));
     }
@@ -56,6 +72,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
             'default_caliber_id' => 'required|exists:calibers,id',
@@ -87,6 +104,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
+        $this->enforceDeviceToken(request());
         $calibers = Caliber::active()->orderBy('name')->get();
         return view('categories.edit', compact('category', 'calibers'));
     }
@@ -96,6 +114,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'default_caliber_id' => 'required|exists:calibers,id',
@@ -118,6 +137,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        $this->enforceDeviceToken(request());
         $category->delete();
 
         return redirect()->route('categories.index')

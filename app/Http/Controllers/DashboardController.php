@@ -20,6 +20,20 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
+        // Trusted device check logic (was middleware)
+        if (auth()->check()) {
+            // Exclude admin users from device trust check (admin is always trusted)
+            if (method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin()) {
+                // continue
+            } else {
+                // Allow access to pairing routes without device check (not needed here, only for pairing routes)
+                $deviceToken = $request->cookie('device_token');
+                if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', auth()->id())->exists()) {
+                    // If not trusted, redirect to pairing page
+                    return redirect()->route('pair-device.form');
+                }
+            }
+        }
         // Branch users: restrict to today and their branch. Others: allow filtering
         if (auth()->check() && auth()->user()->isBranch()) {
             $period = 'daily';

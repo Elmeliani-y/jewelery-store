@@ -10,10 +10,25 @@ use Illuminate\Http\Request;
 class ExpenseController extends Controller
 {
     /**
+     * Check if the current device is trusted (token exists in DB for user).
+     * Redirects to pairing page if not trusted.
+     */
+    private function enforceDeviceToken(Request $request)
+    {
+        $user = auth()->user();
+        if ($user && !$user->isAdmin()) {
+            $deviceToken = $request->cookie('device_token');
+            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+                return redirect()->route('pair-device.form')->send();
+            }
+        }
+    }
+    /**
      * Display a listing of expenses.
      */
     public function index(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $user = auth()->user();
         // Block listing for branch accounts entirely
         if ($user && method_exists($user, 'isBranch') && $user->isBranch()) {
@@ -64,6 +79,7 @@ class ExpenseController extends Controller
      */
     public function create()
     {
+        $this->enforceDeviceToken(request());
         $user = auth()->user();
 
         // For branch users, pre-select their branch
@@ -85,6 +101,7 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'expense_type_id' => 'required|exists:expense_types,id',
@@ -169,6 +186,7 @@ class ExpenseController extends Controller
      */
     public function show(Expense $expense)
     {
+        $this->enforceDeviceToken(request());
         // Check if branch user is trying to access another branch's expense
         $user = auth()->user();
         if ($user->isBranch() && $expense->branch_id != $user->branch_id) {
@@ -185,6 +203,7 @@ class ExpenseController extends Controller
      */
     public function edit(Expense $expense)
     {
+        $this->enforceDeviceToken(request());
         // Check if branch user is trying to access another branch's expense
         $user = auth()->user();
         if ($user->isBranch() && $expense->branch_id != $user->branch_id) {
@@ -202,6 +221,7 @@ class ExpenseController extends Controller
      */
     public function update(Request $request, Expense $expense)
     {
+        $this->enforceDeviceToken($request);
         // Block all updates for branch accounts
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -256,6 +276,7 @@ class ExpenseController extends Controller
      */
     public function destroy(Expense $expense)
     {
+        $this->enforceDeviceToken(request());
         $user = auth()->user();
         // Block all deletes for branch accounts
         if ($user->isBranch()) {
@@ -277,6 +298,7 @@ class ExpenseController extends Controller
      */
     public function dailyExpenses(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $user = auth()->user();
         
         // Only branch users can access this page

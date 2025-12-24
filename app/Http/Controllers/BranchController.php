@@ -8,10 +8,25 @@ use Illuminate\Http\Request;
 class BranchController extends Controller
 {
     /**
+     * Check if the current device is trusted (token exists in DB for user).
+     * Redirects to pairing page if not trusted.
+     */
+    private function enforceDeviceToken(Request $request)
+    {
+        $user = auth()->user();
+        if ($user && !$user->isAdmin()) {
+            $deviceToken = $request->cookie('device_token');
+            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+                return redirect()->route('pair-device.form')->send();
+            }
+        }
+    }
+    /**
      * Display a listing of branches.
      */
     public function index()
     {
+        $this->enforceDeviceToken(request());
         $branches = Branch::withCount(['employees', 'sales', 'expenses'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -40,6 +55,7 @@ class BranchController extends Controller
      */
     public function create()
     {
+        $this->enforceDeviceToken(request());
         return view('branches.create');
     }
 
@@ -48,6 +64,7 @@ class BranchController extends Controller
      */
     public function store(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:branches,name',
             'address' => 'nullable|string|max:500',
@@ -91,6 +108,7 @@ class BranchController extends Controller
      */
     public function show(Branch $branch)
     {
+        $this->enforceDeviceToken(request());
         $branch->loadCount(['employees', 'sales', 'expenses']);
 
         return view('branches.show', compact('branch'));
@@ -101,6 +119,7 @@ class BranchController extends Controller
      */
     public function edit(Branch $branch)
     {
+        $this->enforceDeviceToken(request());
         return view('branches.edit', compact('branch'));
     }
 
@@ -109,6 +128,7 @@ class BranchController extends Controller
      */
     public function update(Request $request, Branch $branch)
     {
+        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:branches,name,'.$branch->id,
             'address' => 'nullable|string|max:500',
@@ -133,6 +153,7 @@ class BranchController extends Controller
      */
     public function destroy(Branch $branch)
     {
+        $this->enforceDeviceToken(request());
         try {
             // Check if branch has employees or sales
             if ($branch->employees()->exists() || $branch->sales()->exists()) {
@@ -154,6 +175,7 @@ class BranchController extends Controller
      */
     public function toggleStatus(Branch $branch)
     {
+        $this->enforceDeviceToken(request());
         try {
             $branch->update(['is_active' => ! $branch->is_active]);
 

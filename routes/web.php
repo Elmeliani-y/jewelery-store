@@ -26,6 +26,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+// Public device pairing page (no auth, no device middleware)
+Route::get('pair-device', [\App\Http\Controllers\DeviceController::class, 'showPairForm'])->name('pair-device.form');
+Route::post('pair-device', [\App\Http\Controllers\DeviceController::class, 'pair'])->name('pair-device.pair');
+
 require __DIR__.'/auth.php';
 
 
@@ -43,23 +48,57 @@ Route::get('storage/{path}', function ($path) {
     return response('', 204);
 })->where('path', '.*')->withoutMiddleware(['auth']);
 
-Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
-    // Exclude storage paths from catch-all legacy routes
-    Route::pattern('first', '^(?!storage$).*$');
-
-    // Original Dashboard route at root
+// Authenticated routes: all require device trust except pairing page, but admins are excluded in the middleware logic
+Route::group(['middleware' => ['auth']], function () {
     Route::get('', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
     Route::get('dashboard/print', [DashboardController::class, 'print'])->name('dashboard.print');
-
-    // Sales Management (original single resource)
     Route::resource('sales', SaleController::class);
     Route::post('sales/{sale}/return', [SaleController::class, 'returnSale'])->name('sales.return');
     Route::post('sales/{sale}/unreturn', [SaleController::class, 'unreturnSale'])->name('sales.unreturn');
     Route::get('api/employees-by-branch', [SaleController::class, 'getEmployeesByBranch'])->name('api.employees-by-branch');
     Route::get('api/sales/search', [SaleController::class, 'searchByInvoice'])->name('api.sales.search');
     Route::get('branch/daily-sales', [SaleController::class, 'dailySales'])->name('branch.daily-sales');
-
+    Route::get('branches/sales-summary', [\App\Http\Controllers\BranchSalesController::class, 'index'])->name('branches.sales-summary');
+    Route::get('returns', [SaleController::class, 'returns'])->name('sales.returns');
+    Route::resource('expenses', ExpenseController::class);
+    Route::get('branch/daily-expenses', [ExpenseController::class, 'dailyExpenses'])->name('branch.daily-expenses');
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'all'])->name('all');
+        Route::get('/index', function () {
+            return redirect()->route('reports.all');
+        })->name('index');
+        Route::get('speed', [ReportController::class, 'speed'])->name('speed');
+        Route::get('comprehensive', [ReportController::class, 'comprehensive'])->name('comprehensive');
+        Route::get('detailed', [ReportController::class, 'detailed'])->name('detailed');
+        Route::get('calibers', [ReportController::class, 'calibers'])->name('calibers');
+        Route::get('categories', [ReportController::class, 'categories'])->name('categories');
+        Route::get('employees', [ReportController::class, 'employees'])->name('employees');
+        Route::get('net-profit', [ReportController::class, 'netProfit'])->name('net-profit');
+        Route::get('by-branch', [ReportController::class, 'byBranch'])->name('by-branch');
+        Route::get('comparative', [ReportController::class, 'comparative'])->name('comparative');
+        Route::match(['get','post'], 'comparative-by-time', [ReportController::class, 'periodComparison'])->name('period_comparison');
+        Route::match(['get', 'post'], 'kasr', [ReportController::class, 'kasr'])->name('kasr');
+        Route::get('accounts', [ReportController::class, 'accounts'])->name('accounts');
+    });
+    Route::resource('branches', BranchController::class);
+    Route::post('branches/{branch}/toggle-status', [BranchController::class, 'toggleStatus'])->name('branches.toggle-status');
+    Route::resource('employees', EmployeeController::class);
+    Route::post('employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
+    Route::resource('calibers', CaliberController::class)->except(['show']);
+    Route::post('calibers/{caliber}/toggle-status', [CaliberController::class, 'toggleStatus'])->name('calibers.toggle-status');
+    Route::resource('categories', CategoryController::class)->except(['show']);
+    Route::resource('expense-types', ExpenseTypeController::class)->except(['show']);
+    Route::resource('users', UserController::class);
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::get('settings/devices', [\App\Http\Controllers\DeviceController::class, 'index'])->name('settings.devices');
+    Route::post('settings/devices/generate', [\App\Http\Controllers\DeviceController::class, 'generateCode'])->name('settings.devices.generate');
+    Route::delete('settings/devices/{id}', [\App\Http\Controllers\DeviceController::class, 'delete'])->name('settings.devices.delete');
+    Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
+    Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
+    Route::get('{any}', [RoutingController::class, 'root'])->name('any');
+// End of file
 
     // Branches sales summary
     Route::get('branches/sales-summary', [\App\Http\Controllers\BranchSalesController::class, 'index'])->name('branches.sales-summary');
@@ -115,6 +154,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     // System Settings
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+
+    // Devices management (admin only)
+    Route::get('settings/devices', [\App\Http\Controllers\DeviceController::class, 'index'])->name('settings.devices');
+    Route::post('settings/devices/generate', [\App\Http\Controllers\DeviceController::class, 'generateCode'])->name('settings.devices.generate');
+    Route::delete('settings/devices/{id}', [\App\Http\Controllers\DeviceController::class, 'delete'])->name('settings.devices.delete');
 
     // Legacy routes for existing template compatibility
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');

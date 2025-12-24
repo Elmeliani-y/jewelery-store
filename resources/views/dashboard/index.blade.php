@@ -68,7 +68,7 @@
 <!-- Start Content-->
 <div class="container-fluid">
     <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column gap-3">
-        <div class="flex-grow-1">
+        <div class="grow">
             <h4 class="fs-18 fw-semibold m-0">لوحة التحكم</h4>
         </div>
         @if(auth()->check() && !auth()->user()->isBranch())
@@ -120,7 +120,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
-                            <div id="total_sales" class="apex-charts"></div>
+                            <!-- <div id="total_sales" class="apex-charts"></div> -->
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-success-subtle text-success fs-13">{{ number_format($metrics['sales_count'], 0, ',', '.') }} فاتورة</span>
@@ -139,7 +139,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_net_sales'], 0, ',', '.') }}</h3>
-                            <div id="total_orders" class="apex-charts"></div>
+                            <!-- <div id="total_orders" class="apex-charts"></div> -->
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-info-subtle text-info fs-13">بعد الضريبة</span>
@@ -158,7 +158,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_expenses'], 0, ',', '.') }}</h3>
-                            <div id="new_customers" class="apex-charts"></div>
+                            <!-- <div id="new_customers" class="apex-charts"></div> -->
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-danger-subtle text-danger fs-13">{{ number_format($metrics['expenses_count'], 0, ',', '.') }} مصروف</span>
@@ -178,7 +178,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['returned_sales_total'], 0, ',', '.') }}</h3>
-                            <div id="returned_sales" class="apex-charts"></div>
+                            <!-- <div id="returned_sales" class="apex-charts"></div> -->
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-warning-subtle text-warning fs-13">{{ number_format($metrics['returned_sales_count'], 0, ',', '.') }} فاتورة مرتجعة</span>
@@ -197,7 +197,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_weight'], 1, ',', '.') }} جرام</h3>
-                            <div id="total_returns" class="apex-charts"></div>
+                            <!-- <div id="total_returns" class="apex-charts"></div> -->
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-warning-subtle text-warning fs-13">وزن الذهب المباع</span>
@@ -216,7 +216,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['price_per_gram'], 2, ',', '.') }}</h3>
-                            <div class="apex-charts"></div>
+                            <!-- <div class="apex-charts"></div> -->
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-info-subtle text-info fs-13">المبيعات ÷ الوزن</span>
@@ -287,7 +287,7 @@
                         @forelse($topPerformers['branches'] as $branch)
                         <li class="list-group-item">
                             <div class="d-flex">
-                                <div class="flex-grow-1 align-content-center">
+                                <div class="grow align-content-center">
                                     <div class="row">
                                         <div class="col-7">
                                             <h6 class="mb-1 text-dark fs-15">{{ $branch['branch']['name'] }}</h6>
@@ -326,7 +326,7 @@
                         @forelse($topPerformers['employees'] as $sale)
                         <li class="list-group-item">
                             <div class="d-flex">
-                                <div class="flex-grow-1 align-content-center">
+                                <div class="grow align-content-center">
                                     <div class="row">
                                         <div class="col-7">
                                             <h6 class="mb-1 text-dark fs-15">{{ $sale['employee']['name'] }}</h6>

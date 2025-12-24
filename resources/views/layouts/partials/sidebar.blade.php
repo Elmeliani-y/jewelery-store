@@ -1,10 +1,14 @@
+@php
+    $user = auth()->user();
+    $deviceToken = request()->cookie('device_token');
+    $trusted = $user && $deviceToken && \App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists();
+@endphp
 <!-- Right Sidebar Start -->
+@if($user && ($user->isAdmin() || $trusted))
 <div class="app-sidebar-menu">
     <div class="h-100" data-simplebar>
-
         <!--- Sidemenu -->
         <div id="sidebar-menu">
-
             <div class="logo-box text-center py-2">
                 @php
                     $settings = \App\Models\Setting::all()->pluck('value', 'key');
@@ -12,7 +16,7 @@
                     $logoFullPath = $logoWebPath ? public_path($logoWebPath) : null;
                     $showCustomLogo = $logoFullPath && file_exists($logoFullPath);
                 @endphp
-                <a href="{{ auth()->user()->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo">
+                <a href="{{ $user->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo">
                     @if($showCustomLogo)
                         <img src="{{ asset($logoWebPath) }}" alt="Logo" style="height:64px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
                     @else
@@ -27,12 +31,9 @@
                     @endif
                 </a>
             </div>
-
             <ul id="side-menu">
-
-                @if(!auth()->user()->isBranch())
+                @if(!$user->isBranch())
                     <li class="menu-title">لوحة التحكم</li>
-
                     <li>
                         <a href="{{ route('dashboard') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-home-outline"></i></span>
@@ -191,6 +192,11 @@
                                 <li>
                                     <a href="{{ route('settings.index') }}" class="tp-link">إعدادات النظام</a>
                                 </li>
+                                @if(auth()->user()->role === 'admin')
+                                <li>
+                                    <a href="{{ route('settings.devices') }}" class="tp-link"><i class="mdi mdi-cellphone-link"></i> إدارة الأجهزة </a>
+                                </li>
+                                @endif
                             </ul>
                         </div>
                     </li>
@@ -205,5 +211,7 @@
         <div class="clearfix"></div>
 
     </div>
+    </div>
 </div>
+@endif
 <!-- Right Sidebar End -->

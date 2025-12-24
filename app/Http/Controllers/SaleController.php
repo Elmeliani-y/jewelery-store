@@ -13,10 +13,25 @@ use Illuminate\Support\Facades\DB;
 class SaleController extends Controller
 {
     /**
+     * Check if the current device is trusted (token exists in DB for user).
+     * Redirects to pairing page if not trusted.
+     */
+    private function enforceDeviceToken(Request $request)
+    {
+        $user = auth()->user();
+        if ($user && !$user->isAdmin()) {
+            $deviceToken = $request->cookie('device_token');
+            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+                return redirect()->route('pair-device.form')->send();
+            }
+        }
+    }
+    /**
      * Display a listing of sales.
      */
     public function index(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $user = auth()->user();
         // For branch accounts: block listing view entirely
         if ($user && method_exists($user, 'isBranch') && $user->isBranch()) {
@@ -77,6 +92,7 @@ class SaleController extends Controller
      */
     public function create()
     {
+        $this->enforceDeviceToken(request());
         $user = auth()->user();
 
         // If user is a branch user, pre-select their branch
@@ -106,6 +122,7 @@ class SaleController extends Controller
      */
     public function store(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // Build dynamic validation rules based on payment method to avoid network errors when cash selected
         $baseRules = [
             'branch_id' => 'required|exists:branches,id',
@@ -279,6 +296,7 @@ class SaleController extends Controller
      */
     public function show(Sale $sale)
     {
+        $this->enforceDeviceToken(request());
         // Check if branch user is trying to access another branch's sale
         $user = auth()->user();
         if ($user->isBranch() && $sale->branch_id != $user->branch_id) {
@@ -295,6 +313,7 @@ class SaleController extends Controller
      */
     public function edit(Sale $sale)
     {
+        $this->enforceDeviceToken(request());
         // Block branch users from editing sales
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -319,6 +338,7 @@ class SaleController extends Controller
      */
     public function update(Request $request, Sale $sale)
     {
+        $this->enforceDeviceToken($request);
         // Block branch users from updating sales
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -463,6 +483,7 @@ class SaleController extends Controller
      */
     public function returnSale(Sale $sale)
     {
+        $this->enforceDeviceToken(request());
         if ($sale->is_returned) {
             return redirect()->route('sales.index')
                 ->with('error', 'هذه الفاتورة مسترجعة بالفعل');
@@ -484,6 +505,7 @@ class SaleController extends Controller
      */
     public function unreturnSale(Sale $sale)
     {
+        $this->enforceDeviceToken(request());
         if (! $sale->is_returned) {
             return redirect()->route('sales.show', $sale)
                 ->with('error', 'هذه الفاتورة ليست مرتجعاً');
@@ -501,6 +523,7 @@ class SaleController extends Controller
      */
     public function getEmployeesByBranch(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $employees = Employee::active()
             ->where('branch_id', $request->branch_id)
             ->get(['id', 'name', 'is_snap']);
@@ -513,6 +536,7 @@ class SaleController extends Controller
      */
     public function searchByInvoice(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $query = $request->get('q');
 
         $sales = Sale::with(['branch', 'employee', 'caliber'])
@@ -528,6 +552,7 @@ class SaleController extends Controller
      */
     public function destroy(Sale $sale)
     {
+        $this->enforceDeviceToken(request());
         // Block all branch users from deleting sales
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -550,6 +575,7 @@ class SaleController extends Controller
      */
     public function dailySales(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $user = auth()->user();
 
         // Only branch users can access
@@ -628,6 +654,7 @@ class SaleController extends Controller
      */
     public function returns(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $query = Sale::with(['branch', 'employee', 'caliber'])
             ->where('is_returned', true)
             ->orderBy('returned_at', 'desc');
