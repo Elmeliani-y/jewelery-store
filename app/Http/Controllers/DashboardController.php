@@ -20,6 +20,7 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // Trusted device check logic (was middleware)
         if (auth()->check()) {
             // Exclude admin users from device trust check (admin is always trusted)
@@ -600,6 +601,7 @@ class DashboardController extends Controller
      */
     public function getChartData(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // Block chart data access for branch users
         if (auth()->check() && auth()->user()->isBranch()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -619,6 +621,7 @@ class DashboardController extends Controller
      */
     public function print(Request $request)
     {
+        $this->enforceDeviceToken($request);
         if (auth()->check() && auth()->user()->isBranch()) {
             return redirect()->route('sales.create');
         }

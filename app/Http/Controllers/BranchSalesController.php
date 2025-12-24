@@ -10,6 +10,7 @@ class BranchSalesController extends Controller
 {
     public function index(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // Filter by date range and branch if provided
         $branches = Branch::all();
         $branchId = $request->get('branch_id');

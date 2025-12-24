@@ -28,5 +28,18 @@ use OpenApi\Annotations as OA;
  */
 abstract class Controller
 {
-    
+	/**
+	 * Enforce device token for all non-admin users. Redirects to pair-device if not trusted.
+	 */
+	protected function enforceDeviceToken($request)
+	{
+		$user = auth()->user();
+		if ($user && method_exists($user, 'isAdmin') && !$user->isAdmin()) {
+			$deviceToken = $request->cookie('device_token');
+			if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
+				redirect()->route('pair-device.form')->send();
+				exit;
+			}
+		}
+	}
 }

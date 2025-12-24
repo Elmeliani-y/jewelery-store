@@ -23,7 +23,7 @@ class ReportController extends Controller
      * Check if the current device is trusted (token exists in DB for user).
      * Redirects to pairing page if not trusted.
      */
-    private function enforceDeviceToken(Request $request)
+    protected function enforceDeviceToken($request)
     {
         $user = auth()->user();
         if ($user && !$user->isAdmin()) {
@@ -38,6 +38,7 @@ class ReportController extends Controller
      */
     public function accounts(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $this->enforceDeviceToken($request);
         $branches = Branch::active()->get();
         $branchId = $request->get('branch_id');
@@ -108,6 +109,7 @@ class ReportController extends Controller
      */
     public function periodComparison(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $this->enforceDeviceToken($request);
         $branches = Branch::active()->get();
 
@@ -471,6 +473,7 @@ class ReportController extends Controller
      */
     public function all(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $perPage = (int) $request->get('per_page', 10);
@@ -686,6 +689,7 @@ class ReportController extends Controller
      */
     public function speed(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // ...existing code...
         $branchId = $request->get('branch_id');
         $date = $request->get('date', date('Y-m-d'));
@@ -962,6 +966,7 @@ class ReportController extends Controller
      */
     public function comprehensive(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1013,6 +1018,7 @@ class ReportController extends Controller
      */
     public function detailed(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
 
@@ -1058,6 +1064,7 @@ class ReportController extends Controller
      */
     public function calibers(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1129,6 +1136,7 @@ class ReportController extends Controller
      */
     public function categories(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1183,6 +1191,7 @@ class ReportController extends Controller
      */
     public function employees(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1251,6 +1260,7 @@ class ReportController extends Controller
      */
     public function netProfit(Request $request)
     {
+        $this->enforceDeviceToken($request);
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
 
@@ -1442,6 +1452,7 @@ class ReportController extends Controller
      */
     public function kasr(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // Calculate total tax for returns
         $totalReturnTax = 0;
         if ($request->branch_id && $request->date_from && $request->date_to) {
@@ -1788,6 +1799,7 @@ class ReportController extends Controller
      */
     public function comparative(Request $request)
     {
+        $this->enforceDeviceToken($request);
         // DEBUG: Show products array for first sale
         // $sale = \App\Models\Sale::notReturned()->first();
         // dd($sale ? $sale->products : null);
