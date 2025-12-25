@@ -1,5 +1,15 @@
-<?php
 
+<?php
+// Redirect default forgot-password to code-based recovery
+Route::get('/forgot-password', function() {
+    return redirect()->route('password.code.form');
+})->name('password.request');
+// Override POST /forgot-password to redirect to code-based recovery and never send a reset link
+Route::post('/forgot-password', function() {
+    return redirect()->route('password.code.form');
+})->name('password.email');
+
+use App\Http\Controllers\Auth\PasswordCodeController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -9,6 +19,12 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+
+// Password code-based recovery
+Route::get('/password/code', [PasswordCodeController::class, 'showCodeForm'])->middleware('guest')->name('password.code.form');
+Route::post('/password/code/request', [PasswordCodeController::class, 'requestCode'])->middleware('guest')->name('password.code.request');
+Route::post('/password/code/verify', [PasswordCodeController::class, 'verifyCode'])->middleware('guest')->name('password.code.verify');
+Route::post('/password/code/reset', [PasswordCodeController::class, 'resetPassword'])->middleware('guest')->name('password.code.reset');
 
 Route::get('/register', [RegisteredUserController::class, 'create'])
     ->middleware('guest')

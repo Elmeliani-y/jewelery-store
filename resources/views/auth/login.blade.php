@@ -58,7 +58,9 @@
                                         </div>
                                     </div>
                                 </form>
-                                
+                                <div class="text-center mt-3">
+                                    <a href="{{ route('password.code.form') }}" class="text-primary">هل نسيت كلمة المرور؟</a>
+                                </div>
                             </div>
                         </div>
                     </div> 
