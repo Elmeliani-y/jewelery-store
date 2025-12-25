@@ -12,7 +12,7 @@ class UserController extends Controller
      * Check if the current device is trusted (token exists in DB for user).
      * Redirects to pairing page if not trusted.
      */
-    private function enforceDeviceToken(Request $request)
+    protected function enforceDeviceToken($request)
     {
         $user = auth()->user();
         if ($user && ! $user->isAdmin()) {

@@ -95,6 +95,16 @@
                                 </tr>
                                 @endforeach
                             </tbody>
+                            <tfoot class="table-light">
+                                <tr class="fw-semibold">
+                                    <td colspan="3">الإجماليات</td>
+                                    <td class="text-end">{{ number_format($returns->sum('weight'), 2) }}</td>
+                                    <td></td>
+                                    <td class="text-end">{{ number_format($returns->sum('total_amount'), 2) }}</td>
+                                    <td class="text-end">عدد المرتجعات: {{ $returns->count() }}</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                     <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
@@ -102,9 +112,6 @@
                             <small class="text-muted">
                                 عرض {{ $returns->firstItem() }}–{{ $returns->lastItem() }} من أصل {{ $returns->total() }}
                             </small>
-                            <span class="badge bg-info text-dark ms-md-3">
-                                الإجمالي: {{ number_format($totalReturns, 2, '.', ',') }} ريال
-                            </span>
                         </div>
                         {{ $returns->links('pagination::bootstrap-5') }}
                     </div>

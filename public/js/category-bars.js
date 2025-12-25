@@ -1,128 +1,118 @@
-// Custom category bar visualization for dashboard
-// This script renders category bars with value, percentage, and total weight
+// category-bars.js
+// Renders the sales by category chart using Chart.js
 
-// Custom category bar visualization for dashboard (for "مبيعات حسب صنف" only)
-function renderCategoryBars() {
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof categoriesData === 'undefined' || !Array.isArray(categoriesData) || categoriesData.length === 0) {
+        console.warn('No category data for chart.');
+        return;
+    }
+    // Sort categoriesData by amount descending
+    const sortedCategories = [...categoriesData].sort((a, b) => {
+        const aAmount = (typeof a.amount !== 'undefined' && !isNaN(a.amount)) ? Number(a.amount) : 0;
+        const bAmount = (typeof b.amount !== 'undefined' && !isNaN(b.amount)) ? Number(b.amount) : 0;
+        return bAmount - aAmount;
+    });
+
     const container = document.getElementById('categories_chart');
     if (!container) return;
-    if (!Array.isArray(categoriesData) || categoriesData.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات لعرض الرسم البياني.</div>';
-        return;
-    }
-    const validCategories = categoriesData.filter(c => c && typeof c === 'object' && !Array.isArray(c) && (c.value !== undefined || c.amount !== undefined));
-    if (validCategories.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted py-3">لا توجد بيانات صالحة لعرض الرسم البياني.</div>';
-        return;
-    }
-    container.innerHTML = '';
-    const getValue = c => parseFloat(c.value !== undefined ? c.value : c.amount);
-    const getWeight = c => parseFloat(c.weight || 0);
-    const totalSales = validCategories.reduce((sum, c) => sum + (getValue(c) || 0), 0);
-    const totalWeight = validCategories.reduce((sum, c) => sum + (getWeight(c) || 0), 0);
-    const maxWeight = Math.max(...validCategories.map(c => getWeight(c) || 0), 1);
-    const getVar = (v, fallback) => getComputedStyle(document.documentElement).getPropertyValue(v) || fallback;
-    const colors = [
-        getVar('--cat-bar-1', '#f59e42'),
-        getVar('--cat-bar-2', '#3b82f6'),
-        getVar('--cat-bar-3', '#a16207'),
-        getVar('--cat-bar-4', '#be185d'),
-        getVar('--cat-bar-5', '#059669'),
-        getVar('--cat-bar-6', '#f43f5e'),
-        getVar('--cat-bar-7', '#6366f1'),
-        getVar('--cat-bar-8', '#eab308'),
-    ];
-    const textColor = getVar('--cat-bar-text', getVar('--main-text-color', '#222'));
-    const borderColor = getVar('--cat-bar-border', '#ccc');
-    validCategories.forEach((cat, i) => {
-        const valueNum = getValue(cat) || 0;
-        const weightNum = getWeight(cat) || 0;
-        const percent = totalSales > 0 ? (valueNum / totalSales * 100) : 0;
-        const barWidth = (weightNum / maxWeight) * 100;
-        const baseColor = colors[i % colors.length];
-        const opacity = (weightNum > 0 && maxWeight > 0) ? (0.3 + 0.7 * (weightNum / maxWeight)) : 0.3;
-        const row = document.createElement('div');
-        row.style.display = 'flex';
-        row.style.alignItems = 'center';
-        row.style.marginBottom = '18px';
-        row.style.width = '100%';
-        row.style.gap = '0.5em';
-        const name = document.createElement('div');
-        name.textContent = cat.name || cat.category || '';
-        name.style.width = '20%';
-        name.style.textAlign = 'right';
-        name.style.fontSize = 'clamp(0.9em, 2.5vw, 1.1em)';
-        name.style.color = textColor;
-        name.style.marginLeft = '0.5em';
-        row.appendChild(name);
-        const barContainer = document.createElement('div');
-        barContainer.style.background = 'transparent';
-        barContainer.style.border = `3px solid ${borderColor}`;
-        barContainer.style.borderRadius = '22px';
-        barContainer.style.height = '2.2em';
-        barContainer.style.width = '100%';
-        barContainer.style.position = 'relative';
-        barContainer.style.display = 'flex';
-        barContainer.style.alignItems = 'center';
-        const barFill = document.createElement('div');
-        barFill.style.background = baseColor;
-        barFill.style.opacity = opacity;
-        barFill.style.height = '100%';
-        barFill.style.width = barWidth + '%';
-        barFill.style.borderRadius = '22px';
-        barFill.style.position = 'absolute';
-        barFill.style.left = 0;
-        barFill.style.top = 0;
-        barFill.style.zIndex = 1;
-        barContainer.appendChild(barFill);
-        const valueText = document.createElement('div');
-        let valueStr = (!isNaN(valueNum) && valueNum !== 0) ? valueNum.toLocaleString() : '0';
-        if (totalSales > 0) {
-            valueText.textContent = `${valueStr} | ${percent.toFixed(2)}%`;
-        } else {
-            valueText.textContent = `${valueStr}`;
-        }
-        valueText.style.position = 'relative';
-        valueText.style.zIndex = 2;
-        valueText.style.width = '100%';
-        valueText.style.textAlign = 'center';
-        valueText.style.fontWeight = 'bold';
-        valueText.style.color = textColor;
-        valueText.style.fontSize = 'clamp(1em, 3vw, 1.3em)';
-        valueText.style.letterSpacing = '0.01em';
-        valueText.style.wordBreak = 'break-word';
-        valueText.style.lineHeight = '1.1';
-        valueText.style.display = 'flex';
-        valueText.style.flexDirection = 'column';
-        valueText.style.justifyContent = 'center';
-        valueText.style.alignItems = 'center';
-        barContainer.appendChild(valueText);
-        row.appendChild(barContainer);
-        const weight = document.createElement('div');
-        let weightStr = (!isNaN(weightNum) && weightNum !== 0) ? weightNum.toLocaleString() + ' جم' : '-';
-        weight.textContent = weightStr;
-        weight.style.width = '18%';
-        weight.style.textAlign = 'left';
-        weight.style.fontSize = 'clamp(0.9em, 2.5vw, 1.1em)';
-        weight.style.color = textColor;
-        weight.style.marginRight = '18px';
-        row.appendChild(weight);
-        container.appendChild(row);
+    container.innerHTML = `
+        <div id="pieChartFlexWrap" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;">
+            <canvas id="categoriesPieChart" style="display:block;margin:0 auto;width:320px;height:220px;"></canvas>
+            <div id="pieChartLegendScroll" style="width:100%;margin-top:4px;max-height:220px;overflow-y:auto;"></div>
+        </div>
+    `;
+    const canvas = document.getElementById('categoriesPieChart');
+    // Set fixed size attributes to prevent Chart.js from resizing canvas
+    canvas.width = 320;
+    canvas.height = 220;
+    const ctx = canvas.getContext('2d');
+    const labels = sortedCategories.map(c => {
+        const cat = c.category || '';
+        const weight = (typeof c.weight !== 'undefined' && !isNaN(c.weight)) ? Number(c.weight).toFixed(2) : '';
+        const count = typeof c.count !== 'undefined' ? c.count : '';
+        return `${cat} (وزن: ${weight}, عدد: ${count})`;
     });
-}
+    const data = sortedCategories.map(c => (typeof c.amount !== 'undefined' && !isNaN(c.amount)) ? Number(c.amount).toFixed(2) : 0);
 
-document.addEventListener('DOMContentLoaded', function () {
-    renderCategoryBars();
-    // Listen for theme changes and re-render bars
-    const observer = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-            if (m.type === 'attributes' && (m.attributeName === 'data-theme' || m.attributeName === 'class')) {
-                renderCategoryBars();
-            }
+    const chartColors = [
+        '#f59e42', '#3b82f6', '#a16207', '#be185d', '#059669', '#f43f5e', '#6366f1', '#eab308',
+        '#b91c1c', '#0e7490', '#fbbf24', '#7c3aed', '#22d3ee', '#f472b6', '#84cc16', '#facc15', '#a21caf'
+    ];
+    const chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'المبيعات حسب الصنف',
+                data: data,
+                backgroundColor: chartColors,
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false // Hide built-in legend
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const i = context.dataIndex;
+                            const c = categoriesData[i];
+                            const amount = (typeof c.amount !== 'undefined' && !isNaN(c.amount)) ? Number(c.amount).toFixed(2) : '';
+                            const weight = (typeof c.weight !== 'undefined' && !isNaN(c.weight)) ? Number(c.weight).toFixed(2) : '';
+                            return `${c.category}: المبيعات ${amount}، الوزن ${weight}، العدد ${c.count}`;
+                        }
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: true
         }
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
-    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
-    if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderCategoryBars);
-    }
+
+    // Custom legend: always show all items
+    setTimeout(() => {
+        const legendDiv = document.getElementById('pieChartLegendScroll');
+        if (legendDiv) {
+            let html = '<ul id="customLegendList" style="list-style:none;padding:0;margin:0;direction:rtl;font-size:13px;line-height:1.2;column-count:2;column-gap:12px;">';
+            sortedCategories.forEach((c, i) => {
+                const color = chartColors[i % chartColors.length];
+                const cat = c.category || '';
+                const weight = (typeof c.weight !== 'undefined' && !isNaN(c.weight)) ? Number(c.weight).toFixed(2) : '';
+                const count = typeof c.count !== 'undefined' ? c.count : '';
+                html += `<li class="legend-item" data-idx="${i}" style="cursor:pointer;user-select:none;display:flex;align-items:center;padding:0 2px;margin:0;white-space:normal;word-break:break-word;">
+                    <span class="legend-color" style="display:inline-block;width:12px;height:12px;background:${color};border-radius:2px;margin-left:4px;"></span>
+                    <span class="legend-label">${cat} (وزن: ${weight}, عدد: ${count})</span>
+                </li>`;
+            });
+            html += '</ul>';
+            legendDiv.innerHTML = html;
+
+            // Add click event to legend items for toggling visibility
+            const chartDataset = chart.data.datasets[0];
+            const legendItems = legendDiv.querySelectorAll('.legend-item');
+            // Track hidden state
+            if (!window._pieLegendHidden) window._pieLegendHidden = {};
+            legendItems.forEach((li, idx) => {
+                li.addEventListener('click', function() {
+                    const i = parseInt(li.getAttribute('data-idx'));
+                    // Toggle hidden state
+                    window._pieLegendHidden[i] = !window._pieLegendHidden[i];
+                    // Set value to 0 if hidden, restore if shown
+                    if (window._pieLegendHidden[i]) {
+                        chartDataset.data[i] = 0;
+                        li.style.opacity = '0.4';
+                        li.querySelector('.legend-label').style.textDecoration = 'line-through';
+                    } else {
+                        chartDataset.data[i] = (typeof sortedCategories[i].amount !== 'undefined' && !isNaN(sortedCategories[i].amount)) ? Number(sortedCategories[i].amount).toFixed(2) : 0;
+                        li.style.opacity = '1';
+                        li.querySelector('.legend-label').style.textDecoration = 'none';
+                    }
+                    chart.update();
+                });
+            });
+        }
+    }, 200);
 });

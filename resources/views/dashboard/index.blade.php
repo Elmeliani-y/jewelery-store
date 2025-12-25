@@ -289,7 +289,10 @@
                             <div class="d-flex">
                                 <div class="grow align-content-center">
                                     <div class="row">
-                                        <div class="col-7">
+                                        <div class="col-1 d-flex align-items-center justify-content-center">
+                                            <span class="badge bg-primary-subtle text-primary fs-13">{{ $branch['rank'] ?? $loop->iteration }}</span>
+                                        </div>
+                                        <div class="col-6">
                                             <h6 class="mb-1 text-dark fs-15">{{ $branch['branch']['name'] }}</h6>
                                             <span class="fs-14 text-muted">{{ $branch['count'] }} فاتورة</span>
                                         </div>
@@ -408,5 +411,6 @@ const salesAmount = {{ $metrics['total_sales'] }};
 const expensesAmount = {{ $metrics['total_expenses'] }};
 </script>
 <script src="{{ asset('js/crm-dashboard-custom.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ asset('js/category-bars.js') }}"></script>
 @endsection

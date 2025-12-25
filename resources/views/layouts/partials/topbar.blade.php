@@ -41,7 +41,7 @@
             <ul class="list-unstyled topnav-menu mb-0 d-flex align-items-center">
 
                 <!-- Light/Dark Mode Button Themes -->
-                <li class="d-none d-sm-flex">
+                <li>
                     <button type="button" class="btn nav-link" id="light-dark-mode">
                         <iconify-icon icon="solar:moon-outline" class="fs-24 align-middle dark-mode"></iconify-icon>
                         <iconify-icon icon="solar:sun-2-outline" class="fs-24 align-middle light-mode"></iconify-icon>

@@ -450,26 +450,42 @@ class DashboardController extends Controller
             ->get();
         $branchData = [];
         foreach ($branchSales as $sale) {
-            $branchId = $sale->branch_id;
-            if (!isset($branchData[$branchId])) {
-                $branchData[$branchId] = [
-                    'branch_id' => $branchId,
+            $saleBranchId = $sale->branch_id;
+            if (!isset($branchData[$saleBranchId])) {
+                $branchData[$saleBranchId] = [
+                    'branch_id' => $saleBranchId,
                     'amount' => 0,
                     'weight' => 0,
                     'count' => 0,
                     'branch' => $sale->branch,
                 ];
             }
-            $branchData[$branchId]['amount'] += $sale->total_amount;
-            $branchData[$branchId]['count']++;
+            $branchData[$saleBranchId]['amount'] += $sale->total_amount;
+            $branchData[$saleBranchId]['count']++;
             $products = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
             if (is_array($products)) {
                 foreach ($products as $product) {
-                    $branchData[$branchId]['weight'] += $product['weight'] ?? 0;
+                    $branchData[$saleBranchId]['weight'] += $product['weight'] ?? 0;
                 }
             }
         }
-        $topBranches = collect($branchData)->sortByDesc('amount')->take(5)->values();
+        $sortedBranches = collect($branchData)->sortByDesc('amount')->values();
+        // If a branch is selected, show only that branch but with its rank
+        if ($branchId && isset($branchData[$branchId])) {
+            // Find the rank (1-based index)
+            $rank = $sortedBranches->search(function($item) use ($branchId) {
+                return $item['branch_id'] == $branchId;
+            });
+            $branchData[$branchId]['rank'] = $rank !== false ? $rank + 1 : null;
+            $topBranches = collect([$branchData[$branchId]]);
+        } else {
+            // Otherwise, show top 5 as before, with ranks
+            $topBranches = $sortedBranches->take(5)->values();
+            foreach ($topBranches as $i => &$b) {
+                $b['rank'] = $i + 1;
+            }
+            unset($b);
+        }
 
         // Top employees by sales
         $employeeSales = Sale::notReturned()
