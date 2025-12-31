@@ -24,6 +24,7 @@ class ExpenseController extends Controller
             }
         }
     }
+
     /**
      * Display a listing of expenses.
      */
@@ -188,7 +189,6 @@ class ExpenseController extends Controller
         return view('expenses.show', compact('expense'));
     }
 
-
     /**
      * Remove the specified expense.
      */
@@ -218,9 +218,9 @@ class ExpenseController extends Controller
     {
         $this->enforceDeviceToken($request);
         $user = auth()->user();
-        
+
         // Only branch users can access this page
-        if (!$user->isBranch()) {
+        if (! $user->isBranch()) {
             abort(403, 'هذه الصفحة مخصصة لحسابات الفروع فقط');
         }
 
