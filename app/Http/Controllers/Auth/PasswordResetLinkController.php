@@ -13,8 +13,11 @@ class PasswordResetLinkController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         return view('auth.forgot-password');
     }
 
@@ -28,6 +31,9 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         $request->validate([
             'email' => 'required|email',
         ]);

@@ -316,7 +316,18 @@ if(Array.isArray(dailySalesData) && dailySalesData.length > 0) {
         }
     };
     if(document.querySelector("#sales-overtime")) {
-        new ApexCharts(document.querySelector("#sales-overtime"), salesOvertimeOptions).render();
+        const salesOvertimeEl = document.querySelector("#sales-overtime");
+        // Set width 100vw for mobile, 100% for desktop
+        function setSalesOvertimeWidth() {
+            if(window.innerWidth <= 600) {
+                salesOvertimeEl.style.width = '100vw';
+            } else {
+                salesOvertimeEl.style.width = '100%';
+            }
+        }
+        setSalesOvertimeWidth();
+        window.addEventListener('resize', setSalesOvertimeWidth);
+        new ApexCharts(salesOvertimeEl, salesOvertimeOptions).render();
     }
 }
 

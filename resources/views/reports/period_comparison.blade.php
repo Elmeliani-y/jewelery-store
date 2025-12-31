@@ -257,13 +257,34 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                function percentDiff($a, $b) {
+                                    if ($b == 0 && $a == 0) return null;
+                                    if ($b == 0) return 100;
+                                    return round((($a - $b) / abs($b)) * 100, 2);
+                                }
+                                $salesPct = percentDiff($period1['total_sales'] ?? 0, $period2['total_sales'] ?? 0);
+                                $weightPct = percentDiff($period1['total_weight'] ?? 0, $period2['total_weight'] ?? 0);
+                                $expensesPct = percentDiff($period1['total_expenses'] ?? 0, $period2['total_expenses'] ?? 0);
+                                $countPct = percentDiff($period1['sales_count'] ?? 0, $period2['sales_count'] ?? 0);
+                            @endphp
                             <tr>
                                 <td>إجمالي المبيعات</td>
-                                <td class="text-end">{{ number_format($period1['total_sales'] ?? 0, 2) }} ريال</td>
+                                <td class="text-end">
+                                    {{ number_format($period1['total_sales'] ?? 0, 2) }}
+                                    @if(!is_null($salesPct))
+                                        <span class="fw-bold {{ $salesPct > 0 ? 'text-success' : ($salesPct < 0 ? 'text-danger' : '') }}"> ({{ $salesPct > 0 ? '+' : '' }}{{ $salesPct }}%)</span>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>إجمالي الوزن</td>
-                                <td class="text-end">{{ number_format($period1['total_weight'] ?? 0, 2) }} جرام</td>
+                                <td class="text-end">
+                                    {{ number_format($period1['total_weight'] ?? 0, 2) }}
+                                    @if(!is_null($weightPct))
+                                        <span class="fw-bold {{ $weightPct > 0 ? 'text-success' : ($weightPct < 0 ? 'text-danger' : '') }}"> ({{ $weightPct > 0 ? '+' : '' }}{{ $weightPct }}%)</span>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>معدل سعر الجرام</td>
@@ -271,11 +292,21 @@
                             </tr>
                             <tr>
                                 <td>عدد المبيعات</td>
-                                <td class="text-end">{{ number_format($period1['sales_count'] ?? 0, 0, ',', '.') }}</td>
+                                <td class="text-end">
+                                    {{ number_format($period1['sales_count'] ?? 0, 0, ',', '.') }}
+                                    @if(!is_null($countPct))
+                                        <span class="fw-bold {{ $countPct > 0 ? 'text-success' : ($countPct < 0 ? 'text-danger' : '') }}"> ({{ $countPct > 0 ? '+' : '' }}{{ $countPct }}%)</span>
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <td>إجمالي المصروفات</td>
-                                <td class="text-end">{{ number_format($period1['total_expenses'] ?? 0, 2) }} ريال</td>
+                                <td class="text-end">
+                                    {{ number_format($period1['total_expenses'] ?? 0, 2) }}
+                                    @if(!is_null($expensesPct))
+                                        <span class="fw-bold {{ $expensesPct > 0 ? 'text-success' : ($expensesPct < 0 ? 'text-danger' : '') }}"> ({{ $expensesPct > 0 ? '+' : '' }}{{ $expensesPct }}%)</span>
+                                    @endif
+                                </td>
                             </tr>
                         </tbody>
                     </table>

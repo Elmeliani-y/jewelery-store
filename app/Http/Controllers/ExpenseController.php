@@ -10,25 +10,10 @@ use Illuminate\Http\Request;
 class ExpenseController extends Controller
 {
     /**
-     * Check if the current device is trusted (token exists in DB for user).
-     * Redirects to pairing page if not trusted.
-     */
-    protected function enforceDeviceToken($request)
-    {
-        $user = auth()->user();
-        if ($user && !$user->isAdmin()) {
-            $deviceToken = $request->cookie('device_token');
-            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
-                return redirect()->route('pair-device.form')->send();
-            }
-        }
-    }
-    /**
      * Display a listing of expenses.
      */
     public function index(Request $request)
     {
-        $this->enforceDeviceToken($request);
         $user = auth()->user();
         // Block listing for branch accounts entirely
         if ($user && method_exists($user, 'isBranch') && $user->isBranch()) {
@@ -79,7 +64,7 @@ class ExpenseController extends Controller
      */
     public function create()
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
         $user = auth()->user();
 
         // For branch users, pre-select their branch

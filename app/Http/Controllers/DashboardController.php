@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\Category;
 use App\Models\Caliber;
 use App\Models\ExpenseType;
+use App\Http\Controllers\DeviceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -18,23 +19,19 @@ class DashboardController extends Controller
     /**
      * Display dashboard with analytics and insights.
      */
+
     public function index(Request $request)
     {
-        $this->enforceDeviceToken($request);
-        // Trusted device check logic (was middleware)
-        if (auth()->check()) {
-            // Exclude admin users from device trust check (admin is always trusted)
-            if (method_exists(auth()->user(), 'isAdmin') && auth()->user()->isAdmin()) {
-                // continue
-            } else {
-                // Allow access to pairing routes without device check (not needed here, only for pairing routes)
-                $deviceToken = $request->cookie('device_token');
-                if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', auth()->id())->exists()) {
-                    // If not trusted, redirect to pairing page
-                    return redirect()->route('pair-device.form');
-                }
-            }
+        // Redirect admin users to devices page
+        if (auth()->check() && auth()->user()->isAdmin()) {
+            return redirect()->route('settings.devices');
         }
+        // Restrict branch users from accessing dashboard
+        if (auth()->check() && auth()->user()->isBranch()) {
+            return redirect()->back()->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
+        // Enforce device or admin session access
+        $this->enforceDeviceOrAdminOr404($request);
         // Branch users: restrict to today and their branch. Others: allow filtering
         if (auth()->check() && auth()->user()->isBranch()) {
             $period = 'daily';
@@ -45,7 +42,6 @@ class DashboardController extends Controller
             // Admin users: use request parameters or default to monthly
             $period = $request->get('period', 'monthly');
             $branchId = $request->get('branch_id');
-            
             // Calculate date range based on period
             switch ($period) {
                 case 'daily':
@@ -72,13 +68,10 @@ class DashboardController extends Controller
 
         // Key metrics
         $metrics = $this->getKeyMetrics($startDate, $endDate, $branchId);
-        
         // Charts data
         $chartsData = $this->getChartsData($startDate, $endDate, $branchId);
-        
         // Top performers
         $topPerformers = $this->getTopPerformers($startDate, $endDate, $branchId);
-
         $branches = \App\Models\Branch::active()->get();
 
         // CSV export of key metrics
@@ -615,9 +608,9 @@ class DashboardController extends Controller
     /**
      * Get dashboard data via AJAX for chart updates.
      */
+
     public function getChartData(Request $request)
     {
-        $this->enforceDeviceToken($request);
         // Block chart data access for branch users
         if (auth()->check() && auth()->user()->isBranch()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -632,40 +625,5 @@ class DashboardController extends Controller
         return response()->json($chartsData[$chartType] ?? []);
     }
 
-    /**
-     * Print-friendly dashboard report without charts.
-     */
-    public function print(Request $request)
-    {
-        $this->enforceDeviceToken($request);
-        if (auth()->check() && auth()->user()->isBranch()) {
-            return redirect()->route('sales.create');
-        }
-
-        $period = $request->get('period', 'monthly');
-        $branchId = $request->get('branch_id');
-
-        if ($period === 'daily') {
-            $startDate = Carbon::now()->startOfDay()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
-        } elseif ($period === 'weekly') {
-            $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
-        } elseif ($period === 'monthly') {
-            $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfMonth()->format('Y-m-d');
-        } else {
-            $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-            $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
-        }
-
-        $metrics = $this->getKeyMetrics($startDate, $endDate, $branchId);
-        $chartsData = $this->getChartsData($startDate, $endDate, $branchId);
-        $topPerformers = $this->getTopPerformers($startDate, $endDate, $branchId);
-        $branch = $branchId ? Branch::find($branchId) : null;
-
-        return view('dashboard.print', compact(
-            'metrics', 'chartsData', 'topPerformers', 'startDate', 'endDate', 'period', 'branch'
-        ));
-    }
+    // Print-friendly dashboard report without charts should be implemented in a separate method if needed.
 }

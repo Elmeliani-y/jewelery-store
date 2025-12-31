@@ -1,10 +1,8 @@
 @php
     $user = auth()->user();
-    $deviceToken = request()->cookie('device_token');
-    $trusted = $user && $deviceToken && \App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists();
 @endphp
 <!-- Right Sidebar Start -->
-@if($user && ($user->isAdmin() || $trusted))
+@if($user)
 <div class="app-sidebar-menu">
     <div class="h-100" data-simplebar>
         <!--- Sidemenu -->
@@ -32,24 +30,29 @@
                 </a>
             </div>
             <ul id="side-menu">
-                @if(!$user->isBranch())
-                    <li class="menu-title">لوحة التحكم</li>
+                @if($user->isAdmin())
+                    <li class="menu-title mt-2">الإدارة (أدمن فقط)</li>
                     <li>
-                        <a href="{{ route('dashboard') }}" class="tp-link">
-                            <span class="nav-icon"><i class="mdi mdi-home-outline"></i></span>
-                            <span> الرئيسية </span>
+                        <a href="#sidebarManagement" data-bs-toggle="collapse" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-cog-outline"></i></span>
+                            <span> إعدادات النظام </span>
                         </a>
+                        <div class="collapse show" id="sidebarManagement">
+                            <ul class="nav-second-level">
+                                <li>
+                                    <a href="{{ route('settings.devices') }}" class="tp-link">إدارة الأجهزة</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('users.index') }}" class="tp-link">المستخدمين</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('settings.index') }}" class="tp-link">إعدادات النظام</a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
-                    <li>
-                        <a href="{{ route('branches.sales-summary') }}" class="tp-link">
-                            <span class="nav-icon"><i class="mdi mdi-store"></i></span>
-                            <span> إجمالي مبيعات الفروع </span>
-                        </a>
-                    </li>
-                @endif
-
-                <li class="menu-title mt-2">إدارة المبيعات</li>
-                @if(auth()->user()->isBranch())
+                @elseif($user->isBranch())
+                    <li class="menu-title mt-2">فرع</li>
                     <li>
                         <a href="{{ route('branch.daily-sales') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-calendar-today"></i></span>
@@ -62,29 +65,6 @@
                             <span> تسجيل مبيعة جديدة </span>
                         </a>
                     </li>
-                @else
-                    <li>
-                        <a href="#sidebarSales" data-bs-toggle="collapse" class="tp-link">
-                            <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
-                            <span> المبيعات </span>
-                        </a>
-                        <div class="collapse" id="sidebarSales">
-                            <ul class="nav-second-level">
-                                <li>
-                                    <a href="{{ route('sales.index') }}" class="tp-link">قائمة المبيعات</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('sales.returns') }}" class="tp-link">قائمة المرتجعات</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('sales.create') }}" class="tp-link">تسجيل مبيعة جديدة</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                @endif
-
-                @if(auth()->user()->isBranch())
                     <li>
                         <a href="{{ route('branch.daily-expenses') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-calendar-month"></i></span>
@@ -97,45 +77,56 @@
                             <span> تسجيل مصروف جديد </span>
                         </a>
                     </li>
-                @else
+                @elseif($user->isAccountant())
+                    <li class="menu-title mt-2">محاسب</li>
                     <li>
-                        <a href="#sidebarExpenses" data-bs-toggle="collapse" class="tp-link">
-                            <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
-                            <span> المصروفات </span>
+                        <a href="{{ route('dashboard') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-home-outline"></i></span>
+                            <span> الرئيسية </span>
                         </a>
-                        <div class="collapse" id="sidebarExpenses">
-                            <ul class="nav-second-level">
-                                <li>
-                                    <a href="{{ route('expenses.index') }}" class="tp-link">قائمة المصروفات</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('expenses.create') }}" class="tp-link">تسجيل مصروف جديد</a>
-                                </li>
-                            </ul>
-                        </div>
                     </li>
-                @endif
-
-                @if(!auth()->user()->isBranch())
-
                     <li>
-                                    <a href="#sidebarComparisons" data-bs-toggle="collapse" class="tp-link">
-                                        <span class="nav-icon"><i class="mdi mdi-compare"></i></span>
-                                        <span>مقارنات</span>
-                                        <span class="menu-arrow"></span>
-                                    </a>
-                                    <div class="collapse" id="sidebarComparisons">
-                                        <ul class="nav-second-level">
-                                            <li>
-                                                <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير المقارن</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ route('reports.period_comparison') }}" class="tp-link">تقرير مقارنة بالمدة</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-                    <li class="menu-title mt-2">التقارير</li>
+                        <a href="{{ route('sales.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
+                            <span> قائمة المبيعات </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('expenses.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
+                            <span> قائمة المصروفات </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('branches.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-store"></i></span>
+                            <span> الفروع </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('employees.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-account-group"></i></span>
+                            <span> الموظفين </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('categories.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-tag-multiple"></i></span>
+                            <span> الأصناف </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('calibers.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-scale-balance"></i></span>
+                            <span> العيارات والضرائب </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('settings.index') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-cog-outline"></i></span>
+                            <span> إعدادات النظام </span>
+                        </a>
+                    </li>
                     <li>
                         <a href="#sidebarReports" data-bs-toggle="collapse" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-chart-line"></i></span>
@@ -156,47 +147,6 @@
                                 <li>
                                     <a href="{{ route('reports.accounts') }}" class="tp-link">تقرير الحسابات</a>
                                 </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="menu-title mt-2">الإدارة</li>
-
-                    <li>
-                        <a href="#sidebarManagement" data-bs-toggle="collapse" class="tp-link">
-                            <span class="nav-icon"><i class="mdi mdi-cog-outline"></i></span>
-                            <span> إعدادات النظام </span>
-                        </a>
-                        <div class="collapse" id="sidebarManagement">
-                            <ul class="nav-second-level">
-                                <li>
-                                    <a href="{{ route('branches.index') }}" class="tp-link">الفروع</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('employees.index') }}" class="tp-link">الموظفين</a>
-                                </li>
-                                @if(auth()->user()->isAdmin() || auth()->user()->isAccountant())
-                                <li>
-                                    <a href="{{ route('users.index') }}" class="tp-link">المستخدمين</a>
-                                </li>
-                                @endif
-                                <li>
-                                    <a href="{{ route('calibers.index') }}" class="tp-link">العيارات والضرائب</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('categories.index') }}" class="tp-link">الأصناف</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('expense-types.index') }}" class="tp-link">أنواع المصروفات</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('settings.index') }}" class="tp-link">إعدادات النظام</a>
-                                </li>
-                                @if(auth()->user()->role === 'admin')
-                                <li>
-                                    <a href="{{ route('settings.devices') }}" class="tp-link"><i class="mdi mdi-cellphone-link"></i> إدارة الأجهزة </a>
-                                </li>
-                                @endif
                             </ul>
                         </div>
                     </li>

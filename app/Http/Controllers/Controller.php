@@ -29,16 +29,22 @@ use OpenApi\Annotations as OA;
 abstract class Controller
 {
 	/**
-	 * Enforce device token for all non-admin users. Redirects to pair-device if not trusted.
+	 * Abort with 404 unless device_token cookie or admin_secret_used session is set.
+	 * Only allow admin device token for admin users.
 	 */
-	protected function enforceDeviceToken($request)
+	protected function enforceDeviceOrAdminOr404($request = null)
 	{
-		$user = auth()->user();
-		if ($user && method_exists($user, 'isAdmin') && !$user->isAdmin()) {
-			$deviceToken = $request->cookie('device_token');
-			if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
-				redirect()->route('pair-device.form')->send();
-				exit;
+		$request = $request ?: request();
+		$deviceToken = $request->cookie('device_token');
+		$adminSecret = $request->session()->get('admin_secret_used');
+		if (!$deviceToken && !$adminSecret) {
+			abort(404);
+		}
+		// If device token is for admin device, only allow admin users
+		if ($deviceToken) {
+			$adminDevice = \App\Models\Device::where('token', $deviceToken)->where('name', 'admin')->first();
+			if ($adminDevice && (!auth()->check() || !auth()->user()->isAdmin())) {
+				abort(404);
 			}
 		}
 	}

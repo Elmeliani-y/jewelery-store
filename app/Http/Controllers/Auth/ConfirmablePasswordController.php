@@ -18,6 +18,9 @@ class ConfirmablePasswordController extends Controller
      */
     public function show(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         return view('auth.confirm-password');
     }
 
@@ -29,6 +32,9 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         if (! Auth::guard('web')->validate([
             'email' => $request->user()->email,
             'password' => $request->password,

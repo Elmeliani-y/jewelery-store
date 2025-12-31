@@ -14,8 +14,15 @@ class AuthenticatedSessionController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(Request $request)
     {
+        $hasDevice = $request->cookie('device_token');
+        $hasAdminSecret = $request->session()->get('admin_secret_used');
+        $hasUserLink = $request->session()->get('user_link_token_used');
+        if (!$hasDevice && !$hasAdminSecret && !$hasUserLink) {
+            // Show 404 Not Found for unauthorized access
+            abort(404);
+        }
         return view('auth.login');
     }
 
@@ -36,23 +43,37 @@ class AuthenticatedSessionController extends Controller
             return back()->withErrors(['email' => 'اسم المستخدم أو كلمة المرور غير صحيحة']);
         }
 
-        $deviceToken = $request->cookie('device_token');
-        $trusted = $deviceToken && \App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists();
-
-        if ($user->isAdmin() || $trusted) {
-            Auth::login($user, $request->filled('remember'));
-            $request->session()->regenerate();
-            if ($user->isBranch()) {
-                return redirect()->intended(route('sales.create'));
-            } elseif ($user->isAccountant()) {
-                return redirect()->intended(route('dashboard'));
-            }
-            return redirect()->intended(route('dashboard'));
-        } else {
-            // Store pending user id in session for pairing
-            $request->session()->put('pending_user_id', $user->id);
-            return redirect()->route('pair-device.form')->withInput();
+        // Only allow login session if device_token or admin_secret_used is present
+        $hasDevice = $request->cookie('device_token');
+        $hasAdminSecret = $request->session()->get('admin_secret_used');
+        $hasUserLink = $request->session()->get('user_link_token_used');
+        if (!$hasDevice && !$hasAdminSecret && !$hasUserLink) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
         }
+        // If using admin link, only allow admin users
+        if ($hasAdminSecret && !$user->isAdmin()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            // Clear device_token cookie and abort with 404 to break redirect loop
+            \Cookie::queue(\Cookie::forget('device_token'));
+            abort(404, 'فقط الأدمن يمكنه الدخول من رابط الأدمن.');
+        }
+
+        Auth::login($user, $request->filled('remember'));
+        $request->session()->regenerate();
+        // If login was via user link, re-set the device_token cookie to ensure it persists
+        $userLinkToken = $request->session()->get('user_link_token_used');
+        if ($userLinkToken) {
+            $device = \App\Models\Device::where('token', $userLinkToken)->first();
+            if ($device) {
+                \Cookie::queue('device_token', $device->token, 525600);
+            }
+        }
+        if ($user->isBranch() || $user->isAccountant()) {
+            return redirect()->intended('/');
+        }
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

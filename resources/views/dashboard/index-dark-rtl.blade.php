@@ -193,7 +193,7 @@
                                     <div class="card-body">
     
                                         <div id="categories_chart" class="apex-charts"></div>
-                                        <div class="device-view text-center">
+                                        <!-- device-view removed -->
                                             <p class="text-uppercase mb-1 fw-medium text-muted">Total Sales</p>
                                             <h3 class="mb-0 text-dark fw-semibold">15,685</h3>
                                         </div>
@@ -284,7 +284,7 @@
                                                         </div>
                                                     </div>
     
-                                                    <div class="flex-grow-1 ms-3 align-content-center">
+                                                    <div class="grow ms-3 align-content-center">
                                                         <div class="row">
                                                             <div class="col-6 col-md-8">
                                                                 <h6 class="mb-1 text-dark fs-15">FuelCell Men's Running Shoes</h6>

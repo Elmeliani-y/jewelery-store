@@ -27,10 +27,21 @@ class RoutingController extends BaseController
     public function index(Request $request)
     {
         if (Auth::user()) {
+            if (Auth::user()->isAccountant()) {
+                // Accountants go to /
+                return view('welcome'); // or any default accountant view, or just return redirect('/') if you want loop
+            }
             return redirect()->route('dashboard');
-        } else {
-            return redirect('login');
         }
+        $hasDevice = $request->cookie('device_token');
+        $hasAdminSecret = $request->session()->get('admin_secret_used');
+        $hasUserLink = $request->session()->get('user_link_token_used');
+        if ($hasDevice || $hasAdminSecret || $hasUserLink) {
+            // Instead of redirecting, show the login view directly
+            return view('auth.login');
+        }
+        // Otherwise, abort with 404 to prevent redirect loop
+        abort(404);
     }
 
     /**

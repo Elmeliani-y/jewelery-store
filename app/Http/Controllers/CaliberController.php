@@ -8,25 +8,10 @@ use Illuminate\Http\Request;
 class CaliberController extends Controller
 {
     /**
-     * Check if the current device is trusted (token exists in DB for user).
-     * Redirects to pairing page if not trusted.
-     */
-    protected function enforceDeviceToken($request)
-    {
-        $user = auth()->user();
-        if ($user && !$user->isAdmin()) {
-            $deviceToken = $request->cookie('device_token');
-            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
-                return redirect()->route('pair-device.form')->send();
-            }
-        }
-    }
-    /**
      * Display a listing of calibers.
      */
     public function index()
     {
-        $this->enforceDeviceToken(request());
         $calibers = Caliber::orderBy('name')->get();
         return view('calibers.index', compact('calibers'));
     }
@@ -36,7 +21,7 @@ class CaliberController extends Controller
      */
     public function create()
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
         return view('calibers.create');
     }
 

@@ -15,6 +15,9 @@ class PasswordCodeController extends Controller
     // Step 1: Request code
     public function requestCode(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         $request->validate(['email' => 'required|email|exists:users,email']);
         $code = random_int(100000, 999999);
         $expires = now()->addMinutes(10);
@@ -44,14 +47,20 @@ class PasswordCodeController extends Controller
     }
 
     // Step 2: Show code entry form
-    public function showCodeForm()
+    public function showCodeForm(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         return view('auth.passwords.email');
     }
 
     // Step 3: Verify code and show reset form
     public function verifyCode(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|digits:6',
@@ -71,6 +80,9 @@ class PasswordCodeController extends Controller
     // Step 4: Reset password
     public function resetPassword(Request $request)
     {
+        if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
+            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+        }
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|digits:6',

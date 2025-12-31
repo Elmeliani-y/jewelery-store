@@ -9,25 +9,10 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     /**
-     * Check if the current device is trusted (token exists in DB for user).
-     * Redirects to pairing page if not trusted.
-     */
-    protected function enforceDeviceToken($request)
-    {
-        $user = auth()->user();
-        if ($user && !$user->isAdmin()) {
-            $deviceToken = $request->cookie('device_token');
-            if (!$deviceToken || !\App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists()) {
-                return redirect()->route('pair-device.form')->send();
-            }
-        }
-    }
-    /**
      * Display a listing of categories.
      */
     public function index()
     {
-        $this->enforceDeviceToken(request());
         $categories = Category::with('defaultCaliber')->orderBy('name')->get();
         // Aggregate sales count per category using products array in sales
         $sales = \App\Models\Sale::notReturned()->get();
@@ -62,7 +47,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
         $calibers = Caliber::active()->orderBy('name')->get();
         return view('categories.create', compact('calibers'));
     }

@@ -1,6 +1,5 @@
 <?php
-// Serve storage files directly to avoid RoutingController catching them
-
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CaliberController;
 use App\Http\Controllers\CategoryController;
@@ -13,27 +12,40 @@ use App\Http\Controllers\RoutingController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+// Admin generates a user login link for non-admins
+Route::post('settings/devices/generate-user-link', [DeviceController::class, 'generateUserLink'])->name('settings.devices.generateUserLink');
+// User link for non-admin login (no device cookie required)
+Route::get('/user-link/{token}', function ($token, Illuminate\Http\Request $request) {
+    $device = \App\Models\Device::where('token', $token)->first();
+    if (!$device) {
+        abort(404);
+    }
+    // Set device_token cookie for 1 year
+    \Cookie::queue('device_token', $device->token, 525600);
+    $request->session()->put('user_link_token_used', $token);
+    return redirect('/login');
+})->withoutMiddleware(['auth', 'device_access']);
 
+// Root route: redirect to dashboard or login
+Route::get('/', [RoutingController::class, 'index']);
 
-// Public device pairing page (no auth, no device middleware)
-Route::get('pair-device', [\App\Http\Controllers\DeviceController::class, 'showPairForm'])->name('pair-device.form');
-Route::post('pair-device', [\App\Http\Controllers\DeviceController::class, 'pair'])->name('pair-device.pair');
+// --- Secret/Admin/Device Auth Logic ---
+// Admin secret login route (static secret in controller)
+Route::get('/admin-secret/{secret}', function ($secret, Illuminate\Http\Request $request) {
+    if ($secret === DeviceController::ADMIN_SECRET) {
+        return app(DeviceController::class)->adminSecretLogin($request);
+    }
+    abort(404);
+})->withoutMiddleware(['auth', 'device_access']);
 
+// Device auth route (for branches/devices)
+Route::get('/device-auth/{token}', [DeviceController::class, 'deviceAuth'])->withoutMiddleware(['auth', 'device_access']);
+
+// Auth and login routes (404 logic will be handled in controllers)
 require __DIR__.'/auth.php';
 
-
+// Serve storage files directly to avoid RoutingController catching them
 Route::get('storage/{path}', function ($path) {
     $file = storage_path('app/public/' . $path);
     if (file_exists($file)) {
@@ -48,7 +60,7 @@ Route::get('storage/{path}', function ($path) {
     return response('', 204);
 })->where('path', '.*')->withoutMiddleware(['auth']);
 
-// Authenticated routes: all require device trust except pairing page, but admins are excluded in the middleware logic
+// Authenticated routes: all require device access except device registration/auth and admin secret login
 Route::group(['middleware' => ['auth']], function () {
     Route::get('', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
@@ -92,25 +104,92 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('users', UserController::class);
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
-    Route::get('settings/devices', [\App\Http\Controllers\DeviceController::class, 'index'])->name('settings.devices');
-    Route::post('settings/devices/generate', [\App\Http\Controllers\DeviceController::class, 'generateCode'])->name('settings.devices.generate');
-    Route::delete('settings/devices/{id}', [\App\Http\Controllers\DeviceController::class, 'delete'])->name('settings.devices.delete');
+
+    // Devices management (admin only)
+    Route::get('settings/devices', [DeviceController::class, 'index'])->name('settings.devices');
+    Route::post('settings/devices/generate', [DeviceController::class, 'generateLink'])->name('settings.devices.generate');
+    Route::delete('settings/devices/{id}', [DeviceController::class, 'delete'])->name('settings.devices.delete');
+
+    // ...existing code for other resources and settings...
+
+    // Legacy routes for existing template compatibility (must be last)
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');
-// End of file
+});
+// Admin generates a user login link for non-admins
+Route::post('settings/devices/generate-user-link', [\App\Http\Controllers\DeviceController::class, 'generateUserLink'])->name('settings.devices.generateUserLink');
+// User link for non-admin login (no device cookie required)
+Route::get('/user-link/{token}', function ($token, \Illuminate\Http\Request $request) {
+    // You can add token validation here if you want to restrict to valid tokens only
+    $request->session()->put('user_link_token_used', $token);
+    return redirect('/login');
+})->withoutMiddleware(['auth', 'device_access']);
 
-    // Branches sales summary
+// Root route: redirect to dashboard or login
+Route::get('/', [RoutingController::class, 'index']);
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+
+
+
+// --- Secret/Admin/Device Auth Logic ---
+use App\Http\Controllers\DeviceController;
+
+// Admin secret login route (static secret in controller)
+Route::get('/admin-secret/{secret}', function ($secret, \Illuminate\Http\Request $request) {
+    if ($secret === DeviceController::ADMIN_SECRET) {
+        return app(DeviceController::class)->adminSecretLogin($request);
+    }
+    abort(404);
+})->withoutMiddleware(['auth', 'device_access']);
+
+// Device auth route (for branches/devices)
+Route::get('/device-auth/{token}', [DeviceController::class, 'deviceAuth'])->withoutMiddleware(['auth', 'device_access']);
+
+// Auth and login routes (404 logic will be handled in controllers)
+require __DIR__.'/auth.php';
+
+
+Route::get('storage/{path}', function ($path) {
+    $file = storage_path('app/public/' . $path);
+    if (file_exists($file)) {
+        return response()->file($file);
+    }
+    // Use the login logo as the placeholder image instead of 404
+    $logo = public_path('images/logo-login.png');
+    if (file_exists($logo)) {
+        return response()->file($logo);
+    }
+    // If no logo, return a 204 No Content so nothing is shown
+    return response('', 204);
+})->where('path', '.*')->withoutMiddleware(['auth']);
+
+// Authenticated routes: all require device access except device registration/auth and admin secret login
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
+    Route::get('dashboard/print', [DashboardController::class, 'print'])->name('dashboard.print');
+    Route::resource('sales', SaleController::class);
+    Route::post('sales/{sale}/return', [SaleController::class, 'returnSale'])->name('sales.return');
+    Route::post('sales/{sale}/unreturn', [SaleController::class, 'unreturnSale'])->name('sales.unreturn');
+    Route::get('api/employees-by-branch', [SaleController::class, 'getEmployeesByBranch'])->name('api.employees-by-branch');
+    Route::get('api/sales/search', [SaleController::class, 'searchByInvoice'])->name('api.sales.search');
+    Route::get('branch/daily-sales', [SaleController::class, 'dailySales'])->name('branch.daily-sales');
     Route::get('branches/sales-summary', [\App\Http\Controllers\BranchSalesController::class, 'index'])->name('branches.sales-summary');
-
-    // Returns dashboard
     Route::get('returns', [SaleController::class, 'returns'])->name('sales.returns');
-
-    // Expenses Management (original single resource)
     Route::resource('expenses', ExpenseController::class);
     Route::get('branch/daily-expenses', [ExpenseController::class, 'dailyExpenses'])->name('branch.daily-expenses');
-
-    // Reports (unrestricted as original)
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'all'])->name('all');
         Route::get('/index', function () {
@@ -129,38 +208,26 @@ Route::group(['middleware' => ['auth']], function () {
         Route::match(['get', 'post'], 'kasr', [ReportController::class, 'kasr'])->name('kasr');
         Route::get('accounts', [ReportController::class, 'accounts'])->name('accounts');
     });
-
-    // Branches Management
     Route::resource('branches', BranchController::class);
     Route::post('branches/{branch}/toggle-status', [BranchController::class, 'toggleStatus'])->name('branches.toggle-status');
-
-    // Employees Management
     Route::resource('employees', EmployeeController::class);
     Route::post('employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
-
-    // Calibers Management
     Route::resource('calibers', CaliberController::class)->except(['show']);
     Route::post('calibers/{caliber}/toggle-status', [CaliberController::class, 'toggleStatus'])->name('calibers.toggle-status');
-
-    // Categories Management
     Route::resource('categories', CategoryController::class)->except(['show']);
-
-    // Expense Types Management
     Route::resource('expense-types', ExpenseTypeController::class)->except(['show']);
-
-    // Users Management
     Route::resource('users', UserController::class);
-
-    // System Settings
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
 
     // Devices management (admin only)
     Route::get('settings/devices', [\App\Http\Controllers\DeviceController::class, 'index'])->name('settings.devices');
-    Route::post('settings/devices/generate', [\App\Http\Controllers\DeviceController::class, 'generateCode'])->name('settings.devices.generate');
+    Route::post('settings/devices/generate', [\App\Http\Controllers\DeviceController::class, 'generateLink'])->name('settings.devices.generate');
     Route::delete('settings/devices/{id}', [\App\Http\Controllers\DeviceController::class, 'delete'])->name('settings.devices.delete');
 
-    // Legacy routes for existing template compatibility
+    // ...existing code for other resources and settings...
+
+    // Legacy routes for existing template compatibility (must be last)
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');

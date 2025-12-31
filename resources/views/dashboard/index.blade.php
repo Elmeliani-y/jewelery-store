@@ -5,6 +5,50 @@
 <style>
 /* Category bar chart theme variables */
 :root {
+                @media (max-width: 600px) {
+                    #sales-overtime {
+                        min-width: 320px !important;
+                        width: 100vw !important;
+                        overflow-x: auto !important;
+                    }
+                    #sales-overtime .apexcharts-canvas {
+                        min-width: 320px !important;
+                        width: 100vw !important;
+                        max-width: 100vw !important;
+                    }
+                }
+            @media (max-width: 600px) {
+                #sales-overtime {
+                    min-width: 320px !important;
+                    width: 100vw !important;
+                    overflow-x: auto !important;
+                }
+                #sales-overtime .apexcharts-canvas {
+                    min-width: 320px !important;
+                    width: 100vw !important;
+                    max-width: 100vw !important;
+                }
+            }
+        /* Responsive tweaks for mobile bar chart */
+        @media (max-width: 600px) {
+            #categories_chart {
+                min-width: 320px !important;
+                min-height: 120px !important;
+                width: 100vw !important;
+                overflow-x: auto !important;
+            }
+            #categories_chart > div {
+                min-width: 320px !important;
+                width: 100vw !important;
+                overflow-x: auto !important;
+            }
+            #categoriesBarChart {
+                min-width: 320px !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                display: block;
+            }
+        }
     --cat-bar-1: #f59e42;
     --cat-bar-2: #3b82f6;
     --cat-bar-3: #a16207;
@@ -15,10 +59,12 @@
     --cat-bar-8: #eab308;
     --cat-bar-text: #7168EE;
     --cat-bar-border: #ccc;
+    --cat-bar-category-color: #222;
 }
 [data-theme="dark"] {
     --cat-bar-text: #7168EE;
     --cat-bar-border: #444;
+    --cat-bar-category-color: #fff;
 }
 @media print { 
     @page { size: A4 portrait; margin: 12mm; } 
@@ -116,11 +162,10 @@
                 <div class="card-body">
                     <div class="widget-first">
                         <div class="d-flex align-items-center mb-2">
-                            <p class="mb-0 text-dark fs-16 fw-medium">إجمالي المبيعات</p>
+                            <p class="mb-0 text-dark fs-16 fw-medium text-center w-100">إجمالي المبيعات</p>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="mb-0 fs-24 text-dark me-4" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
-                            <!-- <div id="total_sales" class="apex-charts"></div> -->
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                            <h3 class="mb-0 fs-24 text-dark text-center w-100" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-success-subtle text-success fs-13">{{ number_format($metrics['sales_count'], 0, ',', '.') }} فاتورة</span>
@@ -231,7 +276,7 @@
     <!-- Start Row -->
     <div class="row">
         <!-- Start Sales By Category -->
-        <div class="col-md-12 col-xl-4">
+        <div class="col-12">
             <div class="card overflow-hidden">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
@@ -239,16 +284,18 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div style="width:100%; max-height:420px; min-height:220px; overflow-y:auto; overflow-x:hidden; direction:rtl; padding-left:8px; padding-right:8px;">
+                    <div style="width:100%; max-height:420px; min-height:220px; overflow-y:auto; overflow-x:visible; direction:rtl; padding-left:8px; padding-right:8px;">
                         <div id="categories_chart" style="width:100%;"></div>
                         <noscript><div class="text-danger">الرجاء تفعيل الجافاسكريبت لعرض الرسم البياني.</div></noscript>
                         @if(empty($chartsData['sales_by_category']) || count($chartsData['sales_by_category']) === 0)
                         <div class="text-center text-muted py-3">لا توجد بيانات لعرض الرسم البياني.</div>
                         @endif
                     </div>
-                    <div class="device-view text-center mt-3">
-                        <p class="text-uppercase mb-1 fw-medium text-muted">إجمالي المبيعات</p>
-                        <h3 class="mb-0 text-dark fw-semibold" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
+                    <!-- device-view removed -->
+                        <div class="text-center">
+                            <p class="text-uppercase mb-1 fw-medium text-muted">إجمالي المبيعات</p>
+                            <h3 class="mb-0 text-dark fw-semibold" dir="ltr">{{ number_format($metrics['total_sales'], 0, ',', '.') }}</h3>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -412,5 +459,6 @@ const expensesAmount = {{ $metrics['total_expenses'] }};
 </script>
 <script src="{{ asset('js/crm-dashboard-custom.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="{{ asset('js/category-bars.js') }}"></script>
 @endsection

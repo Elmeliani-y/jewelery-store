@@ -1,100 +1,141 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Device;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Device;
-use Carbon\Carbon;
 
 class DeviceController extends Controller
 {
-    // Only allow admin
+    // Static secret for admin login (set this to a strong value!)
+    const ADMIN_SECRET = 'my-static-admin-secret';
+
+    // Admin generates a user login link for non-admins
+    public function generateUserLink(Request $request)
+    {
+        // Only allow admin users
+        if (! auth()->check() || ! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'اسم الجهاز مطلوب',
+        ]);
+        $token = Str::random(40);
+        $device = Device::create([
+            'name' => $request->input('name'),
+            'token' => $token,
+            'user_id' => auth()->id(),
+            'last_login_at' => null,
+        ]);
+        $link = url('/user-link/'.$token);
+
+        return back()->with('user_link', $link);
+    }
+
+    // Admin login via secret link
+    public function adminSecretLogin(Request $request)
+    {
+        // Allow anyone to use the link, but only admin can use the device token after login
+        $request->session()->put('admin_secret_used', true);
+        // Ensure admin device exists
+        $device = Device::firstOrCreate(
+            ['name' => 'admin'],
+            [
+                'token' => 'admin-static',
+                'user_id' => 1,
+                'last_login_at' => now(),
+            ]
+        );
+        // Set a persistent cookie for device access (1 year)
+        \Cookie::queue('device_token', $device->token, 525600);
+
+        return redirect('/login');
+    }
+
+    // Show all devices (admin only)
     public function index()
     {
-        if (!\Illuminate\Support\Facades\Gate::allows('admin')) {
-            abort(403, 'غير مصرح لك بالدخول إلى إدارة الأجهزة.');
+        // Only allow admin to view/manage devices
+        if (! auth()->check() || ! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized');
         }
         $devices = Device::all();
+
         return view('settings.devices', compact('devices'));
     }
 
-    public function generateCode(Request $request)
+    // Admin generates a unique device link
+    public function generateLink(Request $request)
     {
-        if (!\Illuminate\Support\Facades\Gate::allows('admin')) {
-            abort(403, 'غير مصرح لك بالدخول إلى إدارة الأجهزة.');
+        // Only allow admin users
+        if (! auth()->check() || ! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized');
         }
-        $code = strtoupper(Str::random(6));
-        Cache::put('pairing_code_' . $code, [
-            'admin_id' => Auth::id(),
-            'expires_at' => Carbon::now()->addMinutes(10)
-        ], 600);
-        return back()->with('pairing_code', $code);
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ], [
+            'name.required' => 'اسم الجهاز مطلوب',
+        ]);
+        $token = Str::random(40);
+        $device = Device::create([
+            'name' => $request->input('name'),
+            'token' => $token,
+            'user_id' => Auth::id(),
+            'last_login_at' => null,
+        ]);
+        $link = url('/device-auth/'.$token);
+
+        return back()->with('device_link', $link);
     }
 
+    // Device uses its unique link to register itself
+    public function deviceAuth($token, Request $request)
+    {
+        $device = Device::where('token', $token)->first();
+        if (! $device) {
+            abort(404);
+        }
+        $device->last_login_at = Carbon::now();
+        $device->save();
+        // Set a persistent cookie for device access (1 year)
+        \Cookie::queue('device_token', $device->token, 525600);
+
+        return redirect('/');
+    }
+
+    // Middleware-like helper for device access
+    public static function checkDeviceAccess(Request $request)
+    {
+        $token = $request->cookie('device_token');
+        if (! $token) {
+            abort(404);
+        }
+        $device = Device::where('token', $token)->first();
+        if (! $device) {
+            abort(404);
+        }
+        // Optionally update last_login_at
+        $device->last_login_at = Carbon::now();
+        $device->save();
+
+        // Allow access
+        return $device;
+    }
+
+    // Admin deletes a device
     public function delete($id)
     {
-        if (!\Illuminate\Support\Facades\Gate::allows('admin')) {
-            abort(403, 'غير مصرح لك بالدخول إلى إدارة الأجهزة.');
+        // Only allow admin users
+        if (! auth()->check() || ! auth()->user()->isAdmin()) {
+            abort(403, 'Unauthorized');
         }
         Device::findOrFail($id)->delete();
-        return back()->with('status', 'Device deleted');
-    }
 
-    // Public pairing page
-    public function showPairForm(Request $request)
-    {
-        $pendingUserId = $request->session()->get('pending_user_id');
-        $user = $pendingUserId ? \App\Models\User::find($pendingUserId) : auth()->user();
-        // If admin, skip pairing and go to dashboard
-        if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
-            Auth::login($user);
-            $request->session()->forget('pending_user_id');
-            return redirect()->route('dashboard');
-        }
-        $deviceToken = $request->cookie('device_token');
-        $trusted = $user && $deviceToken && \App\Models\Device::where('token', $deviceToken)->where('user_id', $user->id)->exists();
-        if ($trusted) {
-            Auth::login($user);
-            $request->session()->forget('pending_user_id');
-            return redirect()->route('dashboard');
-        }
-        return view('pair-device', ['pendingUser' => $user]);
-    }
-
-    public function pair(Request $request)
-    {
-        $request->validate(['code' => 'required|string']);
-        $pendingUserId = $request->session()->get('pending_user_id');
-        $user = $pendingUserId ? \App\Models\User::find($pendingUserId) : auth()->user();
-        if (!$user) {
-            return redirect('/login')->withErrors(['email' => 'يجب تسجيل الدخول أولاً']);
-        }
-        // If admin, skip device pairing and just log in
-        if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
-            Auth::login($user);
-            $request->session()->forget('pending_user_id');
-            return redirect('/')->with('status', 'تم تسجيل الدخول بنجاح');
-        }
-        $data = Cache::get('pairing_code_' . strtoupper($request->code));
-        if (!$data || Carbon::now()->gt($data['expires_at'])) {
-            return back()->withErrors(['code' => 'Invalid or expired code']);
-        }
-        // Use username and browser info as device name
-        $deviceName = ($user ? $user->username : 'User') . ' - ' . ($request->userAgent() ?: 'Unknown');
-        $device = Device::create([
-            'name' => $deviceName,
-            'user_id' => $user->id,
-            'token' => hash('sha256', Str::random(32)),
-            'last_login_at' => now(),
-        ]);
-        // Set device cookie for 1 year
-        \Cookie::queue('device_token', $device->token, 525600);
-        Cache::forget('pairing_code_' . strtoupper($request->code));
-        // Log in user and clear pending
-        Auth::login($user);
-        $request->session()->forget('pending_user_id');
-        return redirect('/')->with('status', 'Device paired successfully');
+        return back()->with('success', 'تم حذف الجهاز بنجاح');
     }
 }
