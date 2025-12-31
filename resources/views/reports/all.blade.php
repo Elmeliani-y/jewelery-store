@@ -22,22 +22,6 @@
         <p class="text-muted mb-0">عرض تفصيلي لجميع المبيعات والمصروفات مع الإحصائيات</p>
     </div>
 
-	<!-- Summary Card: Total Price Per Gram -->
-	<div class="row mb-3">
-		<div class="col-md-4">
-			<div class="card border-info">
-				<div class="card-body text-center">
-					<div class="text-muted small mb-1">سعر الجرام الإجمالي (إجمالي المبيعات / إجمالي الوزن)</div>
-					@php
-						$totalSales = $sales->sum('total_amount');
-						$totalWeight = $sales->sum('weight');
-						$totalPricePerGram = $totalWeight > 0 ? $totalSales / $totalWeight : 0;
-					@endphp
-					<div class="fs-4 fw-bold text-info">{{ number_format($totalPricePerGram, 2) }}</div>
-				</div>
-			</div>
-		</div>
-	</div>
     <!-- Print Title (only visible when printing) -->
     <div class="print-title" style="display: none;">
         <h2>تقرير شامل - المبيعات والمصروفات</h2>

@@ -64,11 +64,19 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
         // If login was via user link, re-set the device_token cookie to ensure it persists
         $userLinkToken = $request->session()->get('user_link_token_used');
+        $deviceToken = $request->cookie('device_token');
+        $device = null;
         if ($userLinkToken) {
             $device = \App\Models\Device::where('token', $userLinkToken)->first();
             if ($device) {
                 \Cookie::queue('device_token', $device->token, 525600);
             }
+        } elseif ($deviceToken) {
+            $device = \App\Models\Device::where('token', $deviceToken)->first();
+        }
+        if ($device) {
+            $device->last_login_at = now();
+            $device->save();
         }
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');

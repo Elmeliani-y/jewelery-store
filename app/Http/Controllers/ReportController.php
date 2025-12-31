@@ -19,13 +19,28 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    // Removed device validation from constructor; now enforced at the start of every action.
+    private function validateDeviceOrAbort()
+    {
+        $token = request()->cookie('device_token');
+        if ($token) {
+            $device = \App\Models\Device::where('token', $token)->first();
+            if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
+                \Auth::logout();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+                \Cookie::queue(\Cookie::forget('device_token'));
+                abort(404);
+            }
+        }
+    }
     /**
      * Accounts report: show network, cash, transfer by branch and date range
      */
     public function accounts(Request $request)
     {
+        $this->validateDeviceOrAbort();
         $this->enforceDeviceOrAdminOr404($request);
-        $this->enforceDeviceToken($request);
         $branches = Branch::active()->get();
         $branchId = $request->get('branch_id');
         $dateFrom = $request->get('date_from');
@@ -95,8 +110,7 @@ class ReportController extends Controller
      */
     public function periodComparison(Request $request)
     {
-        $this->enforceDeviceToken($request);
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $branches = Branch::active()->get();
 
         // Inputs: from1/to1, from2/to2, branch_id, period_type
@@ -384,6 +398,7 @@ class ReportController extends Controller
      */
     public function byBranch(Request $request)
     {
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -459,7 +474,7 @@ class ReportController extends Controller
      */
     public function all(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $perPage = (int) $request->get('per_page', 10);
@@ -675,7 +690,7 @@ class ReportController extends Controller
      */
     public function speed(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         // ...existing code...
         $branchId = $request->get('branch_id');
         $date = $request->get('date', date('Y-m-d'));
@@ -932,6 +947,7 @@ class ReportController extends Controller
      */
     public function index()
     {
+        $this->validateDeviceOrAbort();
         $branches = Branch::active()->get();
         $employees = Employee::active()->get();
         $categories = Category::active()->get();
@@ -952,7 +968,7 @@ class ReportController extends Controller
      */
     public function comprehensive(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1004,7 +1020,7 @@ class ReportController extends Controller
      */
     public function detailed(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
 
@@ -1050,7 +1066,7 @@ class ReportController extends Controller
      */
     public function calibers(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1122,7 +1138,7 @@ class ReportController extends Controller
      */
     public function categories(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1177,7 +1193,7 @@ class ReportController extends Controller
      */
     public function employees(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
         $format = $request->get('format');
@@ -1246,7 +1262,7 @@ class ReportController extends Controller
      */
     public function netProfit(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         $filters = $this->validateFilters($request);
         $lists = $this->getFilterLists();
 
@@ -1438,7 +1454,7 @@ class ReportController extends Controller
      */
     public function kasr(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        $this->validateDeviceOrAbort();
         // Calculate total tax for returns
         $totalReturnTax = 0;
         if ($request->branch_id && $request->date_from && $request->date_to) {

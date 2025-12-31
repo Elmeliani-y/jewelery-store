@@ -12,11 +12,27 @@ use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
+    // Removed device validation from constructor; now enforced at the start of every action.
+    private function validateDeviceOrAbort()
+    {
+        $token = request()->cookie('device_token');
+        if ($token) {
+            $device = \App\Models\Device::where('token', $token)->first();
+            if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
+                \Auth::logout();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+                \Cookie::queue(\Cookie::forget('device_token'));
+                abort(404);
+            }
+        }
+    }
     /**
      * Display a listing of sales.
      */
     public function index(Request $request)
     {
+        $this->validateDeviceOrAbort();
         $user = auth()->user();
         // For branch accounts: block listing view entirely
         if ($user && method_exists($user, 'isBranch') && $user->isBranch()) {
@@ -81,6 +97,7 @@ class SaleController extends Controller
      */
     public function create()
     {
+        $this->validateDeviceOrAbort();
         $this->enforceDeviceOrAdminOr404(request());
         $user = auth()->user();
 

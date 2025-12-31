@@ -9,6 +9,21 @@ use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
+    // Removed device validation from constructor; now enforced at the start of every action.
+    private function validateDeviceOrAbort()
+    {
+        $token = request()->cookie('device_token');
+        if ($token) {
+            $device = \App\Models\Device::where('token', $token)->first();
+            if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
+                \Auth::logout();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+                \Cookie::queue(\Cookie::forget('device_token'));
+                abort(404);
+            }
+        }
+    }
     /**
      * Display a listing of expenses.
      */
@@ -106,16 +121,6 @@ class ExpenseController extends Controller
             'amount.numeric' => 'المبلغ يجب أن يكون رقماً.',
             'amount.min' => 'المبلغ يجب أن يكون على الأقل :min.',
             'expense_date.required' => 'تاريخ المصروف مطلوب.',
-            'expense_date.date' => 'تاريخ المصروف غير صالح.',
-            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
-            'notes.max' => 'الملاحظات يجب ألا تتجاوز :max حرفاً.',
-        ], [
-            'branch_id' => 'الفرع',
-            'expense_type_id' => 'نوع المصروف',
-            'description' => 'الوصف',
-            'amount' => 'المبلغ',
-            'expense_date' => 'تاريخ المصروف',
-            'notes' => 'الملاحظات',
         ]);
 
         // Check if branch user is trying to access another branch
@@ -183,78 +188,6 @@ class ExpenseController extends Controller
         return view('expenses.show', compact('expense'));
     }
 
-    /**
-     * Show the form for editing the specified expense.
-     */
-    public function edit(Expense $expense)
-    {
-        $this->enforceDeviceToken(request());
-        // Check if branch user is trying to access another branch's expense
-        $user = auth()->user();
-        if ($user->isBranch() && $expense->branch_id != $user->branch_id) {
-            abort(403, 'غير مصرح لك بتعديل هذا المصروف');
-        }
-
-        $branches = Branch::active()->get();
-        $expenseTypes = ExpenseType::active()->get();
-
-        return view('expenses.edit', compact('expense', 'branches', 'expenseTypes'));
-    }
-
-    /**
-     * Update the specified expense.
-     */
-    public function update(Request $request, Expense $expense)
-    {
-        $this->enforceDeviceToken($request);
-        // Block all updates for branch accounts
-        $user = auth()->user();
-        if ($user->isBranch()) {
-            abort(403, 'غير مسموح لحساب الفرع بتعديل المصروفات');
-        }
-
-        $validated = $request->validate([
-            'branch_id' => 'required|exists:branches,id',
-            'expense_type_id' => 'required|exists:expense_types,id',
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'expense_date' => 'required|date',
-            'notes' => 'nullable|string|max:1000',
-        ], [
-            'branch_id.required' => 'الفرع مطلوب.',
-            'branch_id.exists' => 'الفرع المحدد غير موجود.',
-            'expense_type_id.required' => 'نوع المصروف مطلوب.',
-            'expense_type_id.exists' => 'نوع المصروف المحدد غير موجود.',
-            'description.required' => 'الوصف مطلوب.',
-            'description.string' => 'الوصف يجب أن يكون نصاً.',
-            'description.max' => 'الوصف يجب ألا يتجاوز :max حرفاً.',
-            'amount.required' => 'المبلغ مطلوب.',
-            'amount.numeric' => 'المبلغ يجب أن يكون رقماً.',
-            'amount.min' => 'المبلغ يجب أن يكون على الأقل :min.',
-            'expense_date.required' => 'تاريخ المصروف مطلوب.',
-            'expense_date.date' => 'تاريخ المصروف غير صالح.',
-            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
-            'notes.max' => 'الملاحظات يجب ألا تتجاوز :max حرفاً.',
-        ], [
-            'branch_id' => 'الفرع',
-            'expense_type_id' => 'نوع المصروف',
-            'description' => 'الوصف',
-            'amount' => 'المبلغ',
-            'expense_date' => 'تاريخ المصروف',
-            'notes' => 'الملاحظات',
-        ]);
-
-        try {
-            $expense->update($validated);
-
-            return redirect()->route('expenses.show', $expense)
-                ->with('success', 'تم تحديث المصروف بنجاح');
-
-        } catch (\Exception $e) {
-            return back()->withInput()
-                ->with('error', 'حدث خطأ في تحديث المصروف: '.$e->getMessage());
-        }
-    }
 
     /**
      * Remove the specified expense.
@@ -302,16 +235,14 @@ class ExpenseController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Apply expense type filter if provided
+        // Optionally filter by expense type
         if ($request->filled('expense_type_id')) {
             $query->where('expense_type_id', $request->expense_type_id);
         }
 
         $expenses = $query->get();
+        $totalExpenses = $expenses->sum('amount');
 
-        // Calculate totals
-        $totalAmount = $expenses->sum('amount');
-
-        return view('expenses.daily', compact('expenses', 'expenseTypes', 'totalAmount'));
+        return view('expenses.daily', compact('expenses', 'expenseTypes', 'totalExpenses'));
     }
 }

@@ -45,5 +45,6 @@ class Kernel extends HttpKernel
         'secret_device' => \App\Http\Middleware\SecretLinkDeviceRegister::class,
         'device_access' => \App\Http\Middleware\EnforceDeviceAccess::class,
         'block_login_unless_device_or_admin' => \App\Http\Middleware\BlockLoginUnlessDeviceOrAdmin::class,
+        'device_valid' => \App\Http\Middleware\EnsureDeviceIsValid::class,
     ];
 }

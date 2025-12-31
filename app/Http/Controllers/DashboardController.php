@@ -16,12 +16,27 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    protected function validateDeviceOrAbort()
+    {
+        $token = request()->cookie('device_token');
+        if ($token) {
+            $device = \App\Models\Device::where('token', $token)->first();
+            if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
+                \Auth::logout();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+                \Cookie::queue(\Cookie::forget('device_token'));
+                abort(404);
+            }
+        }
+    }
     /**
      * Display dashboard with analytics and insights.
      */
 
     public function index(Request $request)
     {
+        $this->validateDeviceOrAbort();
         // Redirect admin users to devices page
         if (auth()->check() && auth()->user()->isAdmin()) {
             return redirect()->route('settings.devices');

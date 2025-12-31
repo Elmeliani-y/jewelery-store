@@ -8,11 +8,26 @@ use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
+    private function validateDeviceOrAbort()
+    {
+        $token = request()->cookie('device_token');
+        if ($token) {
+            $device = \App\Models\Device::where('token', $token)->first();
+            if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
+                \Auth::logout();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+                \Cookie::queue(\Cookie::forget('device_token'));
+                abort(404);
+            }
+        }
+    }
     /**
      * Display a listing of employees.
      */
     public function index(Request $request)
     {
+            $this->validateDeviceOrAbort();
         $query = Employee::with('branch')->orderBy('created_at', 'desc');
 
         // Apply filters
@@ -35,6 +50,7 @@ class EmployeeController extends Controller
      */
     public function create()
     {
+            $this->validateDeviceOrAbort();
         $branches = Branch::active()->get();
         return view('employees.create', compact('branches'));
     }
@@ -44,6 +60,7 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
+            $this->validateDeviceOrAbort();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
@@ -70,6 +87,7 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
+            $this->validateDeviceOrAbort();
         $employee->load('branch');
         
         // Get employee sales statistics
@@ -95,6 +113,7 @@ class EmployeeController extends Controller
      */
     public function edit(Employee $employee)
     {
+            $this->validateDeviceOrAbort();
         $branches = Branch::active()->get();
         return view('employees.edit', compact('employee', 'branches'));
     }
@@ -104,6 +123,7 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, Employee $employee)
     {
+            $this->validateDeviceOrAbort();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
@@ -130,6 +150,7 @@ class EmployeeController extends Controller
      */
     public function destroy(Employee $employee)
     {
+            $this->validateDeviceOrAbort();
         try {
             // Check if employee has sales
             if ($employee->sales()->exists()) {
@@ -151,6 +172,7 @@ class EmployeeController extends Controller
      */
     public function toggleStatus(Employee $employee)
     {
+            $this->validateDeviceOrAbort();
         try {
             $employee->update(['is_active' => !$employee->is_active]);
 

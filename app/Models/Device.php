@@ -5,8 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Device extends Model
 {
-	protected $fillable = [
-		'name', 'user_id', 'token', 'last_login_at'
-	];
+    protected $fillable = [
+        'name', 'user_id', 'token', 'last_login_at', 'active'
+    ];
 }
 

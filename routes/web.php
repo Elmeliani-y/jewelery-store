@@ -61,7 +61,7 @@ Route::get('storage/{path}', function ($path) {
 })->where('path', '.*')->withoutMiddleware(['auth']);
 
 // Authenticated routes: all require device access except device registration/auth and admin secret login
-Route::group(['middleware' => ['auth']], function () {
+Route::group(['middleware' => ['auth', 'device_valid']], function () {
     Route::get('', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart-data');
     Route::get('dashboard/print', [DashboardController::class, 'print'])->name('dashboard.print');

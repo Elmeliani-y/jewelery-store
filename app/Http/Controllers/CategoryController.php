@@ -8,11 +8,27 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    // Removed device validation from constructor; now enforced at the start of every action.
+    private function validateDeviceOrAbort()
+    {
+        $token = request()->cookie('device_token');
+        if ($token) {
+            $device = \App\Models\Device::where('token', $token)->first();
+            if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
+                \Auth::logout();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+                \Cookie::queue(\Cookie::forget('device_token'));
+                abort(404);
+            }
+        }
+    }
     /**
      * Display a listing of categories.
      */
     public function index()
     {
+        $this->validateDeviceOrAbort();
         $categories = Category::with('defaultCaliber')->orderBy('name')->get();
         // Aggregate sales count per category using products array in sales
         $sales = \App\Models\Sale::notReturned()->get();
@@ -47,6 +63,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
+        $this->validateDeviceOrAbort();
         $this->enforceDeviceOrAdminOr404(request());
         $calibers = Caliber::active()->orderBy('name')->get();
         return view('categories.create', compact('calibers'));
@@ -57,6 +74,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validateDeviceOrAbort();
         $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',

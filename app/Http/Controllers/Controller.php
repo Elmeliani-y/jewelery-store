@@ -26,7 +26,7 @@ use OpenApi\Annotations as OA;
  *     bearerFormat="JWT"
  * )
  */
-abstract class Controller
+abstract class Controller extends \Illuminate\Routing\Controller
 {
 	/**
 	 * Abort with 404 unless device_token cookie or admin_secret_used session is set.
