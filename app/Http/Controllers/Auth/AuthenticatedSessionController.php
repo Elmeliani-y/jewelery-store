@@ -81,7 +81,7 @@ class AuthenticatedSessionController extends Controller
         // Ensure admin_secret_used session key is always present after admin login
         if ($request->session()->get('admin_secret_used') && $user->isAdmin()) {
             $request->session()->put('admin_secret_used', true);
-            // Force set device_token for admin
+            // Force set device_token for admin with explicit options for production
             $device = \App\Models\Device::firstOrCreate(
                 ['name' => 'admin'],
                 [
@@ -90,7 +90,20 @@ class AuthenticatedSessionController extends Controller
                     'last_login_at' => now(),
                 ]
             );
-            \Cookie::queue('device_token', $device->token, 525600);
+            // Set cookie for all subdomains, secure, Lax
+            \Cookie::queue(
+                \Cookie::make(
+                    'device_token',
+                    $device->token,
+                    525600, // minutes
+                    '/',
+                    '.railway.app', // set to your production domain
+                    true, // Secure
+                    false, // HttpOnly
+                    false, // Raw
+                    'Lax' // SameSite
+                )
+            );
         }
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');
