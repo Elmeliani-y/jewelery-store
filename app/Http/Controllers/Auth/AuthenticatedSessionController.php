@@ -78,6 +78,10 @@ class AuthenticatedSessionController extends Controller
             $device->last_login_at = now();
             $device->save();
         }
+        // Ensure admin_secret_used session key is always present after admin login
+        if ($request->session()->get('admin_secret_used') && $user->isAdmin()) {
+            $request->session()->put('admin_secret_used', true);
+        }
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');
         }
