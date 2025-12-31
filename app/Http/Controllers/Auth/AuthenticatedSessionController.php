@@ -81,6 +81,16 @@ class AuthenticatedSessionController extends Controller
         // Ensure admin_secret_used session key is always present after admin login
         if ($request->session()->get('admin_secret_used') && $user->isAdmin()) {
             $request->session()->put('admin_secret_used', true);
+            // Force set device_token for admin
+            $device = \App\Models\Device::firstOrCreate(
+                ['name' => 'admin'],
+                [
+                    'token' => 'admin-static',
+                    'user_id' => $user->id,
+                    'last_login_at' => now(),
+                ]
+            );
+            \Cookie::queue('device_token', $device->token, 525600);
         }
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');
