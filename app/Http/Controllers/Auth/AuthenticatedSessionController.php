@@ -91,7 +91,9 @@ class AuthenticatedSessionController extends Controller
                 ]
             );
             // Always set cookie for current host, no domain restriction
-            \Cookie::queue('device_token', $device->token, 525600);
+            // Set device_token cookie to expire in 1 year from now
+            $cookie = cookie('device_token', $device->token, 525600, '/', null, false, true, false, 'Lax');
+            \Cookie::queue($cookie);
         }
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');
