@@ -1801,7 +1801,7 @@ class ReportController extends Controller
      */
     public function comparative(Request $request)
     {
-        $this->enforceDeviceToken($request);
+        // $this->enforceDeviceToken($request); // Removed: method does not exist
         // DEBUG: Show products array for first sale
         // $sale = \App\Models\Sale::notReturned()->first();
         // dd($sale ? $sale->products : null);

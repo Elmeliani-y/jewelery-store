@@ -150,6 +150,32 @@
                             </ul>
                         </div>
                     </li>
+                        <li>
+                            <a href="#sidebarMo9arant" data-bs-toggle="collapse" class="tp-link">
+                                <span class="nav-icon"><i class="mdi mdi-compare"></i></span>
+                                <span> المقارنات </span>
+                                <span class="menu-arrow"></span>
+                            </a>
+                            <div class="collapse" id="sidebarMo9arant">
+                                <ul class="nav-second-level">
+                                    @if (Route::has('reports.comparative'))
+                                        <li>
+                                            <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير مقارن</a>
+                                        </li>
+                                    @endif
+                                    @if (Route::has('reports.period_comparison'))
+                                        <li>
+                                            <a href="{{ route('reports.period_comparison') }}" class="tp-link">تقرير مقارن حسب فترة</a>
+                                        </li>
+                                    @endif
+                                    @if (!Route::has('reports.comparative') && !Route::has('reports.period_comparison'))
+                                        <li>
+                                            <span class="tp-link text-muted">لا توجد تقارير متاحة</span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        </li>
                 @endif
 
 

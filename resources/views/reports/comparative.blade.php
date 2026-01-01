@@ -364,16 +364,16 @@
                                 y: {
                                     beginAtZero: true,
                                     ticks: {
-                                        callback: function(value) {
-                                            return value.toLocaleString();
+                                                callback: function(value) {
+                                                    return value.toLocaleString();
+                                                },
+                                            }
                                         }
                                     }
                                 }
-                            }
+                            });
                         }
                     });
-                }
-            });
         </script>
     <!-- Branch-wise Grouped Data and Charts -->
     @foreach($branchesComparison as $index => $branch)
@@ -606,143 +606,49 @@
             }
         });
     });
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            callbacks: {
-                                                label: function(context) {
-                                                    return 'المصروفات: ' + context.parsed.y.toLocaleString();
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: { grid: { display: false } },
-                                        y: {
-                                            beginAtZero: true,
-                                            ticks: {
-                                                callback: function(value) {
-                                                    return value.toLocaleString();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }
 
-                        // Branch Employees Chart (bar chart for top employees by sales)
-                        const branchEmployees = employeesData.filter(e => e.branch_id === branchId);
-                        const topEmployees = branchEmployees.sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 10);
-                        const employeesCanvas = document.getElementById('employeesComparisonChart' + index);
-                        if (employeesCanvas) {
-                            new Chart(employeesCanvas, {
-                                type: 'bar',
-                                data: {
-                                    labels: topEmployees.map(e => e.employee_name),
-                                    datasets: [{
-                                        label: 'المبيعات للموظف',
-                                        data: topEmployees.map(e => e.total_sales || 0),
-                                        backgroundColor: chartColors,
-                                        borderRadius: 6,
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            callbacks: {
-                                                label: function(context) {
-                                                    return 'المبيعات: ' + context.parsed.y.toLocaleString();
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: { grid: { display: false } },
-                                        y: {
-                                            beginAtZero: true,
-                                            ticks: {
-                                                callback: function(value) {
-                                                    return value.toLocaleString();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }
-
-                        // Branch Categories Chart (bar chart for top categories by sales)
-                        const branchCategories = categoriesData.filter(c => c.branch_id === branchId);
-                        const topCategories = branchCategories.sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 10);
-                        const categoriesCanvas = document.getElementById('categoriesComparisonChart' + index);
-                        if (categoriesCanvas) {
-                            new Chart(categoriesCanvas, {
-                                type: 'bar',
-                                data: {
-                                    labels: topCategories.map(c => c.category_name),
-                                    datasets: [{
-                                        label: 'المبيعات للصنف',
-                                        data: topCategories.map(c => c.total_sales || 0),
-                                        backgroundColor: chartColors,
-                                        borderRadius: 6,
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            callbacks: {
-                                                label: function(context) {
-                                                    return 'المبيعات: ' + context.parsed.y.toLocaleString();
-                                                }
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: { grid: { display: false } },
-                                        y: {
-                                            beginAtZero: true,
-                                            ticks: {
-                                                callback: function(value) {
-                                                    return value.toLocaleString();
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
+    // Define colors for charts
+    const chartColors = [
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(199, 199, 199, 0.7)',
+        'rgba(83, 102, 255, 0.7)',
+        'rgba(255, 99, 255, 0.7)',
+        'rgba(99, 255, 132, 0.7)'
+    ];
 
     // Two Branch Main Comparison Chart
     @if(isset($twoBranchComparison) && $showTwoBranchComparison)
+    (function() {
+    const colors = {
+        primary: 'rgba(54, 162, 235, 0.7)',
+        danger: 'rgba(220, 53, 69, 0.7)',
+        success: 'rgba(40, 167, 69, 0.7)',
+        warning: 'rgba(255, 193, 7, 0.7)',
+        info: 'rgba(23, 162, 184, 0.7)'
+    };
+    
     const branch1Data = {
-        name: '{{ $twoBranchComparison["branch1"]["name"] }}',
-        sales: {{ $twoBranchComparison['branch1']['sales'] }},
-        expenses: {{ $twoBranchComparison['branch1']['expenses'] }},
-        profit: {{ $twoBranchComparison['branch1']['profit'] }},
-        weight: {{ $twoBranchComparison['branch1']['weight'] }},
-        count: {{ $twoBranchComparison['branch1']['count'] }}
+        name: @json($twoBranchComparison["branch1"]["name"]),
+        sales: @json($twoBranchComparison['branch1']['sales']),
+        expenses: @json($twoBranchComparison['branch1']['expenses']),
+        profit: @json($twoBranchComparison['branch1']['profit']),
+        weight: @json($twoBranchComparison['branch1']['weight']),
+        count: @json($twoBranchComparison['branch1']['count'])
     };
 
     const branch2Data = {
-        name: '{{ $twoBranchComparison["branch2"]["name"] }}',
-        sales: {{ $twoBranchComparison['branch2']['sales'] }},
-        expenses: {{ $twoBranchComparison['branch2']['expenses'] }},
-        profit: {{ $twoBranchComparison['branch2']['profit'] }},
-        weight: {{ $twoBranchComparison['branch2']['weight'] }},
-        count: {{ $twoBranchComparison['branch2']['count'] }}
+        name: @json($twoBranchComparison["branch2"]["name"]),
+        sales: @json($twoBranchComparison['branch2']['sales']),
+        expenses: @json($twoBranchComparison['branch2']['expenses']),
+        profit: @json($twoBranchComparison['branch2']['profit']),
+        weight: @json($twoBranchComparison['branch2']['weight']),
+        count: @json($twoBranchComparison['branch2']['count'])
     };
-    @endif
 
     // Main comparison chart
     new Chart(document.getElementById('twoBranchMainChart'), {
@@ -862,7 +768,7 @@
                     datasets: [{
                         label: 'مبيعات الموظف',
                         data: branchEmployees.map(emp => emp.total_sales || 0),
-                        backgroundColor: branchEmployees.map(() => colors.primary),
+                        backgroundColor: branchEmployees.map(() => chartColors[0]),
                         borderRadius: 5
                     }]
                 },
@@ -886,23 +792,26 @@
                         }
                     },
                     scales: {
-                x: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'المبيعات'
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return value.toLocaleString();
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'المبيعات'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
                         }
                     }
                 }
-            }
+            });
         }
     });
 
     // Categories Comparison Chart
+    const categoriesData = @json($categoriesComparison);
     const branch1Categories = categoriesData.filter(cat => cat.branch_id == branch1Data.id);
     const branch2Categories = categoriesData.filter(cat => cat.branch_id == branch2Data.id);
     
@@ -975,6 +884,8 @@
 
     // Calibers Comparison Chart
     const calibersData = @json($calibersComparison);
+    const branch1Calibers = calibersData.filter(cal => cal.branch_id == branch1Data.id);
+    const branch2Calibers = calibersData.filter(cal => cal.branch_id == branch2Data.id);
     // Get all unique caliber names
     const caliberNames = [...new Set(calibersData.map(c => c.name))];
     // Prepare datasets for each branch
@@ -1159,6 +1070,9 @@
         }
     });
 
+    })(); // End of IIFE for two-branch comparison
+    @endif
+
     // CSV Export Function
     function exportToCSV() {
         let csvContent = '\uFEFF'; // UTF-8 BOM for Arabic support
@@ -1166,6 +1080,27 @@
         
         @if($showTwoBranchComparison && isset($twoBranchComparison))
             // Two Branch Comparison Export
+            const branch1Data = {
+                name: @json($twoBranchComparison["branch1"]["name"]),
+                sales: @json($twoBranchComparison['branch1']['sales']),
+                expenses: @json($twoBranchComparison['branch1']['expenses']),
+                profit: @json($twoBranchComparison['branch1']['profit']),
+                weight: @json($twoBranchComparison['branch1']['weight']),
+                count: @json($twoBranchComparison['branch1']['count'])
+            };
+            const branch2Data = {
+                name: @json($twoBranchComparison["branch2"]["name"]),
+                sales: @json($twoBranchComparison['branch2']['sales']),
+                expenses: @json($twoBranchComparison['branch2']['expenses']),
+                profit: @json($twoBranchComparison['branch2']['profit']),
+                weight: @json($twoBranchComparison['branch2']['weight']),
+                count: @json($twoBranchComparison['branch2']['count'])
+            };
+            const branch1Employees = @json($twoBranchComparison['branch1']['employees'] ?? []);
+            const branch2Employees = @json($twoBranchComparison['branch2']['employees'] ?? []);
+            const branch1PricePerGram = branch1Data.weight > 0 ? branch1Data.sales / branch1Data.weight : 0;
+            const branch2PricePerGram = branch2Data.weight > 0 ? branch2Data.sales / branch2Data.weight : 0;
+            
             csvContent += 'التقرير المقارن بين فرعين\n\n';
             
             // Summary Section
@@ -1189,8 +1124,14 @@
             // Price Per Gram Section
             csvContent += '\nسعر الجرام للفروع\n';
             csvContent += 'الفرع,سعر الجرام\n';
+            @if(isset($twoBranchComparison))
+            const branch1PricePerGram = {{ $twoBranchComparison['branch1']['weight'] > 0 ? $twoBranchComparison['branch1']['sales'] / $twoBranchComparison['branch1']['weight'] : 0 }};
+            const branch2PricePerGram = {{ $twoBranchComparison['branch2']['weight'] > 0 ? $twoBranchComparison['branch2']['sales'] / $twoBranchComparison['branch2']['weight'] : 0 }};
+            const branch1Employees = @json($twoBranchComparison['branch1']['employees'] ?? []);
+            const branch2Employees = @json($twoBranchComparison['branch2']['employees'] ?? []);
             csvContent += `"${branch1Data.name}","${branch1PricePerGram}"\n`;
             csvContent += `"${branch2Data.name}","${branch2PricePerGram}"\n`;
+            @endif
             
         @else
             // General Comparison Export
