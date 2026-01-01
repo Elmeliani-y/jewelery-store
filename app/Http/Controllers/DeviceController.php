@@ -56,12 +56,15 @@ class DeviceController extends Controller
     {
         // Allow anyone to use the link, but only admin can use the device token after login
         $request->session()->put('admin_secret_used', true);
-        // Ensure admin device exists
+        // Get the current admin user if logged in
+        $adminUser = auth()->user();
+        $adminId = ($adminUser && $adminUser->isAdmin()) ? $adminUser->id : 1;
+        // Ensure admin device exists with correct user_id
         $device = Device::firstOrCreate(
             ['name' => 'admin'],
             [
                 'token' => 'admin-static',
-                'user_id' => 1,
+                'user_id' => $adminId,
                 'last_login_at' => now(),
             ]
         );
