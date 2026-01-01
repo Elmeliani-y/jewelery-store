@@ -71,6 +71,7 @@ class DeviceController extends Controller
                 'token' => 'admin-static',
                 'user_id' => $adminId,
                 'last_login_at' => now(),
+                'active' => true,
             ]
         );
         // Set a persistent cookie for device access (1 year)
