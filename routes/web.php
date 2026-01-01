@@ -1,3 +1,11 @@
+// Debug route to check server time
+Route::get('/debug-server-time', function () {
+    return response()->json([
+        'laravel_now' => now()->toDateTimeString(),
+        'php_date' => date('c'),
+        'timezone' => config('app.timezone'),
+    ]);
+});
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BranchController;
