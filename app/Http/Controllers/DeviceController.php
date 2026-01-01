@@ -88,7 +88,7 @@ class DeviceController extends Controller
         if (! auth()->check() || ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized');
         }
-        $devices = Device::where('active', true)->get();
+        $devices = Device::all();
         return view('settings.devices', compact('devices'));
     }
 
