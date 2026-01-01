@@ -88,7 +88,7 @@ class DeviceController extends Controller
         if (! auth()->check() || ! auth()->user()->isAdmin()) {
             abort(403, 'Unauthorized');
         }
-        $devices = Device::all();
+        $devices = Device::where('active', true)->get();
         return view('settings.devices', compact('devices'));
     }
 
@@ -159,8 +159,7 @@ class DeviceController extends Controller
             abort(403, 'Unauthorized');
         }
         $device = Device::findOrFail($id);
-        $device->active = false;
-        $device->save();
-        return back()->with('success', 'تم حذف الجهاز بنجاح');
+        $device->delete();
+        return back()->with('success', 'تم حذف الجهاز نهائياً من قاعدة البيانات');
     }
 }
