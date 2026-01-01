@@ -81,7 +81,7 @@ class AuthenticatedSessionController extends Controller
         // Ensure admin_secret_used session key is always present after admin login
         if ($request->session()->get('admin_secret_used') && $user->isAdmin()) {
             $request->session()->put('admin_secret_used', true);
-            // Force set device_token for admin with explicit options for production
+            // Force set device_token for admin, always for current host
             $device = \App\Models\Device::firstOrCreate(
                 ['name' => 'admin'],
                 [
@@ -90,20 +90,8 @@ class AuthenticatedSessionController extends Controller
                     'last_login_at' => now(),
                 ]
             );
-            // Set cookie for current host, works on any domain or environment
-            \Cookie::queue(
-                \Cookie::make(
-                    'device_token',
-                    $device->token,
-                    525600, // minutes
-                    '/',
-                    null, // No domain restriction
-                    false, // Not secure (works on HTTP and HTTPS)
-                    false, // HttpOnly
-                    false, // Raw
-                    'Lax' // SameSite
-                )
-            );
+            // Always set cookie for current host, no domain restriction
+            \Cookie::queue('device_token', $device->token, 525600);
         }
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');
