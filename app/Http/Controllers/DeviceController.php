@@ -13,8 +13,13 @@ class DeviceController extends Controller
     protected function validateDeviceOrAbort()
     {
         $token = request()->cookie('device_token');
+        $user = auth()->user();
         if ($token) {
             $device = \App\Models\Device::where('token', $token)->first();
+            // Accept admin device token for admin users
+            if ($device && $device->name === 'admin' && $user && $user->isAdmin()) {
+                return;
+            }
             if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
                 \Auth::logout();
                 request()->session()->invalidate();
