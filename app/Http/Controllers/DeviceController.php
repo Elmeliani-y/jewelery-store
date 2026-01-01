@@ -51,6 +51,7 @@ class DeviceController extends Controller
             'token' => $token,
             'user_id' => auth()->id(),
             'last_login_at' => null,
+            'active' => true,
         ]);
         $link = url('/user-link/'.$token);
         return back()->with('user_link', $link);
@@ -111,6 +112,7 @@ class DeviceController extends Controller
             'token' => $token,
             'user_id' => Auth::id(),
             'last_login_at' => null,
+            'active' => true,
         ]);
         $link = url('/device-auth/'.$token);
         return back()->with('device_link', $link);
