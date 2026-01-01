@@ -98,6 +98,10 @@ class AuthenticatedSessionController extends Controller
         if ($user->isBranch() || $user->isAccountant()) {
             return redirect()->intended('/');
         }
+        // Redirect admin directly to devices page
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('settings.devices'));
+        }
         return redirect()->intended(route('dashboard'));
     }
 
