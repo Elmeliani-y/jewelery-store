@@ -1,18 +1,3 @@
-// Debug route to show all cookies and session values
-Route::get('/debug-cookies-session', function (\Illuminate\Http\Request $request) {
-    return response()->json([
-        'cookies' => $request->cookies->all(),
-        'session' => $request->session()->all(),
-    ]);
-})->withoutMiddleware(['auth', 'device_access']);
-// Debug route to check server time
-Route::get('/debug-server-time', function () {
-    return response()->json([
-        'laravel_now' => now()->toDateTimeString(),
-        'php_date' => date('c'),
-        'timezone' => config('app.timezone'),
-    ]);
-})->withoutMiddleware(['auth', 'device_access']);
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BranchController;

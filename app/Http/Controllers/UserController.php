@@ -8,10 +8,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->validateDeviceOrAbort();
-    }
+
     private function validateDeviceOrAbort()
     {
         $token = request()->cookie('device_token');
@@ -32,8 +29,8 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->validateDeviceOrAbort();
         $users = User::with('branch')->orderBy('created_at', 'desc')->get();
-
         return view('users.index', compact('users'));
     }
 
