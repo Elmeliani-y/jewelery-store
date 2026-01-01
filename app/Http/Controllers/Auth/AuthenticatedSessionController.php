@@ -90,15 +90,15 @@ class AuthenticatedSessionController extends Controller
                     'last_login_at' => now(),
                 ]
             );
-            // Set cookie for all subdomains, secure, Lax
+            // Set cookie for current host, works on any domain or environment
             \Cookie::queue(
                 \Cookie::make(
                     'device_token',
                     $device->token,
                     525600, // minutes
                     '/',
-                    '.railway.app', // set to your production domain
-                    true, // Secure
+                    null, // No domain restriction
+                    false, // Not secure (works on HTTP and HTTPS)
                     false, // HttpOnly
                     false, // Raw
                     'Lax' // SameSite

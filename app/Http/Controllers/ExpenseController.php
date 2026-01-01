@@ -12,18 +12,13 @@ class ExpenseController extends Controller
     // Removed device validation from constructor; now enforced at the start of every action.
     private function validateDeviceOrAbort()
     {
-        $request = request();
-        $token = $request->cookie('device_token');
-        $adminSecret = $request->session()->get('admin_secret_used');
-        if (!$token && !$adminSecret) {
-            abort(404);
-        }
+        $token = request()->cookie('device_token');
         if ($token) {
             $device = \App\Models\Device::where('token', $token)->first();
             if (! $device || ! $device->active || ! $device->user_id || ! \App\Models\User::where('id', $device->user_id)->exists()) {
                 \Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
                 \Cookie::queue(\Cookie::forget('device_token'));
                 abort(404);
             }
