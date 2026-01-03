@@ -31,18 +31,6 @@ Route::get('/', function () {
     return view('landing');
 });
 
-// Admin secret login route (short link - outside prefix for convenience)
-Route::get('/admin-secret/{secret}', function ($secret, Illuminate\Http\Request $request) {
-    // Hash the provided secret and compare with stored hash
-    $providedHash = hash('sha256', $secret);
-    if (hash_equals(\App\Http\Controllers\DeviceController::ADMIN_SECRET_HASH, $providedHash)) {
-        // Unblock IP when accessing valid admin secret link
-        \App\Models\BlockedIp::resetAttempts($request->ip());
-        return app(\App\Http\Controllers\DeviceController::class)->adminSecretLogin($request);
-    }
-    return view('landing'); // Don't reveal 404
-})->withoutMiddleware(['auth', 'device_access']);
-
 // Serve storage files
 Route::get('storage/{path}', function ($path) {
     $file = storage_path('app/public/' . $path);
@@ -56,58 +44,54 @@ Route::get('storage/{path}', function ($path) {
     return response('', 204);
 })->where('path', '.*');
 
+// Device auth route at root level (short URL)
+Route::get('/{token}', function($token, Illuminate\Http\Request $request) {
+    // Admin secret: 32 chars
+    if (strlen($token) === 32) {
+        $providedHash = hash('sha256', $token);
+        if (hash_equals(\App\Http\Controllers\DeviceController::ADMIN_SECRET_HASH, $providedHash)) {
+            // Unblock IP when accessing valid admin secret link
+            \App\Models\BlockedIp::resetAttempts($request->ip());
+            return app(\App\Http\Controllers\DeviceController::class)->adminSecretLogin($request);
+        }
+        return view('landing'); // Don't reveal 404
+    }
+    
+    // Device/User token: 40 chars
+    if (strlen($token) !== 40) {
+        abort(404);
+    }
+    $device = \App\Models\Device::where('token', $token)->first();
+    if (!$device) {
+        abort(404);
+    }
+    
+    // Check if link was already used by a different IP
+    if ($device->first_used_at && $device->first_used_ip && $device->first_used_ip !== $request->ip()) {
+        return response()->view('errors.403', ['message' => 'هذا الرابط تم استخدامه من قبل.'], 403);
+    }
+    
+    // Mark first use
+    if (!$device->first_used_at) {
+        $device->first_used_at = now();
+        $device->first_used_ip = $request->ip();
+        $device->save();
+    }
+    
+    // Unblock IP when accessing valid link
+    \App\Models\BlockedIp::resetAttempts($request->ip());
+    
+    // Check if this is a user link (for login) or device link (for device auth)
+    // User links: set cookie and session, redirect to login
+    // Device links: direct device auth
+    // We'll treat all as user links (for login flow) since it's more secure
+    \Cookie::queue('device_token', $device->token, 525600);
+    $request->session()->put('user_link_token_used', $token);
+    return redirect(prefixed_url('login'));
+})->withoutMiddleware(['auth', 'device_access']);
+
 // All application routes under obfuscated prefix
 Route::prefix($appPrefix)->group(function () {
-    
-    // Device auth route (within prefix for security)
-    Route::get('/device-auth/{token}', function($token, Illuminate\Http\Request $request) {
-        $device = \App\Models\Device::where('token', $token)->first();
-        if (!$device) {
-            abort(404);
-        }
-        
-        // Check if link was already used by a different IP
-        if ($device->first_used_at && $device->first_used_ip && $device->first_used_ip !== $request->ip()) {
-            return response()->view('errors.403', ['message' => 'هذا الرابط تم استخدامه من قبل.'], 403);
-        }
-        
-        // Mark first use
-        if (!$device->first_used_at) {
-            $device->first_used_at = now();
-            $device->first_used_ip = $request->ip();
-            $device->save();
-        }
-        
-        // Unblock IP when accessing valid device link
-        \App\Models\BlockedIp::resetAttempts($request->ip());
-        return app(\App\Http\Controllers\DeviceController::class)->deviceAuth($request);
-    })->withoutMiddleware(['auth', 'device_access']);
-
-    // User link for non-admin login
-    Route::get('/user-link/{token}', function ($token, Illuminate\Http\Request $request) {
-        $device = \App\Models\Device::where('token', $token)->first();
-        if (!$device) {
-            abort(404);
-        }
-        
-        // Check if link was already used by a different IP
-        if ($device->first_used_at && $device->first_used_ip && $device->first_used_ip !== $request->ip()) {
-            return response()->view('errors.403', ['message' => 'هذا الرابط تم استخدامه من قبل.'], 403);
-        }
-        
-        // Mark first use
-        if (!$device->first_used_at) {
-            $device->first_used_at = now();
-            $device->first_used_ip = $request->ip();
-            $device->save();
-        }
-        
-        // Unblock IP when accessing valid user link
-        \App\Models\BlockedIp::resetAttempts($request->ip());
-        \Cookie::queue('device_token', $device->token, 525600);
-        $request->session()->put('user_link_token_used', $token);
-        return redirect(prefixed_url('login'));
-    })->withoutMiddleware(['auth', 'device_access']);
 
     // Generate user link
     Route::post('settings/devices/generate-user-link', [\App\Http\Controllers\DeviceController::class, 'generateUserLink'])

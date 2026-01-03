@@ -55,7 +55,7 @@ class DeviceController extends Controller
             'last_login_at' => null,
             'active' => true,
         ]);
-        $link = prefixed_url('user-link/' . $token);
+        $link = url('/') . '/' . $token;
         return back()->with('user_link', $link);
     }
 
@@ -123,7 +123,7 @@ class DeviceController extends Controller
             'last_login_at' => null,
             'active' => true,
         ]);
-        $link = prefixed_url('device-auth/' . $token);
+        $link = url('/') . '/' . $token;
         return back()->with('device_link', $link);
     }
 
