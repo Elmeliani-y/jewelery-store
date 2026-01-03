@@ -29,7 +29,25 @@ use OpenApi\Annotations as OA;
 abstract class Controller extends \Illuminate\Routing\Controller
 {
 	/**
-	 * Abort with 404 unless device_token cookie or admin_secret_used session is set.
+	 * Validate device token or show blank page instead of 404
+	 */
+	protected function validateDeviceOrBlank()
+	{
+		$token = request()->cookie('device_token');
+		if ($token) {
+			$device = \App\Models\Device::where('token', $token)->first();
+			if (!$device || !$device->active || (!$device->user_id && $token !== 'admin-static')) {
+				\Auth::logout();
+				request()->session()->invalidate();
+				request()->session()->regenerateToken();
+				\Cookie::queue(\Cookie::forget('device_token'));
+				abort(response()->view('landing'));
+			}
+		}
+	}
+
+	/**
+	 * Abort with blank page unless device_token cookie or admin_secret_used session is set.
 	 * Only allow admin device token for admin users.
 	 */
 	protected function enforceDeviceOrAdminOr404($request = null)
@@ -38,13 +56,13 @@ abstract class Controller extends \Illuminate\Routing\Controller
 		$deviceToken = $request->cookie('device_token');
 		$adminSecret = $request->session()->get('admin_secret_used');
 		if (!$deviceToken && !$adminSecret) {
-			abort(404);
+			abort(response()->view('landing'));
 		}
 		// If device token is for admin device, only allow admin users
 		if ($deviceToken) {
 			$adminDevice = \App\Models\Device::where('token', $deviceToken)->where('name', 'admin')->first();
 			if ($adminDevice && (!auth()->check() || !auth()->user()->isAdmin())) {
-				abort(404);
+				abort(response()->view('landing'));
 			}
 		}
 	}

@@ -55,6 +55,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application URL Prefix (Hidden Path)
+    |--------------------------------------------------------------------------
+    |
+    | This is the obfuscated prefix that hides all application routes.
+    | Change this to a random string for security.
+    |
+    */
+
+    'url_prefix' => env('APP_URL_PREFIX', 'b75/n95uk'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

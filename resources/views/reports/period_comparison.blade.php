@@ -243,7 +243,7 @@
     </script>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">الفترة 1: {{ $period1['period'] }}</h5>
@@ -258,33 +258,28 @@
                         </thead>
                         <tbody>
                             @php
-                                function percentDiff($a, $b) {
-                                    if ($b == 0 && $a == 0) return null;
-                                    if ($b == 0) return 100;
-                                    return round((($a - $b) / abs($b)) * 100, 2);
+                                function calculatePercentDiff($val1, $val2) {
+                                    $diff = $val1 - $val2;
+                                    if ($val2 != 0) {
+                                        return round(($diff / $val2) * 100, 2);
+                                    } elseif ($val1 != 0) {
+                                        return 100.00;
+                                    } else {
+                                        return 0;
+                                    }
                                 }
-                                $salesPct = percentDiff($period1['total_sales'] ?? 0, $period2['total_sales'] ?? 0);
-                                $weightPct = percentDiff($period1['total_weight'] ?? 0, $period2['total_weight'] ?? 0);
-                                $expensesPct = percentDiff($period1['total_expenses'] ?? 0, $period2['total_expenses'] ?? 0);
-                                $countPct = percentDiff($period1['sales_count'] ?? 0, $period2['sales_count'] ?? 0);
+                                $salesPct = calculatePercentDiff($period1['total_sales'] ?? 0, $period2['total_sales'] ?? 0);
+                                $weightPct = calculatePercentDiff($period1['total_weight'] ?? 0, $period2['total_weight'] ?? 0);
+                                $expensesPct = calculatePercentDiff($period1['total_expenses'] ?? 0, $period2['total_expenses'] ?? 0);
+                                $countPct = calculatePercentDiff($period1['sales_count'] ?? 0, $period2['sales_count'] ?? 0);
                             @endphp
                             <tr>
                                 <td>إجمالي المبيعات</td>
-                                <td class="text-end">
-                                    {{ number_format($period1['total_sales'] ?? 0, 2) }}
-                                    @if(!is_null($salesPct))
-                                        <span class="fw-bold {{ $salesPct > 0 ? 'text-success' : ($salesPct < 0 ? 'text-danger' : '') }}"> ({{ $salesPct > 0 ? '+' : '' }}{{ $salesPct }}%)</span>
-                                    @endif
-                                </td>
+                                <td class="text-end">{{ number_format($period1['total_sales'] ?? 0, 2) }} ريال</td>
                             </tr>
                             <tr>
                                 <td>إجمالي الوزن</td>
-                                <td class="text-end">
-                                    {{ number_format($period1['total_weight'] ?? 0, 2) }}
-                                    @if(!is_null($weightPct))
-                                        <span class="fw-bold {{ $weightPct > 0 ? 'text-success' : ($weightPct < 0 ? 'text-danger' : '') }}"> ({{ $weightPct > 0 ? '+' : '' }}{{ $weightPct }}%)</span>
-                                    @endif
-                                </td>
+                                <td class="text-end">{{ number_format($period1['total_weight'] ?? 0, 2) }} جرام</td>
                             </tr>
                             <tr>
                                 <td>معدل سعر الجرام</td>
@@ -292,21 +287,11 @@
                             </tr>
                             <tr>
                                 <td>عدد المبيعات</td>
-                                <td class="text-end">
-                                    {{ number_format($period1['sales_count'] ?? 0, 0, ',', '.') }}
-                                    @if(!is_null($countPct))
-                                        <span class="fw-bold {{ $countPct > 0 ? 'text-success' : ($countPct < 0 ? 'text-danger' : '') }}"> ({{ $countPct > 0 ? '+' : '' }}{{ $countPct }}%)</span>
-                                    @endif
-                                </td>
+                                <td class="text-end">{{ number_format($period1['sales_count'] ?? 0, 0, ',', '.') }}</td>
                             </tr>
                             <tr>
                                 <td>إجمالي المصروفات</td>
-                                <td class="text-end">
-                                    {{ number_format($period1['total_expenses'] ?? 0, 2) }}
-                                    @if(!is_null($expensesPct))
-                                        <span class="fw-bold {{ $expensesPct > 0 ? 'text-success' : ($expensesPct < 0 ? 'text-danger' : '') }}"> ({{ $expensesPct > 0 ? '+' : '' }}{{ $expensesPct }}%)</span>
-                                    @endif
-                                </td>
+                                <td class="text-end">{{ number_format($period1['total_expenses'] ?? 0, 2) }} ريال</td>
                             </tr>
                         </tbody>
                     </table>
@@ -314,7 +299,7 @@
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">الفترة 2: {{ $period2['period'] }}</h5>
@@ -353,6 +338,50 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">الفروقات %</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <small class="d-block text-muted mb-1">المبيعات</small>
+                                <strong class="{{ $salesPct > 0 ? 'text-success' : ($salesPct < 0 ? 'text-danger' : '') }}">
+                                    {{ $salesPct > 0 ? '+' : '' }}{{ number_format($salesPct, 2) }}%
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <small class="d-block text-muted mb-1">الوزن</small>
+                                <strong class="{{ $weightPct > 0 ? 'text-success' : ($weightPct < 0 ? 'text-danger' : '') }}">
+                                    {{ $weightPct > 0 ? '+' : '' }}{{ number_format($weightPct, 2) }}%
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <small class="d-block text-muted mb-1">المصروفات</small>
+                                <strong class="{{ $expensesPct > 0 ? 'text-success' : ($expensesPct < 0 ? 'text-danger' : '') }}">
+                                    {{ $expensesPct > 0 ? '+' : '' }}{{ number_format($expensesPct, 2) }}%
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <small class="d-block text-muted mb-1">العدد</small>
+                                <strong class="{{ $countPct > 0 ? 'text-success' : ($countPct < 0 ? 'text-danger' : '') }}">
+                                    {{ $countPct > 0 ? '+' : '' }}{{ number_format($countPct, 2) }}%
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -386,22 +415,14 @@
                                             <td class="text-end">{{ number_format($row['total_weight_1'], 2) }}</td>
                                             <td class="text-end">{{ number_format($row['total_weight_2'], 2) }}</td>
                                             <td class="text-end">
-                                                @if($row['sales_diff_pct'] !== null)
-                                                    <span class="fw-bold {{ $row['sales_diff_pct'] > 0 ? 'text-success' : ($row['sales_diff_pct'] < 0 ? 'text-danger' : '') }}">
-                                                        @if($row['sales_diff_pct'] > 0)+@endif{{ $row['sales_diff_pct'] }}%
-                                                    </span>
-                                                @else
-                                                    -
-                                                @endif
+                                                <span class="fw-bold {{ $row['sales_diff_pct'] > 0 ? 'text-success' : ($row['sales_diff_pct'] < 0 ? 'text-danger' : '') }}">
+                                                    @if($row['sales_diff_pct'] > 0)+@endif{{ number_format($row['sales_diff_pct'], 2) }}%
+                                                </span>
                                             </td>
                                             <td class="text-end">
-                                                @if($row['weight_diff_pct'] !== null)
-                                                    <span class="fw-bold {{ $row['weight_diff_pct'] > 0 ? 'text-success' : ($row['weight_diff_pct'] < 0 ? 'text-danger' : '') }}">
-                                                        @if($row['weight_diff_pct'] > 0)+@endif{{ $row['weight_diff_pct'] }}%
-                                                    </span>
-                                                @else
-                                                    -
-                                                @endif
+                                                <span class="fw-bold {{ $row['weight_diff_pct'] > 0 ? 'text-success' : ($row['weight_diff_pct'] < 0 ? 'text-danger' : '') }}">
+                                                    @if($row['weight_diff_pct'] > 0)+@endif{{ number_format($row['weight_diff_pct'], 2) }}%
+                                                </span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -417,29 +438,37 @@
                                         <td class="text-end">{{ number_format($rows->sum('total_weight_2'), 2) }}</td>
                                         <td class="text-end">
                                             @php
-                                                $salesDiffs = $rows->pluck('sales_diff_pct')->filter(fn($v) => $v !== null);
-                                                $avgSalesDiff = $salesDiffs->count() ? round($salesDiffs->avg(), 2) : null;
+                                                $totalSales1 = $rows->sum('total_sales_1');
+                                                $totalSales2 = $rows->sum('total_sales_2');
+                                                $salesDiff = $totalSales2 - $totalSales1;
+                                                if ($totalSales1 != 0) {
+                                                    $avgSalesDiff = round(($salesDiff / $totalSales1) * 100, 2);
+                                                } elseif ($totalSales2 != 0) {
+                                                    $avgSalesDiff = 100.00;
+                                                } else {
+                                                    $avgSalesDiff = 0;
+                                                }
                                             @endphp
-                                            @if($avgSalesDiff !== null)
-                                                <span class="fw-bold {{ $avgSalesDiff > 0 ? 'text-success' : ($avgSalesDiff < 0 ? 'text-danger' : '') }}">
-                                                    @if($avgSalesDiff > 0)+@endif{{ $avgSalesDiff }}%
-                                                </span>
-                                            @else
-                                                -
-                                            @endif
+                                            <span class="fw-bold {{ $avgSalesDiff > 0 ? 'text-success' : ($avgSalesDiff < 0 ? 'text-danger' : '') }}">
+                                                @if($avgSalesDiff > 0)+@endif{{ number_format($avgSalesDiff, 2) }}%
+                                            </span>
                                         </td>
                                         <td class="text-end">
                                             @php
-                                                $weightDiffs = $rows->pluck('weight_diff_pct')->filter(fn($v) => $v !== null);
-                                                $avgWeightDiff = $weightDiffs->count() ? round($weightDiffs->avg(), 2) : null;
+                                                $totalWeight1 = $rows->sum('total_weight_1');
+                                                $totalWeight2 = $rows->sum('total_weight_2');
+                                                $weightDiff = $totalWeight2 - $totalWeight1;
+                                                if ($totalWeight1 != 0) {
+                                                    $avgWeightDiff = round(($weightDiff / $totalWeight1) * 100, 2);
+                                                } elseif ($totalWeight2 != 0) {
+                                                    $avgWeightDiff = 100.00;
+                                                } else {
+                                                    $avgWeightDiff = 0;
+                                                }
                                             @endphp
-                                            @if($avgWeightDiff !== null)
-                                                <span class="fw-bold {{ $avgWeightDiff > 0 ? 'text-success' : ($avgWeightDiff < 0 ? 'text-danger' : '') }}">
-                                                    @if($avgWeightDiff > 0)+@endif{{ $avgWeightDiff }}%
-                                                </span>
-                                            @else
-                                                -
-                                            @endif
+                                            <span class="fw-bold {{ $avgWeightDiff > 0 ? 'text-success' : ($avgWeightDiff < 0 ? 'text-danger' : '') }}">
+                                                @if($avgWeightDiff > 0)+@endif{{ number_format($avgWeightDiff, 2) }}%
+                                            </span>
                                         </td>
                                     </tr>
                                 </tfoot>

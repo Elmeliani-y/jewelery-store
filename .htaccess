@@ -1,0 +1,43 @@
+# Secure .htaccess for root directory
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Block access to sensitive files
+    RewriteRule ^\.env$ - [F,L]
+    RewriteRule ^composer\.(json|lock)$ - [F,L]
+    RewriteRule ^package(-lock)?\.json$ - [F,L]
+    
+    # Redirect all requests to public folder
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "\.(env|json|config\.js|md|gitignore|gitattributes|lock|yml|yaml|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block access to hidden files and directories
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect git folder
+<DirectoryMatch "\.git">
+    Order allow,deny
+    Deny from all
+</DirectoryMatch>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>

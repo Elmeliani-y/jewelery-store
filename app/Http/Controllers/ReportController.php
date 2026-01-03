@@ -363,8 +363,26 @@ class ReportController extends Controller
                 // Difference %
                 $salesDiff = $totalSales2 - $totalSales1;
                 $weightDiff = $totalWeight2 - $totalWeight1;
-                $salesDiffPct = $totalSales1 != 0 ? round(($salesDiff / $totalSales1) * 100, 2) : null;
-                $weightDiffPct = $totalWeight1 != 0 ? round(($weightDiff / $totalWeight1) * 100, 2) : null;
+                
+                // Calculate percentage even when period 1 is zero
+                if ($totalSales1 != 0) {
+                    $salesDiffPct = round(($salesDiff / $totalSales1) * 100, 2);
+                } elseif ($totalSales2 != 0) {
+                    // If period 1 is zero but period 2 has sales, show as 100% increase
+                    $salesDiffPct = 100.00;
+                } else {
+                    $salesDiffPct = 0;
+                }
+                
+                if ($totalWeight1 != 0) {
+                    $weightDiffPct = round(($weightDiff / $totalWeight1) * 100, 2);
+                } elseif ($totalWeight2 != 0) {
+                    // If period 1 is zero but period 2 has weight, show as 100% increase
+                    $weightDiffPct = 100.00;
+                } else {
+                    $weightDiffPct = 0;
+                }
+                
                 // Only add if there is sales in either period
                 if ($totalSales1 != 0 || $totalSales2 != 0) {
                     $data[] = [

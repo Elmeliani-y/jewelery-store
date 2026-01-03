@@ -460,5 +460,5 @@ const expensesAmount = {{ $metrics['total_expenses'] }};
 <script src="{{ asset('js/crm-dashboard-custom.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<script src="{{ asset('js/category-bars.js') }}"></script>
+<script src="{{ asset('js/category-bars.js') }}?v={{ time() }}"></script>
 @endsection

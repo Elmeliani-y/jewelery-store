@@ -1,2 +1,17 @@
+# Block all search engines from indexing this site
 User-agent: *
-Disallow:
+Disallow: /
+
+# Prevent archiving by Wayback Machine
+User-agent: ia_archiver
+Disallow: /
+
+# Block other common bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /

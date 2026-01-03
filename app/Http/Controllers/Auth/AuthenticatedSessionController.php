@@ -20,8 +20,8 @@ class AuthenticatedSessionController extends Controller
         $hasAdminSecret = $request->session()->get('admin_secret_used');
         $hasUserLink = $request->session()->get('user_link_token_used');
         if (!$hasDevice && !$hasAdminSecret && !$hasUserLink) {
-            // Show 404 Not Found for unauthorized access
-            abort(404);
+            // Show blank page for unauthorized access
+            return response()->view('landing');
         }
         return view('auth.login');
     }
@@ -40,6 +40,21 @@ class AuthenticatedSessionController extends Controller
 
         $user = \App\Models\User::where('username', $credentials['username'])->first();
         if (!$user || !\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            // Track failed login attempts (skip for admin users)
+            $ipAddress = $request->ip();
+            
+            // Only block non-admin attempts
+            if (!$user || !$user->isAdmin()) {
+                \App\Models\BlockedIp::recordFailedAttempt($ipAddress);
+                
+                // Check if IP should be blocked after 3 failed attempts
+                if (\App\Models\BlockedIp::isBlocked($ipAddress)) {
+                    return response()->view('errors.403', [
+                        'message' => 'Your IP address has been blocked due to multiple failed login attempts.'
+                    ], 403);
+                }
+            }
+            
             return back()->withErrors(['email' => 'اسم المستخدم أو كلمة المرور غير صحيحة']);
         }
 
@@ -60,6 +75,9 @@ class AuthenticatedSessionController extends Controller
             abort(404, 'فقط الأدمن يمكنه الدخول من رابط الأدمن.');
         }
 
+        // Reset failed attempts on successful login
+        \App\Models\BlockedIp::resetAttempts($request->ip());
+        
         Auth::login($user, $request->filled('remember'));
         $request->session()->regenerate();
         // If login was via user link, re-set the device_token cookie to ensure it persists
@@ -95,13 +113,15 @@ class AuthenticatedSessionController extends Controller
             $cookie = cookie('device_token', $device->token, 525600, '/', null, false, true, false, 'Lax');
             \Cookie::queue($cookie);
         }
-        if ($user->isBranch() || $user->isAccountant()) {
-            return redirect()->intended('/');
-        }
-        // Redirect admin directly to devices page
+        // Redirect based on user role
         if ($user->isAdmin()) {
             return redirect()->intended(route('settings.devices'));
         }
+        // For branch users, redirect to sales page (daily sales)
+        if ($user->isBranch()) {
+            return redirect()->intended(route('sales.create'));
+        }
+        // For accountant users, redirect to dashboard
         return redirect()->intended(route('dashboard'));
     }
 
@@ -117,7 +137,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
-
-        return redirect('/login');
+        
+        // Don't clear device_token - keep it for re-login
+        // Just redirect to prefixed login page
+        return redirect(prefixed_url('login'));
     }
 }

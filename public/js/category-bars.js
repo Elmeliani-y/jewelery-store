@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const container = document.getElementById('categories_chart');
   if (!container) return;
-  const chartHeight = Math.max(180, sortedCategories.length * 32);
+  const chartHeight = Math.max(180, sortedCategories.length * 50);
   // Use a scrollable container to ensure full chart and labels are visible
   // Responsive: full width for desktop, 100vw for mobile
   const isMobile = window.innerWidth <= 600;
@@ -195,42 +195,53 @@ document.addEventListener('DOMContentLoaded', function () {
       const yScale = scales.y;
       const totalSales = soldData.reduce((a, b) => a + b, 0) || 1;
       ctx.save();
-      // Use purple for total sales, black/white for category name and weight
-      let salesColor = '#7168EE';
-      let labelColor = isDarkMode() ? '#fff' : '#222';
+      // Use mode-aware colors for text
+      const isDark = isDarkMode();
+      let salesColor = '#000'; // black
+      let labelColor = isDark ? '#fff' : '#222';
+      let weightColor = '#000'; // black
       meta.data.forEach((bar, i) => {
         if (!bar) return;
         const y = bar.y;
         const cat = sortedCategories[i];
-        // Draw total sales value, centered in the bar
+        // Draw total sales value with percentage, right side of bar
         const barLeft = xScale.left;
         const barRight = xScale.right;
         const barWidth = barRight - barLeft;
-        const labelX = barLeft + barWidth / 2;
+        const centerX = barLeft + barWidth / 2;
+        const rightX = barRight - 10;
         const sold = soldData[i];
+        const percent = totalSales > 0 ? ((sold / totalSales) * 100).toFixed(1) : '0.0';
         let soldLabel = (sold !== null && sold !== undefined) ? Number(sold).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
-        ctx.font = 'bold 16px Cairo, Tahoma, Arial, sans-serif';
-        ctx.textAlign = 'center';
+        
+        ctx.font = 'bold 18px Cairo, Tahoma, Arial, sans-serif';
         ctx.textBaseline = 'middle';
         ctx.save();
         ctx.fillStyle = salesColor;
-        ctx.shadowColor = 'rgba(0,0,0,0.08)';
+        ctx.shadowColor = isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.08)';
         ctx.shadowBlur = 2;
-        ctx.fillText(soldLabel, labelX, y);
+        
+        // Draw sales amount in center
+        ctx.textAlign = 'center';
+        ctx.fillText(soldLabel, centerX, y);
+        
+        // Draw percentage on right
+        ctx.textAlign = 'right';
+        ctx.fillText(`${percent}%`, rightX, y);
         ctx.restore();
 
-        // Draw weight value, centered inside the bar
+        // Draw weight value in colored box (left side)
         let weightRaw = typeof cat.weight !== 'undefined' ? Number(cat.weight) : null;
         if (weightRaw !== null && !isNaN(weightRaw)) {
           let weightText = weightRaw.toFixed(2);
           ctx.font = 'bold 14px Cairo, Tahoma, Arial, sans-serif';
           ctx.textAlign = 'left';
           ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#fff'; // white
+          ctx.fillStyle = '#000'; // Black text
           ctx.save();
-          ctx.shadowColor = 'rgba(0,0,0,0.08)';
-          ctx.shadowBlur = 1;
-          // Always stick weight to the left edge of the bar
+          ctx.shadowColor = 'rgba(0,0,0,0.3)';
+          ctx.shadowBlur = 2;
+          // Position weight at the start of the colored bar (left edge)
           ctx.fillText(weightText, bar.base + 8, y);
           ctx.restore();
         }

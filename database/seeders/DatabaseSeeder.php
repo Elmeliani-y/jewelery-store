@@ -37,5 +37,15 @@ class DatabaseSeeder extends Seeder
                 'remember_token' => Str::random(10),
             ]);
         }
+
+        // Seed system data (branches, categories, calibers, etc.)
+        $this->call([
+            JewelrySystemSeeder::class,
+        ]);
+
+        // Seed fake sales/expenses data for testing
+        $this->call([
+            FakeSalesExpensesSeeder::class,
+        ]);
     }
 }

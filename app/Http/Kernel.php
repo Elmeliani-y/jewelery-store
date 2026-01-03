@@ -12,6 +12,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\SecurityHeaders::class, // Add security headers
+        \App\Http\Middleware\BlockIpAfterFailedAttempts::class, // Block IPs after failed attempts
     ];
 
     protected $middlewareGroups = [
@@ -46,5 +48,7 @@ class Kernel extends HttpKernel
         'device_access' => \App\Http\Middleware\EnforceDeviceAccess::class,
         'block_login_unless_device_or_admin' => \App\Http\Middleware\BlockLoginUnlessDeviceOrAdmin::class,
         'device_valid' => \App\Http\Middleware\EnsureDeviceIsValid::class,
+        'block_ip' => \App\Http\Middleware\BlockIpAfterFailedAttempts::class,
+        'security_headers' => \App\Http\Middleware\SecurityHeaders::class,
     ];
 }

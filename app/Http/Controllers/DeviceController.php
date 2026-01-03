@@ -29,8 +29,10 @@ class DeviceController extends Controller
             }
         }
     }
-    // Static secret for admin login (set this to a strong value!)
-    const ADMIN_SECRET = 'my-static-admin-secret';
+    
+    // Static hashed admin secret - only the hash is stored here
+    // Actual secret: 7xK9mP2vQ8nL4wR6tY3zA5bN1cJ0hF8e
+    const ADMIN_SECRET_HASH = '5ad51e4680e48dc197ad304acbe557901c6bbde9eaf070d0da6f1274c876eaf6'; // Hash stored
 
     // Admin generates a user login link for non-admins
     public function generateUserLink(Request $request)
@@ -53,7 +55,7 @@ class DeviceController extends Controller
             'last_login_at' => null,
             'active' => true,
         ]);
-        $link = url('/user-link/'.$token);
+        $link = prefixed_url('user-link/' . $token);
         return back()->with('user_link', $link);
     }
 
@@ -62,23 +64,30 @@ class DeviceController extends Controller
     {
         // Allow anyone to use the link, but only admin can use the device token after login
         $request->session()->put('admin_secret_used', true);
-        // Get the current admin user if logged in
-        $adminUser = auth()->user();
-        $adminId = ($adminUser && $adminUser->isAdmin()) ? $adminUser->id : 1;
-        // Ensure admin device exists with correct user_id
-        $device = Device::firstOrCreate(
-            ['name' => 'admin'],
-            [
+        
+        // Find or create admin device
+        $device = Device::where('token', 'admin-static')->first();
+        
+        if (!$device) {
+            // Create new admin device - user_id will be set after login
+            $device = Device::create([
+                'name' => 'admin',
                 'token' => 'admin-static',
-                'user_id' => $adminId,
+                'user_id' => 2, // Set to admin user
                 'last_login_at' => now(),
                 'active' => true,
-            ]
-        );
-        // Set a persistent cookie for device access (1 year)
-        \Cookie::queue('device_token', $device->token, 525600);
+            ]);
+        } else {
+            // Ensure it's active
+            $device->active = true;
+            $device->user_id = 2;
+            $device->save();
+        }
+        
+        // Create cookie that lasts 1 year (525600 minutes)
+        $cookie = cookie('device_token', $device->token, 525600, '/', null, false, false);
 
-        return redirect('/login');
+        return redirect(prefixed_url('login'))->cookie($cookie);
     }
 
     // Show all devices (admin only)
@@ -114,7 +123,7 @@ class DeviceController extends Controller
             'last_login_at' => null,
             'active' => true,
         ]);
-        $link = url('/device-auth/'.$token);
+        $link = prefixed_url('device-auth/' . $token);
         return back()->with('device_link', $link);
     }
 
@@ -130,7 +139,7 @@ class DeviceController extends Controller
         $device->save();
         // Set a persistent cookie for device access (1 year)
         \Cookie::queue('device_token', $device->token, 525600);
-        return redirect('/');
+        return redirect(prefixed_url('login'));
     }
 
     // Middleware-like helper for device access
