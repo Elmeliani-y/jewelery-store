@@ -55,7 +55,14 @@ abstract class Controller extends \Illuminate\Routing\Controller
 		$request = $request ?: request();
 		$deviceToken = $request->cookie('device_token');
 		$adminSecret = $request->session()->get('admin_secret_used');
+		\Log::info('enforceDeviceOrAdminOr404 check', [
+			'has_device_token' => !empty($deviceToken),
+			'has_admin_secret' => !empty($adminSecret),
+			'is_authenticated' => auth()->check(),
+			'user_id' => auth()->id(),
+		]);
 		if (!$deviceToken && !$adminSecret) {
+			\Log::info('aborting - no device token or admin secret');
 			abort(response()->view('landing'));
 		}
 		// If device token is for admin device, only allow admin users

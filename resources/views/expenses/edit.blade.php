@@ -12,8 +12,8 @@
                 <h4 class="mb-sm-0">تعديل مصروف</h4>
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">المصروفات</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('c5d9f2h7') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('l7m2n6o1.index') }}">المصروفات</a></li>
                         <li class="breadcrumb-item active">تعديل</li>
                     </ol>
                 </div>
@@ -28,7 +28,7 @@
         </div>
     @endif
 
-    <form action="{{ route('expenses.update', $expense) }}" method="POST">
+    <form action="{{ route('l7m2n6o1.update', $expense) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="row">
@@ -94,7 +94,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="mdi mdi-content-save-outline me-1"></i> حفظ التعديلات
                             </button>
-                            <a href="{{ route('expenses.show', $expense) }}" class="btn btn-light">إلغاء</a>
+                            <a href="{{ route('l7m2n6o1.show', $expense) }}" class="btn btn-light">إلغاء</a>
                         </div>
                     </div>
                 </div>

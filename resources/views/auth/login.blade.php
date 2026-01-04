@@ -30,7 +30,7 @@
                             </div>
 
                             <div class="pt-0">
-                                <form method="POST" action="{{ route('login')}}" class="my-4">
+                                <form method="POST" action="{{ url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8') }}" class="my-4">
                                     @csrf
                                     @if (sizeof($errors) > 0)
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -59,7 +59,7 @@
                                     </div>
                                 </form>
                                 <div class="text-center mt-3">
-                                    <a href="{{ route('password.code.form') }}" class="text-primary">هل نسيت كلمة المرور؟</a>
+                                    <a href="{{ route('i5j1k6l9.m3n8o2p7') }}" class="text-primary">هل نسيت كلمة المرور؟</a>
                                 </div>
                             </div>
                         </div>

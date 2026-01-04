@@ -31,7 +31,7 @@
                                         <div class="alert alert-success">{{ session('status') }}</div>
                                     @endif
                                     @if(!session('show_code_form'))
-                                        <form method="POST" action="{{ route('password.code.request') }}">
+                                        <form method="POST" action="{{ route('i5j1k6l9.q4r9s1t6') }}">
                                             @csrf
                                             <div class="form-group mb-3">
                                                 <label for="email" class="form-label fw-semibold">البريد الإلكتروني</label>
@@ -44,7 +44,7 @@
                                             </div>
                                         </form>
                                     @else
-                                        <form method="POST" action="{{ route('password.code.verify') }}">
+                                        <form method="POST" action="{{ route('i5j1k6l9.u2v8w3x7') }}">
                                             @csrf
                                             <input type="hidden" name="email" value="{{ session('email') }}">
                                             <div class="form-group mb-3">

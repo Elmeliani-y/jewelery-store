@@ -5,14 +5,14 @@
 <div class="container-fluid">
     <div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:linear-gradient(135deg,#0d6efd,#6610f2);padding:1.25rem 1rem;border-radius:14px;color:#fff;">
         <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('branches.index') }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
+            <a href="{{ route('x9y4z1a6.index') }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
             <h5 class="mb-0"><iconify-icon icon="solar:buildings-bold-duotone" class="fs-4 me-1"></iconify-icon> الفرع: {{ $branch->name }}</h5>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('branches.edit',$branch) }}" class="btn btn-primary btn-sm"><iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon> تعديل</a>
-            <form action="{{ route('branches.toggle-status',$branch) }}" method="POST">@csrf <button class="btn btn-{{ $branch->is_active? 'warning':'success' }} btn-sm" type="submit"><iconify-icon icon="solar:{{ $branch->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>{{ $branch->is_active? 'تعطيل':'تفعيل' }}</button></form>
+            <a href="{{ route('x9y4z1a6.edit',$branch) }}" class="btn btn-primary btn-sm"><iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon> تعديل</a>
+            <form action="{{ route('x9y4z1a6.b2c7d5e8',$branch) }}" method="POST">@csrf <button class="btn btn-{{ $branch->is_active? 'warning':'success' }} btn-sm" type="submit"><iconify-icon icon="solar:{{ $branch->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>{{ $branch->is_active? 'تعطيل':'تفعيل' }}</button></form>
             @if(!$branch->employees_count && !$branch->sales_count)
-            <form action="{{ route('branches.destroy',$branch) }}" method="POST" class="delete-form">@csrf @method('DELETE') <button class="btn btn-danger btn-sm" type="submit"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon></button></form>
+            <form action="{{ route('x9y4z1a6.destroy',$branch) }}" method="POST" class="delete-form">@csrf @method('DELETE') <button class="btn btn-danger btn-sm" type="submit"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon></button></form>
             @endif
         </div>
     </div>

@@ -1,79 +1,30 @@
 
 <?php
-// Redirect default forgot-password to code-based recovery
-Route::get('/forgot-password', function() {
-    return redirect()->route('password.code.form');
-})->name('password.request');
-// Override POST /forgot-password to redirect to code-based recovery and never send a reset link
-Route::post('/forgot-password', function() {
-    return redirect()->route('password.code.form');
-})->name('password.email');
 
 use App\Http\Controllers\Auth\PasswordCodeController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 // Password code-based recovery
-Route::get('/password/code', [PasswordCodeController::class, 'showCodeForm'])->middleware('guest')->name('password.code.form');
-Route::post('/password/code/request', [PasswordCodeController::class, 'requestCode'])->middleware('guest')->name('password.code.request');
-Route::post('/password/code/verify', [PasswordCodeController::class, 'verifyCode'])->middleware('guest')->name('password.code.verify');
-Route::post('/password/code/reset', [PasswordCodeController::class, 'resetPassword'])->middleware('guest')->name('password.code.reset');
+Route::get('/e9f3g7h2', [PasswordCodeController::class, 'showCodeForm'])->middleware('guest')->name('i5j1k6l9.m3n8o2p7');
+Route::post('/e9f3g7h2/q4r9s1t6', [PasswordCodeController::class, 'requestCode'])->middleware('guest')->name('i5j1k6l9.q4r9s1t6');
+Route::post('/e9f3g7h2/u2v8w3x7', [PasswordCodeController::class, 'verifyCode'])->middleware('guest')->name('i5j1k6l9.u2v8w3x7');
+Route::post('/e9f3g7h2/y1z6a4b9', [PasswordCodeController::class, 'resetPassword'])->middleware('guest')->name('i5j1k6l9.y1z6a4b9');
 
-Route::get('/register', [RegisteredUserController::class, 'create'])
+Route::get('/c8d2e7f1', [RegisteredUserController::class, 'create'])
     ->middleware('guest')
-    ->name('register');
+    ->name('c8d2e7f1');
 
-Route::post('/register', [RegisteredUserController::class, 'store'])
+Route::post('/c8d2e7f1', [RegisteredUserController::class, 'store'])
     ->middleware('guest');
 
-Route::get('/login', [AuthenticatedSessionController::class, 'create'])
+Route::get('/k2m7n3p8', [AuthenticatedSessionController::class, 'create'])
     ->middleware('guest')
     ->name('login');
 
-Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+Route::post('/k2m7n3p8', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
-
-Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-    ->middleware('guest')
-    ->name('password.request');
-
-Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-    ->middleware('guest')
-    ->name('password.email');
-
-Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-    ->middleware('guest')
-    ->name('password.reset');
-
-Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')
-    ->name('password.update');
-
-Route::get('/verify-email', [EmailVerificationPromptController::class, '__invoke'])
-    ->middleware(['auth', 'device_valid'])
-    ->name('verification.notice');
-
-Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
-    ->middleware(['auth', 'device_valid', 'signed', 'throttle:6,1'])
-    ->name('verification.verify');
-
-Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-    ->middleware(['auth', 'device_valid', 'throttle:6,1'])
-    ->name('verification.send');
-
-Route::get('/confirm-password', [ConfirmablePasswordController::class, 'show'])
-    ->middleware(['auth', 'device_valid'])
-    ->name('password.confirm');
-
-Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store'])
-    ->middleware(['auth', 'device_valid']);
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware(['auth'])

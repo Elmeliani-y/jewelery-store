@@ -66,7 +66,7 @@ class ExpenseTypeController extends Controller
             ]);
         }
 
-        return redirect()->route('expense-types.index')
+        return redirect()->route('b2c6d1e5.index')
                        ->with('success', 'تم إضافة نوع المصروف بنجاح');
     }
 
@@ -97,7 +97,7 @@ class ExpenseTypeController extends Controller
 
         $expenseType->update($validated);
 
-        return redirect()->route('expense-types.index')
+        return redirect()->route('b2c6d1e5.index')
                        ->with('success', 'تم تحديث نوع المصروف بنجاح');
     }
 
@@ -108,7 +108,7 @@ class ExpenseTypeController extends Controller
     {
         $this->validateDeviceOrAbort();
         $expenseType->delete();
-        return redirect()->route('expense-types.index')
+        return redirect()->route('b2c6d1e5.index')
                        ->with('success', 'تم حذف نوع المصروف بنجاح');
     }
 }

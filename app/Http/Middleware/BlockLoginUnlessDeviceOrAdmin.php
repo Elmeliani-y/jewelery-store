@@ -22,7 +22,7 @@ class BlockLoginUnlessDeviceOrAdmin
             !$request->cookie('device_token') &&
             !$request->session()->get('admin_secret_used')
         ) {
-            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+            return redirect(url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8'))->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
         }
         return $next($request);
     }

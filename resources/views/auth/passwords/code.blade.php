@@ -15,7 +15,7 @@
                                 @if($errors->any())
                                     <div class="alert alert-danger">{{ $errors->first() }}</div>
                                 @endif
-                                <form method="POST" action="{{ route('password.code.verify') }}">
+                                <form method="POST" action="{{ route('i5j1k6l9.u2v8w3x7') }}">
                                     @csrf
                                     <div class="form-group mb-3">
                                         <label for="email" class="form-label fw-semibold">البريد الإلكتروني</label>

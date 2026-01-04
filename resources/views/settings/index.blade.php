@@ -12,7 +12,7 @@
                 <h4 class="mb-sm-0">إعدادات النظام</h4>
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('c5d9f2h7') }}">الرئيسية</a></li>
                         <li class="breadcrumb-item active">إعدادات النظام</li>
                     </ol>
                 </div>
@@ -33,7 +33,7 @@
         </div>
     @endif
 
-    <form action="{{ route('settings.update') }}" method="POST" class="arabic-text" enctype="multipart/form-data">
+    <form action="{{ route('h4i8j3k7.update') }}" method="POST" class="arabic-text" enctype="multipart/form-data">
         @csrf
         <div class="row">
             <div class="col-lg-8">
@@ -126,7 +126,7 @@
                             <iconify-icon icon="solar:diskette-bold"></iconify-icon>
                             حفظ الإعدادات
                         </button>
-                        <a href="{{ route('dashboard') }}" class="btn btn-light btn-lg">
+                        <a href="{{ route('c5d9f2h7') }}" class="btn btn-light btn-lg">
                             <iconify-icon icon="solar:arrow-right-bold"></iconify-icon>
                             إلغاء
                         </a>

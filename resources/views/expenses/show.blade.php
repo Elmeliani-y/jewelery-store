@@ -12,8 +12,8 @@
                 <h4 class="mb-sm-0">تفاصيل المصروف</h4>
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">المصروفات</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('c5d9f2h7') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('l7m2n6o1.index') }}">المصروفات</a></li>
                         <li class="breadcrumb-item active">عرض</li>
                     </ol>
                 </div>
@@ -84,10 +84,10 @@
                     <h5 class="card-title">الإجراءات</h5>
                     <div class="d-grid gap-2">
                         @if(!auth()->user() || !auth()->user()->isBranch())
-                            <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-warning">
+                            <a href="{{ route('l7m2n6o1.edit', $expense) }}" class="btn btn-warning">
                                 <i class="mdi mdi-pencil-outline me-1"></i> تعديل
                             </a>
-                            <form action="{{ route('expenses.destroy', $expense) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
+                            <form action="{{ route('l7m2n6o1.destroy', $expense) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">
@@ -96,9 +96,9 @@
                             </form>
                         @endif
                         @if(auth()->user() && auth()->user()->isBranch())
-                            <a href="{{ route('branch.daily-expenses') }}" class="btn btn-light">عودة إلى المصروفات اليومية</a>
+                            <a href="{{ route('r8s3t7u1.p4q9r5s2') }}" class="btn btn-light">عودة إلى المصروفات اليومية</a>
                         @else
-                            <a href="{{ route('expenses.index') }}" class="btn btn-light">عودة إلى المصروفات</a>
+                            <a href="{{ route('l7m2n6o1.index') }}" class="btn btn-light">عودة إلى المصروفات</a>
                         @endif
                     </div>
                 </div>

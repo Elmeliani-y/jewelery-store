@@ -16,7 +16,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ route('users.update', $user) }}" method="POST">
+                    <form action="{{ route('d7e1f5g9.update', $user) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -91,7 +91,7 @@
                                 <iconify-icon icon="solar:check-circle-bold-duotone" class="me-1"></iconify-icon>
                                 حفظ التغييرات
                             </button>
-                            <a href="{{ route('users.show', $user) }}" class="btn btn-secondary">
+                            <a href="{{ route('d7e1f5g9.show', $user) }}" class="btn btn-secondary">
                                 <iconify-icon icon="solar:close-circle-bold-duotone" class="me-1"></iconify-icon>
                                 إلغاء
                             </a>

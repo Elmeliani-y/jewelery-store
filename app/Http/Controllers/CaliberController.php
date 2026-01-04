@@ -48,7 +48,7 @@ class CaliberController extends Controller
     public function store(Request $request)
     {
         $this->validateDeviceOrAbort();
-        $this->enforceDeviceToken($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:calibers,name',
             'tax_rate' => 'required|numeric|min:0|max:100',
@@ -60,25 +60,27 @@ class CaliberController extends Controller
 
         Caliber::create($validated);
 
-        return redirect()->route('calibers.index')
+        return redirect()->route('n6o1p4q9.index')
                        ->with('success', 'تم إضافة العيار بنجاح');
     }
 
     /**
      * Show the form for editing the specified caliber.
      */
-    public function edit(Caliber $caliber)
+    public function edit(Caliber $n6o1p4q9)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $caliber = $n6o1p4q9; // Alias for clarity
         return view('calibers.edit', compact('caliber'));
     }
 
     /**
      * Update the specified caliber.
      */
-    public function update(Request $request, Caliber $caliber)
+    public function update(Request $request, Caliber $n6o1p4q9)
     {
-        $this->enforceDeviceToken($request);
+        $caliber = $n6o1p4q9; // Alias for clarity
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:calibers,name,' . $caliber->id,
             'tax_rate' => 'required|numeric|min:0|max:100',
@@ -90,7 +92,7 @@ class CaliberController extends Controller
 
         $caliber->update($validated);
 
-        return redirect()->route('calibers.index')
+        return redirect()->route('n6o1p4q9.index')
                        ->with('success', 'تم تحديث العيار بنجاح');
     }
 
@@ -99,7 +101,7 @@ class CaliberController extends Controller
      */
     public function toggleStatus(Caliber $caliber)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
         $caliber->update([
             'is_active' => !$caliber->is_active
         ]);
@@ -111,9 +113,10 @@ class CaliberController extends Controller
     /**
      * Remove the specified caliber.
      */
-    public function destroy(Caliber $caliber)
+    public function destroy(Caliber $n6o1p4q9)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $caliber = $n6o1p4q9; // Alias for clarity
         // Check if caliber is used in any sales
         if ($caliber->sales()->count() > 0) {
             return back()->with('error', 'لا يمكن حذف العيار لأنه مستخدم في المبيعات');
@@ -121,7 +124,7 @@ class CaliberController extends Controller
 
         $caliber->delete();
 
-        return redirect()->route('calibers.index')
+        return redirect()->route('n6o1p4q9.index')
                        ->with('success', 'تم حذف العيار بنجاح');
     }
 }

@@ -73,7 +73,7 @@ class EmployeeController extends Controller
         try {
             Employee::create($validated);
 
-            return redirect()->route('employees.index')
+            return redirect()->route('f3g8h1i4.index')
                            ->with('success', 'تم إضافة الموظف بنجاح');
 
         } catch (\Exception $e) {
@@ -85,8 +85,9 @@ class EmployeeController extends Controller
     /**
      * Display the specified employee.
      */
-    public function show(Employee $employee)
+    public function show(Employee $f3g8h1i4)
     {
+        $employee = $f3g8h1i4; // Alias for clarity
             $this->validateDeviceOrAbort();
         $employee->load('branch');
         
@@ -111,8 +112,9 @@ class EmployeeController extends Controller
     /**
      * Show the form for editing the specified employee.
      */
-    public function edit(Employee $employee)
+    public function edit(Employee $f3g8h1i4)
     {
+        $employee = $f3g8h1i4; // Alias for clarity
             $this->validateDeviceOrAbort();
         $branches = Branch::active()->get();
         return view('employees.edit', compact('employee', 'branches'));
@@ -121,8 +123,9 @@ class EmployeeController extends Controller
     /**
      * Update the specified employee.
      */
-    public function update(Request $request, Employee $employee)
+    public function update(Request $request, Employee $f3g8h1i4)
     {
+        $employee = $f3g8h1i4; // Alias for clarity
             $this->validateDeviceOrAbort();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -136,7 +139,7 @@ class EmployeeController extends Controller
         try {
             $employee->update($validated);
 
-            return redirect()->route('employees.show', $employee)
+            return redirect()->route('f3g8h1i4.show', $employee)
                            ->with('success', 'تم تحديث الموظف بنجاح');
 
         } catch (\Exception $e) {
@@ -148,8 +151,9 @@ class EmployeeController extends Controller
     /**
      * Remove the specified employee.
      */
-    public function destroy(Employee $employee)
+    public function destroy(Employee $f3g8h1i4)
     {
+        $employee = $f3g8h1i4; // Alias for clarity
             $this->validateDeviceOrAbort();
         try {
             // Check if employee has sales
@@ -159,7 +163,7 @@ class EmployeeController extends Controller
 
             $employee->delete();
 
-            return redirect()->route('employees.index')
+            return redirect()->route('f3g8h1i4.index')
                            ->with('success', 'تم حذف الموظف بنجاح');
 
         } catch (\Exception $e) {

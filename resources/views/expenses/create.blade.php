@@ -17,10 +17,10 @@
 
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('c5d9f2h7') }}">الرئيسية</a></li>
                         {{-- رابط قائمة المصروفات مخفي لحساب الفرع بعد تقييد الوصول --}}
                         @if(!auth()->user() || !auth()->user()->isBranch())
-                            <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">المصروفات</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('l7m2n6o1.index') }}">المصروفات</a></li>
                         @endif
                         <li class="breadcrumb-item active">تسجيل جديد</li>
                     </ol>
@@ -37,7 +37,7 @@
         </div>
     @endif
 
-    <form id="expense-create-form" action="{{ route('expenses.store') }}" method="POST">
+    <form id="expense-create-form" action="{{ route('l7m2n6o1.store') }}" method="POST">
         @csrf
         
         <div class="row">
@@ -175,7 +175,7 @@
                         </button>
 
                         @if(!auth()->user() || !auth()->user()->isBranch())
-                            <a href="{{ route('expenses.index') }}" class="btn btn-light btn-lg">
+                            <a href="{{ route('l7m2n6o1.index') }}" class="btn btn-light btn-lg">
                                 <iconify-icon icon="solar:close-circle-bold" class="fs-5 me-2"></iconify-icon>
                                 إلغاء
                             </a>

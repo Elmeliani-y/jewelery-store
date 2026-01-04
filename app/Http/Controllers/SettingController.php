@@ -54,7 +54,7 @@ class SettingController extends Controller
 
         // Always reload settings from DB after save
         $settings = $this->readSettings();
-        return redirect()->route('settings.index')->with(['success' => 'تم حفظ إعدادات النظام بنجاح', 'settings' => $settings]);
+        return redirect()->route('h4i8j3k7')->with(['success' => 'تم حفظ إعدادات النظام بنجاح', 'settings' => $settings]);
     }
 
     private function readSettings(): array

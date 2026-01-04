@@ -35,7 +35,7 @@
 
     @include('reports.partials.toolbar', [
         'title' => '',
-        'backUrl' => route('reports.index'),
+        'backUrl' => route('t3u8v1w4.b1c5d8e3'),
         'exportRoute' => 'reports.all',
         'exportQuery' => request()->query(),
         'filters' => $filters ?? []
@@ -45,20 +45,20 @@
     <div class="card mb-3 no-print" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: none;">
         <div class="card-body">
             <div class="d-flex flex-wrap gap-2 justify-content-center">
-                <a href="{{ route('reports.kasr') }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
+                <a href="{{ route('t3u8v1w4.t6u2v8w5') }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
 					<i class="mdi mdi-chart-box me-1"></i> تقرير صافي الربح
                 </a>
-                <a href="{{ route('reports.comparative', request()->query()) }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
+                <a href="{{ route('t3u8v1w4.l3m8n2o6', request()->query()) }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
                     <i class="mdi mdi-chart-line me-1"></i> التقرير المقارن
                 </a>
-                <a href="{{ route('reports.speed', request()->query()) }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
+                <a href="{{ route('t3u8v1w4.f4g9h2i7', request()->query()) }}" class="btn btn-dark" style="background-color: #0f172a; border-color: #0f172a; min-width: 150px;">
                     <i class="mdi mdi-speedometer me-1"></i> تقرير السرعة
                 </a>
             </div>
         </div>
     </div>
 
-    <form method="GET" action="{{ route('reports.all') }}" class="card mb-4 no-print" id="filterForm">
+    <form method="GET" action="{{ route('t3u8v1w4.b1c5d8e3') }}" class="card mb-4 no-print" id="filterForm">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3">
@@ -133,7 +133,7 @@
                 </div>
                 <div class="col-12 text-end">
                     <button type="submit" class="btn btn-primary">تصفية</button>
-                    <a href="{{ route('reports.all') }}" class="btn btn-secondary ms-2">إعادة تعيين</a>
+                    <a href="{{ route('t3u8v1w4.b1c5d8e3') }}" class="btn btn-secondary ms-2">إعادة تعيين</a>
                     <button type="button" class="btn btn-success ms-2" onclick="window.print()">طباعة A4</button>
                 </div>
             </div>
@@ -610,7 +610,7 @@ $(document).ready(function() {
         
         if (branchId) {
             // Filter employees by selected branch
-            $.get('{{ route("api.employees-by-branch") }}', { branch_id: branchId })
+            $.get('{{ route("f9g2h6i3.j7k1l4m8") }}', { branch_id: branchId })
                 .done(function(data) {
                     data.forEach(function(employee) {
                         const selected = selectedEmployee == employee.id ? 'selected' : '';

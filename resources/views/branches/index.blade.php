@@ -21,7 +21,7 @@
             <p class="mb-0 opacity-75">استعراض وإدارة الفروع وتفعيلها وتعطيلها</p>
         </div>
         <div>
-            <a href="{{ route('branches.create') }}" class="btn btn-light">
+            <a href="{{ route('x9y4z1a6.create') }}" class="btn btn-light">
                 <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة فرع
             </a>
         </div>
@@ -63,13 +63,13 @@
                     </div>
 
                     <div class="mt-3 d-flex gap-2">
-                        <a href="{{ route('branches.show',$branch) }}" class="btn btn-secondary btn-sm flex-fill">
+                        <a href="{{ route('x9y4z1a6.show',$branch) }}" class="btn btn-secondary btn-sm flex-fill">
                             <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon>عرض
                         </a>
-                        <a href="{{ route('branches.edit',$branch) }}" class="btn btn-primary btn-sm flex-fill">
+                        <a href="{{ route('x9y4z1a6.edit',$branch) }}" class="btn btn-primary btn-sm flex-fill">
                             <iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon>تعديل
                         </a>
-                        <form action="{{ route('branches.toggle-status',$branch) }}" method="POST" class="flex-fill">
+                        <form action="{{ route('x9y4z1a6.b2c7d5e8',$branch) }}" method="POST" class="flex-fill">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-{{ $branch->is_active? 'warning':'success' }} w-100">
                                 <iconify-icon icon="solar:{{ $branch->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>
@@ -77,7 +77,7 @@
                             </button>
                         </form>
                         @if(!$branch->employees_count && !$branch->sales_count)
-                        <form action="{{ route('branches.destroy',$branch) }}" method="POST" class="flex-fill delete-form">
+                        <form action="{{ route('x9y4z1a6.destroy',$branch) }}" method="POST" class="flex-fill delete-form">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm w-100" title="حذف">
                                 <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
@@ -93,7 +93,7 @@
                     <iconify-icon icon="solar:buildings-bold-duotone" class="fs-1 text-muted mb-3"></iconify-icon>
                     <h5 class="text-muted mb-2">لا توجد فروع</h5>
                     <p class="text-muted mb-3">ابدأ بإضافة فرع جديد للمتجر</p>
-                    <a href="{{ route('branches.create') }}" class="btn btn-primary"><iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة فرع</a>
+                    <a href="{{ route('x9y4z1a6.create') }}" class="btn btn-primary"><iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة فرع</a>
                 </div>
             </div>
         @endforelse

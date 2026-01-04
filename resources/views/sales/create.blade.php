@@ -16,9 +16,9 @@
                 </div>
                 <div class="text-end">
                     <ol class="breadcrumb m-0 py-0 arabic-text">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-primary">الرئيسية</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('c5d9f2h7') }}" class="text-primary">الرئيسية</a></li>
                         @unless(auth()->user()->isBranch())
-                        <li class="breadcrumb-item"><a href="{{ route('sales.index') }}" class="text-primary">المبيعات</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('t6u1v5w8.index') }}" class="text-primary">المبيعات</a></li>
                         @endunless
                         <li class="breadcrumb-item active">تسجيل مبيعة جديدة</li>
                     </ol>
@@ -38,7 +38,7 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form id="sale-create-form" action="{{ route('sales.store') }}" method="POST" class="arabic-text" novalidate>
+                    <form id="sale-create-form" action="{{ route('t6u1v5w8.store') }}" method="POST" class="arabic-text" novalidate>
                         @csrf
                         
                         <!-- Branch and Employee Section -->
@@ -352,7 +352,7 @@
                         <div class="row mt-4">
                             <div class="col-12">
                                 <div class="d-flex flex-column flex-sm-row justify-content-end gap-3">
-                                    <a href="{{ route('sales.index') }}" class="btn btn-secondary btn-lg">
+                                    <a href="{{ route('t6u1v5w8.index') }}" class="btn btn-secondary btn-lg">
                                         <iconify-icon icon="solar:arrow-right-bold"></iconify-icon>
                                         إلغاء
                                     </a>
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const employeeSelect = $('#employee_id');
         employeeSelect.html('<option value="">جاري التحميل...</option>');
         if (branchId) {
-            $.get('{{ route("api.employees-by-branch") }}', { branch_id: branchId })
+            $.get('{{ route("f9g2h6i3.j7k1l4m8") }}', { branch_id: branchId })
                 .done(function(data) {
                     employeeSelect.html('<option value="">اختر الموظف</option>');
                     data.forEach(function(employee) {

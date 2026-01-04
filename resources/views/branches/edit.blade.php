@@ -3,11 +3,11 @@
 @section('content')
 <div class="container-fluid">
     <div class="page-header mb-4 d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#0d6efd,#6610f2);padding:1.25rem 1rem;border-radius:14px;color:#fff;">
-        <a href="{{ route('branches.show',$branch) }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
+        <a href="{{ route('x9y4z1a6.show',$branch) }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
         <h5 class="mb-0"><iconify-icon icon="solar:pen-bold-duotone" class="fs-4 me-1"></iconify-icon> تعديل الفرع: {{ $branch->name }}</h5>
     </div>
 
-    <form action="{{ route('branches.update',$branch) }}" method="POST">@csrf @method('PUT')
+    <form action="{{ route('x9y4z1a6.update',$branch) }}" method="POST">@csrf @method('PUT')
         <div class="row">
             <div class="col-lg-8">
                 <div class="card form-card mb-4"><div class="card-body">
@@ -40,7 +40,7 @@
                 </div></div>
                 <div class="d-grid gap-2">
                     <button class="btn btn-primary btn-lg" type="submit"><iconify-icon icon="solar:diskette-bold" class="me-1"></iconify-icon> حفظ التعديلات</button>
-                    <a href="{{ route('branches.show',$branch) }}" class="btn btn-light btn-lg"><iconify-icon icon="solar:close-circle-bold" class="me-1"></iconify-icon> إلغاء</a>
+                    <a href="{{ route('x9y4z1a6.show',$branch) }}" class="btn btn-light btn-lg"><iconify-icon icon="solar:close-circle-bold" class="me-1"></iconify-icon> إلغاء</a>
                 </div>
             </div>
         </div>

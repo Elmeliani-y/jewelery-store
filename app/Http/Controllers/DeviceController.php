@@ -31,8 +31,8 @@ class DeviceController extends Controller
     }
     
     // Static hashed admin secret - only the hash is stored here
-    // Actual secret: 7xK9mP2vQ8nL4wR6tY3zA5bN1cJ0hF8e
-    const ADMIN_SECRET_HASH = '5ad51e4680e48dc197ad304acbe557901c6bbde9eaf070d0da6f1274c876eaf6'; // Hash stored
+    // Actual secret: pK3e8fnQjgrykS7RamqNuGcC4D2sBVLF9Zbt65WA
+    const ADMIN_SECRET_HASH = 'b348db35495cca5568bafad01fcb64e282fcc609a6c9c54ff8ad06e6cd015817'; // Hash stored
 
     // Admin generates a user login link for non-admins
     public function generateUserLink(Request $request)
@@ -87,7 +87,7 @@ class DeviceController extends Controller
         // Create cookie that lasts 1 year (525600 minutes)
         $cookie = cookie('device_token', $device->token, 525600, '/', null, false, false);
 
-        return redirect(prefixed_url('login'))->cookie($cookie);
+        return redirect('/' . env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8')->cookie($cookie);
     }
 
     // Show all devices (admin only)

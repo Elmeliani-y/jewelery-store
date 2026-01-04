@@ -33,24 +33,38 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
+        $ipAddress = $request->ip();
         $credentials = [
             'username' => $request->input('email'),
             'password' => $request->input('password'),
         ];
 
         $user = \App\Models\User::where('username', $credentials['username'])->first();
+        
+        // Check if accessing through admin link
+        $hasAdminSecret = $request->session()->get('admin_secret_used');
+        
+        // Check if IP is blocked BEFORE attempting login (but skip for admin users or admin links)
+        if ($hasAdminSecret || ($user && $user->isAdmin())) {
+            // Admin links and admin users are never blocked by IP
+        } else {
+            // Check if this non-admin IP is blocked
+            if (\App\Models\BlockedIp::isBlocked($ipAddress)) {
+                return response()->view('errors.403', [
+                    'message' => 'تم حظر عنوان IP الخاص بك مؤقتاً بسبب محاولات تسجيل دخول فاشلة متعددة. يرجى التواصل مع المسؤول لإلغاء الحظر.'
+                ], 403);
+            }
+        }
+        
         if (!$user || !\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
-            // Track failed login attempts (skip for admin users)
-            $ipAddress = $request->ip();
-            
-            // Only block non-admin attempts
-            if (!$user || !$user->isAdmin()) {
+            // Track failed login attempts (skip for admin links and admin users)
+            if (!$hasAdminSecret && (!$user || !$user->isAdmin())) {
                 \App\Models\BlockedIp::recordFailedAttempt($ipAddress);
                 
-                // Check if IP should be blocked after 3 failed attempts
+                // Check if IP should be blocked after this attempt
                 if (\App\Models\BlockedIp::isBlocked($ipAddress)) {
                     return response()->view('errors.403', [
-                        'message' => 'Your IP address has been blocked due to multiple failed login attempts.'
+                        'message' => 'تم حظر عنوان IP الخاص بك بسبب محاولات تسجيل دخول فاشلة متعددة. يرجى التواصل مع المسؤول لإلغاء الحظر.'
                     ], 403);
                 }
             }
@@ -115,14 +129,17 @@ class AuthenticatedSessionController extends Controller
         }
         // Redirect based on user role
         if ($user->isAdmin()) {
-            return redirect()->intended(route('settings.devices'));
+            \Log::info('Redirecting admin user', ['route' => route('h4i8j3k7.l2m6n9o4')]);
+            return redirect(route('h4i8j3k7.l2m6n9o4'));
         }
         // For branch users, redirect to sales page (daily sales)
         if ($user->isBranch()) {
-            return redirect()->intended(route('sales.create'));
+            \Log::info('Redirecting branch user', ['route' => route('t6u1v5w8.create')]);
+            return redirect(route('t6u1v5w8.create'));
         }
         // For accountant users, redirect to dashboard
-        return redirect()->intended(route('dashboard'));
+        \Log::info('Redirecting accountant user', ['route' => route('c5d9f2h7'), 'user_id' => $user->id]);
+        return redirect(route('c5d9f2h7'));
     }
 
     /**
@@ -140,6 +157,6 @@ class AuthenticatedSessionController extends Controller
         
         // Don't clear device_token - keep it for re-login
         // Just redirect to prefixed login page
-        return redirect(prefixed_url('login'));
+        return redirect('/' . env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8');
     }
 }

@@ -31,7 +31,7 @@
             <p class="mb-0 opacity-75">إدارة أصناف المبيعات</p>
         </div>
         <div>
-            <a href="{{ route('categories.create') }}" class="btn btn-light">
+            <a href="{{ route('v5w9x4y1.create') }}" class="btn btn-light">
                 <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة صنف جديد
             </a>
         </div>
@@ -67,10 +67,10 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        <a href="{{ route('categories.edit', $category) }}" class="btn btn-sm btn-primary flex-fill">
+                        <a href="{{ route('v5w9x4y1.edit', $category) }}" class="btn btn-sm btn-primary flex-fill">
                             <iconify-icon icon="solar:pen-bold"></iconify-icon> تعديل
                         </a>
-                        <form action="{{ route('categories.destroy', $category) }}" method="POST" class="flex-fill" onsubmit="return confirm('هل أنت متأكد من حذف هذا الصنف؟')">
+                        <form action="{{ route('v5w9x4y1.destroy', $category) }}" method="POST" class="flex-fill" onsubmit="return confirm('هل أنت متأكد من حذف هذا الصنف؟')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger w-100">

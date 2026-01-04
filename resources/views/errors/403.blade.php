@@ -23,6 +23,10 @@
             justify-content: center;
             direction: rtl;
         }
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
         .error-code {
             font-size: 10rem;
             font-weight: bold;
@@ -37,12 +41,22 @@
             text-align: center;
             margin-top: 2rem;
         }
+        .error-message {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-top: 2rem;
+            max-width: 800px;
+            line-height: 1.8;
+        }
     </style>
 </head>
 <body>
-    <div>
+    <div class="container">
         <div class="error-code">403</div>
         <div class="error-text">محظور</div>
+        @if(isset($message))
+            <div class="error-message">{{ $message }}</div>
+        @endif
     </div>
 </body>
 </html>

@@ -39,7 +39,7 @@ class DashboardController extends Controller
         $this->validateDeviceOrAbort();
         // Redirect admin users to devices page
         if (auth()->check() && auth()->user()->isAdmin()) {
-            return redirect()->route('settings.devices');
+            return redirect()->route('h4i8j3k7.l2m6n9o4');
         }
         // Restrict branch users from accessing dashboard
         if (auth()->check() && auth()->user()->isBranch()) {

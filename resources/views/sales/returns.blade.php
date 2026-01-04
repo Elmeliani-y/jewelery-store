@@ -1,5 +1,4 @@
-@extends('layouts.vertical')
-
+@extends('layouts.vertical', ['title' => 'قائمة المرتجعات'])
 @section('title') قائمة المرتجعات @endsection
 
 @section('content')
@@ -17,7 +16,7 @@
                 <i class="mdi mdi-arrow-left"></i> العودة لقائمة اليومية
             </a>
         @else
-            <a href="{{ route('sales.index') }}" class="btn btn-outline-primary">
+            <a href="{{ route('t6u1v5w8.index') }}" class="btn btn-outline-primary">
                 <i class="mdi mdi-arrow-left"></i> العودة لقائمة المبيعات
             </a>
         @endif
@@ -85,10 +84,10 @@
                                     <td dir="ltr"><span class="fw-semibold text-dark">{{ number_format($sale->total_amount, 0, ',', '.') }} <small class="text-muted">ريال</small></span></td>
                                     <td class="text-muted">{{ $sale->returned_at ? $sale->returned_at->format('Y-m-d') : '-' }}</td>
                                     <td class="text-center sales-table-actions">
-                                        <a href="{{ route('sales.show', $sale) }}" class="btn btn-icon btn-sm bg-info-subtle" data-bs-toggle="tooltip" data-bs-original-title="عرض">
+                                        <a href="{{ route('t6u1v5w8.show', $sale) }}" class="btn btn-icon btn-sm bg-info-subtle" data-bs-toggle="tooltip" data-bs-original-title="عرض">
                                             <i class="mdi mdi-eye-outline text-info fs-16"></i>
                                         </a>
-                                        <button type="button" class="btn btn-icon btn-sm bg-success-subtle ms-1 btn-unreturn-sale" data-sale-id="{{ $sale->id }}" data-url="{{ route('sales.unreturn', $sale) }}" data-bs-toggle="tooltip" data-bs-original-title="إرجاع كعملية بيع">
+                                        <button type="button" class="btn btn-icon btn-sm bg-success-subtle ms-1 btn-unreturn-sale" data-sale-id="{{ $sale->id }}" data-url="{{ route('t6u1v5w8.b4c8d1e5', $sale) }}" data-bs-toggle="tooltip" data-bs-original-title="إرجاع كعملية بيع">
                                             <i class="mdi mdi-backup-restore text-success fs-16"></i>
                                         </button>
                                     </td>

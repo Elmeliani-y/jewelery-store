@@ -9,7 +9,7 @@
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="mb-0">تفاصيل المستخدم</h4>
                 <div class="page-title-right">
-                    <a href="{{ route('users.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('d7e1f5g9.index') }}" class="btn btn-secondary">
                         <iconify-icon icon="solar:arrow-right-bold-duotone" class="me-1"></iconify-icon>
                         العودة للقائمة
                     </a>
@@ -106,7 +106,7 @@
                     <hr>
 
                     <div class="d-flex gap-2">
-                        <a href="{{ route('users.edit', $user) }}" class="btn btn-warning">
+                        <a href="{{ route('d7e1f5g9.edit', $user) }}" class="btn btn-warning">
                             <iconify-icon icon="solar:pen-bold-duotone" class="me-1"></iconify-icon>
                             تعديل
                         </a>
@@ -115,7 +115,7 @@
                             <iconify-icon icon="solar:trash-bin-trash-bold-duotone" class="me-1"></iconify-icon>
                             حذف
                         </button>
-                        <form id="delete-form" action="{{ route('users.destroy', $user) }}" method="POST" class="d-none">
+                        <form id="delete-form" action="{{ route('d7e1f5g9.destroy', $user) }}" method="POST" class="d-none">
                             @csrf
                             @method('DELETE')
                         </form>

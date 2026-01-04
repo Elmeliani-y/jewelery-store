@@ -16,7 +16,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ route('users.store') }}" method="POST">
+                    <form action="{{ route('d7e1f5g9.store') }}" method="POST">
                         @csrf
 
                         <div class="mb-3">
@@ -79,7 +79,7 @@
                                 <iconify-icon icon="solar:check-circle-bold-duotone" class="me-1"></iconify-icon>
                                 حفظ
                             </button>
-                            <a href="{{ route('users.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('d7e1f5g9.index') }}" class="btn btn-secondary">
                                 <iconify-icon icon="solar:close-circle-bold-duotone" class="me-1"></iconify-icon>
                                 إلغاء
                             </a>

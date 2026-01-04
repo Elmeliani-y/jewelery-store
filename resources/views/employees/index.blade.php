@@ -12,14 +12,14 @@
             <p class="mb-0 opacity-75">إضافة وتحديث بيانات الموظفين وربطهم بالفروع</p>
         </div>
         <div>
-            <a href="{{ route('employees.create') }}" class="btn btn-light"><iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة موظف</a>
+            <a href="{{ route('f3g8h1i4.create') }}" class="btn btn-light"><iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة موظف</a>
         </div>
     </div>
 
     @include('layouts.partials.flash')
 
     <div class="filter-box mb-4">
-        <form class="row g-3" method="GET" action="{{ route('employees.index') }}">
+        <form class="row g-3" method="GET" action="{{ route('f3g8h1i4.index') }}">
             <div class="col-md-4">
                 <label class="form-label small-label">الفرع</label>
                 <select name="branch_id" class="form-select" onchange="this.form.submit()">
@@ -57,11 +57,11 @@
                     @if($emp->email)<div class="text-muted mb-1">✉ {{ $emp->email }}</div>@endif
                 </div>
                 <div class="mt-3 d-flex gap-2">
-                    <a href="{{ route('employees.show',$emp) }}" class="btn btn-secondary btn-sm flex-fill"><iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon> عرض</a>
-                    <a href="{{ route('employees.edit',$emp) }}" class="btn btn-primary btn-sm flex-fill"><iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon> تعديل</a>
-                    <form action="{{ route('employees.toggle-status',$emp) }}" method="POST" class="flex-fill">@csrf <button class="btn btn-sm btn-{{ $emp->is_active? 'warning':'success' }} w-100" type="submit"><iconify-icon icon="solar:{{ $emp->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>{{ $emp->is_active? 'تعطيل':'تفعيل' }}</button></form>
+                    <a href="{{ route('f3g8h1i4.show',$emp) }}" class="btn btn-secondary btn-sm flex-fill"><iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon> عرض</a>
+                    <a href="{{ route('f3g8h1i4.edit',$emp) }}" class="btn btn-primary btn-sm flex-fill"><iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon> تعديل</a>
+                    <form action="{{ route('f3g8h1i4.j9k5l2m7',$emp) }}" method="POST" class="flex-fill">@csrf <button class="btn btn-sm btn-{{ $emp->is_active? 'warning':'success' }} w-100" type="submit"><iconify-icon icon="solar:{{ $emp->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>{{ $emp->is_active? 'تعطيل':'تفعيل' }}</button></form>
                     @if(!$emp->sales()->exists())
-                    <form action="{{ route('employees.destroy',$emp) }}" method="POST" class="flex-fill delete-form">@csrf @method('DELETE') <button class="btn btn-danger btn-sm w-100" type="submit"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon></button></form>
+                    <form action="{{ route('f3g8h1i4.destroy',$emp) }}" method="POST" class="flex-fill delete-form">@csrf @method('DELETE') <button class="btn btn-danger btn-sm w-100" type="submit"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon></button></form>
                     @endif
                 </div>
             </div>
@@ -72,7 +72,7 @@
                 <iconify-icon icon="solar:user-bold-duotone" class="fs-1 text-muted mb-3"></iconify-icon>
                 <h5 class="text-muted mb-2">لا يوجد موظفون</h5>
                 <p class="text-muted mb-3">ابدأ بإضافة أول موظف للمتجر</p>
-                <a href="{{ route('employees.create') }}" class="btn btn-success"><iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة موظف</a>
+                <a href="{{ route('f3g8h1i4.create') }}" class="btn btn-success"><iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة موظف</a>
             </div>
         </div>
         @endforelse

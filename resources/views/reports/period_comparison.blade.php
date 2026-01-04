@@ -7,13 +7,13 @@
             <div class="page-title-box d-flex align-items-center justify-content-between">
                 <h4 class="page-title text-primary-emphasis">مقارنة بالفترات</h4>
                 <div>
-                    <a href="{{ route('reports.all') }}" class="btn btn-secondary">عودة للتقارير</a>
+                    <a href="{{ route('t3u8v1w4.b1c5d8e3') }}" class="btn btn-secondary">عودة للتقارير</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <form method="GET" action="{{ route('reports.period_comparison') }}" class="card mb-4" id="mo9aranaForm">
+    <form method="GET" action="{{ route('t3u8v1w4.p4q9r1s7') }}" class="card mb-4" id="mo9aranaForm">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3" id="from1-group"></div>

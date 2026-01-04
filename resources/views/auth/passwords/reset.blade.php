@@ -15,7 +15,7 @@
                                 @if($errors->any())
                                     <div class="alert alert-danger">{{ $errors->first() }}</div>
                                 @endif
-                                <form method="POST" action="{{ route('password.code.reset') }}">
+                                <form method="POST" action="{{ route('i5j1k6l9.y1z6a4b9') }}">
                                     @csrf
                                     <input type="hidden" name="email" value="{{ $email }}">
                                     <input type="hidden" name="code" value="{{ $code }}">

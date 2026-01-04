@@ -1,5 +1,4 @@
-@extends('layouts.vertical')
-
+@extends('layouts.vertical', ['title' => 'تعديل المبيعة'])
 @section('title') تعديل المبيعة @endsection
 
 @section('css')
@@ -66,6 +65,13 @@ document.addEventListener('DOMContentLoaded', function() {
 @endpush
 
 @section('content')
+@php
+    // Decode products JSON string to array for use throughout the view
+    $productsArray = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+    if (!is_array($productsArray)) {
+        $productsArray = [];
+    }
+@endphp
 <div class="container-fluid">
     <div class="edit-header d-flex flex-column flex-lg-row justify-content-between gap-3">
         <div>
@@ -75,8 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="d-flex flex-wrap gap-2">
             <span class="badge badge-meta bg-primary-subtle text-primary"><i class="mdi mdi-storefront-outline me-1"></i>{{ $sale->branch->name }}</span>
             <span class="badge badge-meta bg-info-subtle text-info"><i class="mdi mdi-account-outline me-1"></i>{{ $sale->employee->name }}</span>
-            @if($sale->products && count($sale->products) > 0)
-            <span class="badge badge-meta bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i>{{ count($sale->products) }} منتج</span>
+            @if(count($productsArray) > 0)
+            <span class="badge badge-meta bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i>{{ count($productsArray) }} منتج</span>
             @endif
         </div>
     </div>
@@ -88,18 +94,18 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     @endif
 
-    <form method="POST" action="{{ route('sales.update', $sale) }}" novalidate id="sale-edit-form">
+    <form method="POST" action="{{ route('t6u1v5w8.update', $sale) }}" novalidate id="sale-edit-form">
         @csrf
         @method('PUT')
 
-    @if($sale->products && count($sale->products) > 0)
+    @if(count($productsArray) > 0)
     <div class="card mb-3">
         <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
-            <h6 class="mb-0"><i class="mdi mdi-package-variant-closed me-1"></i> المنتجات ({{ count($sale->products) }})</h6>
+            <h6 class="mb-0"><i class="mdi mdi-package-variant-closed me-1"></i> المنتجات ({{ count($productsArray) }})</h6>
             <span class="badge bg-warning-subtle text-warning">قابل للتعديل</span>
         </div>
         <div class="card-body">
-            @foreach($sale->products as $index => $product)
+            @foreach($productsArray as $index => $product)
             <div class="row g-3 mb-3 pb-3 border-bottom">
                 <div class="col-12">
                     <h6 class="text-muted">منتج {{ $index + 1 }}</h6>
@@ -226,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="col-md-6 payment-group" id="network_group">
                             <label class="form-label">مبلغ الشبكة <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="network_amount" id="network_amount_input" value="{{ old('network_amount', array_sum(array_column($sale->products ?? [], 'amount')) ?: ($sale->network_amount ?? '')) }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="network_amount" id="network_amount_input" value="{{ old('network_amount', array_sum(array_column($productsArray, 'amount')) ?: ($sale->network_amount ?? '')) }}" class="form-control @error('network_amount') is-invalid @enderror" placeholder="0.00">
                             @error('network_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-calculator-variant me-1"></i>سيتم حساب المبلغ النقدي تلقائياً
@@ -234,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="col-md-6 payment-group" id="transfer_group" style="display:none;">
                             <label class="form-label">مبلغ التحويل <span class="text-danger payment-required">*</span></label>
-                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', array_sum(array_column($sale->products ?? [], 'amount')) ?: ($sale->transfer_amount ?? '')) }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
+                            <input type="number" step="0.01" name="transfer_amount" id="transfer_amount_input" value="{{ old('transfer_amount', array_sum(array_column($productsArray, 'amount')) ?: ($sale->transfer_amount ?? '')) }}" class="form-control @error('transfer_amount') is-invalid @enderror" placeholder="0.00">
                             @error('transfer_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-bank-transfer me-1"></i>أدخل مبلغ التحويل إذا كان الدفع عبر سناب
@@ -242,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="col-md-6 payment-group" id="cash_group" style="display:none;">
                             <label class="form-label">المبلغ النقدي</label>
-                            <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ array_sum(array_column($sale->products ?? [], 'amount')) ?: ($sale->cash_amount ?? '') }}" class="form-control" placeholder="0.00">
+                            <input type="number" step="0.01" name="cash_amount" id="cash_amount_input" value="{{ array_sum(array_column($productsArray, 'amount')) ?: ($sale->cash_amount ?? '') }}" class="form-control" placeholder="0.00">
                         </div>
                     <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -314,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="submit" class="btn btn-warning"><i class="mdi mdi-content-save-outline me-1"></i> حفظ التعديلات</button>
-                        <a href="{{ route('sales.show', $sale) }}" class="btn btn-secondary"><i class="mdi mdi-arrow-left me-1"></i> إلغاء</a>
+                        <a href="{{ route('t6u1v5w8.show', $sale) }}" class="btn btn-secondary"><i class="mdi mdi-arrow-left me-1"></i> إلغاء</a>
                     </div>
                 </div>
                 <div class="form-section">
@@ -327,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </form>
 
     @if(!$sale->is_returned)
-    <form action="{{ route('sales.return', $sale) }}" method="POST" class="d-inline">
+    <form action="{{ route('t6u1v5w8.x2y7z3a9', $sale) }}" method="POST" class="d-inline">
         @csrf
         <button type="submit" class="btn btn-danger mt-3" onclick="return confirm('هل أنت متأكد من استرجاع هذه الفاتورة؟');">
             <i class="mdi mdi-backup-restore me-1"></i> تعيين كمرتجع

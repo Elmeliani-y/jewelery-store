@@ -28,7 +28,7 @@
             <p class="mb-0 opacity-75">استعراض وإدارة مستخدمي النظام</p>
         </div>
         <div>
-            <a href="{{ route('users.create') }}" class="btn btn-light">
+            <a href="{{ route('d7e1f5g9.create') }}" class="btn btn-light">
                 <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة مستخدم
             </a>
         </div>
@@ -73,14 +73,14 @@
                     </div>
 
                     <div class="mt-3 d-flex gap-2">
-                        <a href="{{ route('users.show', $user) }}" class="btn btn-secondary btn-sm flex-fill">
+                        <a href="{{ route('d7e1f5g9.show', $user) }}" class="btn btn-secondary btn-sm flex-fill">
                             <iconify-icon icon="solar:eye-bold" class="me-1"></iconify-icon>عرض
                         </a>
-                        <a href="{{ route('users.edit', $user) }}" class="btn btn-primary btn-sm flex-fill">
+                        <a href="{{ route('d7e1f5g9.edit', $user) }}" class="btn btn-primary btn-sm flex-fill">
                             <iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon>تعديل
                         </a>
                         @if($user->id !== auth()->id())
-                        <form action="{{ route('users.destroy', $user) }}" method="POST" class="flex-fill delete-form">
+                        <form action="{{ route('d7e1f5g9.destroy', $user) }}" method="POST" class="flex-fill delete-form">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('هل أنت متأكد من حذف هذا المستخدم؟')">
@@ -96,7 +96,7 @@
                 <div class="text-center py-5">
                     <iconify-icon icon="solar:users-group-rounded-bold-duotone" class="fs-1 text-muted mb-3" style="font-size:4rem"></iconify-icon>
                     <p class="text-muted">لا توجد مستخدمين</p>
-                    <a href="{{ route('users.create') }}" class="btn btn-primary mt-2">
+                    <a href="{{ route('d7e1f5g9.create') }}" class="btn btn-primary mt-2">
                         <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة مستخدم جديد
                     </a>
                 </div>

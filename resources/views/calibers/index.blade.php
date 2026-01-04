@@ -1,8 +1,6 @@
 @extends('layouts.vertical', ['title' => 'إدارة العيارات'])
 
-@section('title')
-    @lang('translation.calibers-management')
-@endsection
+@section('title') العيارات @endsection
 
 @section('css')
 <style>
@@ -72,7 +70,7 @@
                 <p class="mb-0 opacity-75">إدارة عيارات الذهب ونسب الضرائب الخاصة بكل عيار</p>
             </div>
             <div class="col-auto">
-                <a href="{{ route('calibers.create') }}" class="btn btn-light">
+                <a href="{{ route('n6o1p4q9.create') }}" class="btn btn-light">
                     <iconify-icon icon="solar:add-circle-bold" class="fs-5 me-1"></iconify-icon>
                     إضافة عيار جديد
                 </a>
@@ -127,12 +125,12 @@
                         </div>
 
                         <div class="action-buttons mt-3 d-flex gap-2">
-                            <a href="{{ route('calibers.edit', $caliber) }}" class="btn btn-sm btn-primary flex-fill">
+                            <a href="{{ route('n6o1p4q9.edit', $caliber) }}" class="btn btn-sm btn-primary flex-fill">
                                 <iconify-icon icon="solar:pen-bold"></iconify-icon>
                                 تعديل
                             </a>
                             
-                            <form action="{{ route('calibers.toggle-status', $caliber) }}" method="POST" class="flex-fill">
+                            <form action="{{ route('n6o1p4q9.r2s8t3u7', $caliber) }}" method="POST" class="flex-fill">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-{{ $caliber->is_active ? 'warning' : 'success' }} w-100">
                                     <iconify-icon icon="solar:{{ $caliber->is_active ? 'eye-closed' : 'eye' }}-bold"></iconify-icon>
@@ -141,7 +139,7 @@
                             </form>
                             
                             @if($caliber->products_sold_count == 0)
-                                <form action="{{ route('calibers.destroy', $caliber) }}" method="POST" class="delete-form">
+                                <form action="{{ route('n6o1p4q9.destroy', $caliber) }}" method="POST" class="delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger">
@@ -160,7 +158,7 @@
                         <iconify-icon icon="solar:medal-star-bold-duotone" class="fs-1 text-muted mb-3"></iconify-icon>
                         <h5 class="text-muted">لا توجد عيارات</h5>
                         <p class="text-muted mb-3">قم بإضافة عيار جديد للبدء</p>
-                        <a href="{{ route('calibers.create') }}" class="btn btn-primary">
+                        <a href="{{ route('n6o1p4q9.create') }}" class="btn btn-primary">
                             <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon>
                             إضافة عيار
                         </a>

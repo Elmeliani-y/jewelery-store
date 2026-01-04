@@ -13,7 +13,7 @@
 
     @include('reports.partials.toolbar', [
         'title' => 'تقرير مفصل',
-        'backUrl' => route('reports.index'),
+        'backUrl' => route('t3u8v1w4.b1c5d8e3'),
         'exportRoute' => 'reports.detailed',
         'exportQuery' => request()->query(),
         'filters' => $filters ?? []

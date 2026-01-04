@@ -14,7 +14,7 @@
                     $logoFullPath = $logoWebPath ? public_path($logoWebPath) : null;
                     $showCustomLogo = $logoFullPath && file_exists($logoFullPath);
                 @endphp
-                <a href="{{ $user->isBranch() ? route('branch.daily-sales') : route('dashboard') }}" class="logo">
+                <a href="{{ $user->isBranch() ? route('r8s3t7u1.v4w9x2y5') : route('c5d9f2h7') }}" class="logo">
                     @if($showCustomLogo)
                         <img src="{{ asset($logoWebPath) }}" alt="Logo" style="height:64px; max-width:90%; border-radius:10px; display:block; margin:0 auto 8px;">
                     @else
@@ -40,13 +40,16 @@
                         <div class="collapse show" id="sidebarManagement">
                             <ul class="nav-second-level">
                                 <li>
-                                    <a href="{{ route('settings.devices') }}" class="tp-link">إدارة الأجهزة</a>
+                                    <a href="{{ route('h4i8j3k7.l2m6n9o4') }}" class="tp-link">إدارة الأجهزة</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('users.index') }}" class="tp-link">المستخدمين</a>
+                                    <a href="{{ route('q8r2s6t0') }}" class="tp-link">عناوين IP المحظورة</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('settings.index') }}" class="tp-link">إعدادات النظام</a>
+                                    <a href="{{ route('d7e1f5g9.index') }}" class="tp-link">المستخدمين</a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('h4i8j3k7') }}" class="tp-link">إعدادات النظام</a>
                                 </li>
                             </ul>
                         </div>
@@ -54,25 +57,25 @@
                 @elseif($user->isBranch())
                     <li class="menu-title mt-2">فرع</li>
                     <li>
-                        <a href="{{ route('branch.daily-sales') }}" class="tp-link">
+                        <a href="{{ route('r8s3t7u1.v4w9x2y5') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-calendar-today"></i></span>
                             <span> المبيعات اليومية </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('sales.create') }}" class="tp-link">
+                        <a href="{{ route('t6u1v5w8.create') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
                             <span> تسجيل مبيعة جديدة </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('branch.daily-expenses') }}" class="tp-link">
+                        <a href="{{ route('r8s3t7u1.p4q9r5s2') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-calendar-month"></i></span>
                             <span> المصروفات اليومية </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('expenses.create') }}" class="tp-link">
+                        <a href="{{ route('l7m2n6o1.create') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
                             <span> تسجيل مصروف جديد </span>
                         </a>
@@ -80,49 +83,55 @@
                 @elseif($user->isAccountant())
                     <li class="menu-title mt-2">محاسب</li>
                     <li>
-                        <a href="{{ route('dashboard') }}" class="tp-link">
+                        <a href="{{ route('c5d9f2h7') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-home-outline"></i></span>
                             <span> الرئيسية </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('sales.index') }}" class="tp-link">
+                        <a href="{{ route('t6u1v5w8.index') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-shopping-outline"></i></span>
                             <span> قائمة المبيعات </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('expenses.index') }}" class="tp-link">
+                        <a href="{{ route('l7m2n6o1.index') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-wallet-outline"></i></span>
                             <span> قائمة المصروفات </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('branches.index') }}" class="tp-link">
+                        <a href="{{ route('h1i5j9k3') }}" class="tp-link">
+                            <span class="nav-icon"><i class="mdi mdi-backup-restore"></i></span>
+                            <span> قائمة المرتجعات </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('x9y4z1a6.index') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-store"></i></span>
                             <span> الفروع </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('employees.index') }}" class="tp-link">
+                        <a href="{{ route('f3g8h1i4.index') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-account-group"></i></span>
                             <span> الموظفين </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('categories.index') }}" class="tp-link">
+                        <a href="{{ route('v5w9x4y1.index') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-tag-multiple"></i></span>
                             <span> الأصناف </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('calibers.index') }}" class="tp-link">
+                        <a href="{{ route('n6o1p4q9.index') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-scale-balance"></i></span>
                             <span> العيارات والضرائب </span>
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('settings.index') }}" class="tp-link">
+                        <a href="{{ route('h4i8j3k7') }}" class="tp-link">
                             <span class="nav-icon"><i class="mdi mdi-cog-outline"></i></span>
                             <span> إعدادات النظام </span>
                         </a>
@@ -136,16 +145,16 @@
                         <div class="collapse" id="sidebarReports">
                             <ul class="nav-second-level">
                                 <li>
-                                    <a href="{{ route('reports.all') }}" class="tp-link">تقرير الكل</a>
+                                    <a href="{{ route('t3u8v1w4.b1c5d8e3') }}" class="tp-link">تقرير الكل</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('reports.kasr') }}" class="tp-link">تقرير صافي الربح</a>
+                                    <a href="{{ route('t3u8v1w4.t6u2v8w5') }}" class="tp-link">تقرير صافي الربح</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('reports.speed') }}" class="tp-link">تقرير السرعة</a>
+                                    <a href="{{ route('t3u8v1w4.f4g9h2i7') }}" class="tp-link">تقرير السرعة</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('reports.accounts') }}" class="tp-link">تقرير الحسابات</a>
+                                    <a href="{{ route('t3u8v1w4.a3b7c1d5') }}" class="tp-link">تقرير الحسابات</a>
                                 </li>
                             </ul>
                         </div>
@@ -158,17 +167,17 @@
                             </a>
                             <div class="collapse" id="sidebarMo9arant">
                                 <ul class="nav-second-level">
-                                    @if (Route::has('reports.comparative'))
+                                    @if (Route::has('t3u8v1w4.l3m8n2o6'))
                                         <li>
-                                            <a href="{{ route('reports.comparative') }}" class="tp-link">تقرير مقارن</a>
+                                            <a href="{{ route('t3u8v1w4.l3m8n2o6') }}" class="tp-link">تقرير مقارن</a>
                                         </li>
                                     @endif
-                                    @if (Route::has('reports.period_comparison'))
+                                    @if (Route::has('t3u8v1w4.p4q9r1s7'))
                                         <li>
-                                            <a href="{{ route('reports.period_comparison') }}" class="tp-link">تقرير مقارن حسب فترة</a>
+                                            <a href="{{ route('t3u8v1w4.p4q9r1s7') }}" class="tp-link">تقرير مقارن حسب فترة</a>
                                         </li>
                                     @endif
-                                    @if (!Route::has('reports.comparative') && !Route::has('reports.period_comparison'))
+                                    @if (!Route::has('t3u8v1w4.l3m8n2o6') && !Route::has('t3u8v1w4.p4q9r1s7'))
                                         <li>
                                             <span class="tp-link text-muted">لا توجد تقارير متاحة</span>
                                         </li>

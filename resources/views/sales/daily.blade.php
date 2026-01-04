@@ -64,7 +64,7 @@
                     </h4>
                 </div>
                 <div class="text-end">
-                    <a href="{{ route('sales.create') }}" class="btn btn-primary">
+                    <a href="{{ route('t6u1v5w8.create') }}" class="btn btn-primary">
                         <iconify-icon icon="solar:add-circle-bold"></iconify-icon>
                         تسجيل مبيعة جديدة
                     </a>
@@ -204,7 +204,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="GET" action="{{ route('branch.daily-sales') }}" class="row g-3 align-items-end arabic-text">
+                    <form method="GET" action="{{ route('r8s3t7u1.v4w9x2y5') }}" class="row g-3 align-items-end arabic-text">
                         <div class="col-md-4">
                             <label for="employee_id" class="form-label">تصفية حسب الموظف</label>
                             <select name="employee_id" id="employee_id" class="form-select">
@@ -302,11 +302,11 @@
                                             <td>
                                                 <div class="d-flex gap-1">
                                                     @if(!auth()->user()->isBranch())
-                                                    <a href="{{ route('sales.edit', $sale) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
+                                                    <a href="{{ route('t6u1v5w8.edit', $sale) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
                                                         <iconify-icon icon="solar:pen-bold"></iconify-icon>
                                                     </a>
                                                     @endif
-                                                    <a href="{{ route('sales.show', $sale) }}" class="btn btn-sm btn-info edit-btn" title="عرض">
+                                                    <a href="{{ route('t6u1v5w8.show', $sale) }}" class="btn btn-sm btn-info edit-btn" title="عرض">
                                                         <iconify-icon icon="solar:eye-bold"></iconify-icon>
                                                     </a>
                                                 </div>

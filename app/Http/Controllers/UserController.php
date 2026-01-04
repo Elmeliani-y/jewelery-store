@@ -63,7 +63,7 @@ class UserController extends Controller
             $validated['password'] = bcrypt($validated['password']);
             User::create($validated);
 
-            return redirect()->route('users.index')
+            return redirect()->route('d7e1f5g9.index')
                 ->with('success', 'تم إضافة المستخدم بنجاح');
 
         } catch (\Exception $e) {
@@ -88,7 +88,6 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $this->enforceDeviceToken(request());
         $branches = Branch::where('is_active', true)->get();
 
         return view('users.edit', compact('user', 'branches'));
@@ -99,7 +98,6 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $this->enforceDeviceToken($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,'.$user->id,
@@ -117,7 +115,7 @@ class UserController extends Controller
 
             $user->update($validated);
 
-            return redirect()->route('users.show', $user)
+            return redirect()->route('d7e1f5g9.show', $user)
                 ->with('success', 'تم تحديث المستخدم بنجاح');
 
         } catch (\Exception $e) {
@@ -131,7 +129,6 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $this->enforceDeviceToken(request());
         try {
             // Prevent deleting current logged-in user
             if ($user->id === auth()->id()) {
@@ -143,7 +140,7 @@ class UserController extends Controller
 
             $user->delete();
 
-            return redirect()->route('users.index')
+            return redirect()->route('d7e1f5g9.index')
                 ->with('success', 'تم حذف المستخدم وجميع أجهزته بنجاح');
 
         } catch (\Exception $e) {

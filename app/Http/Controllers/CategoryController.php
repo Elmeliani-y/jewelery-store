@@ -75,7 +75,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->validateDeviceOrAbort();
-        $this->enforceDeviceToken($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
             'default_caliber_id' => 'required|exists:calibers,id',
@@ -98,16 +98,17 @@ class CategoryController extends Controller
             ]);
         }
 
-        return redirect()->route('categories.index')
+        return redirect()->route('v5w9x4y1.index')
                        ->with('success', 'تم إضافة الصنف بنجاح');
     }
 
     /**
      * Show the form for editing the specified category.
      */
-    public function edit(Category $category)
+    public function edit(Category $v5w9x4y1)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $category = $v5w9x4y1; // Alias for clarity
         $calibers = Caliber::active()->orderBy('name')->get();
         return view('categories.edit', compact('category', 'calibers'));
     }
@@ -115,9 +116,10 @@ class CategoryController extends Controller
     /**
      * Update the specified category.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Category $v5w9x4y1)
     {
-        $this->enforceDeviceToken($request);
+        $category = $v5w9x4y1; // Alias for clarity
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'default_caliber_id' => 'required|exists:calibers,id',
@@ -131,19 +133,20 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('categories.index')
+        return redirect()->route('v5w9x4y1.index')
                        ->with('success', 'تم تحديث الصنف بنجاح');
     }
 
     /**
      * Remove the specified category.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $v5w9x4y1)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $category = $v5w9x4y1; // Alias for clarity
         $category->delete();
 
-        return redirect()->route('categories.index')
+        return redirect()->route('v5w9x4y1.index')
                        ->with('success', 'تم حذف الصنف بنجاح');
     }
 }

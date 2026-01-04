@@ -102,7 +102,7 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-        $this->enforceDeviceToken($request);
+
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'expense_type_id' => 'required|exists:expense_types,id',
@@ -152,11 +152,11 @@ class ExpenseController extends Controller
 
             // Redirect branch users to daily expenses, others to expense list
             if ($user->isBranch()) {
-                return redirect()->route('branch.daily-expenses')
+                return redirect()->route('r8s3t7u1.p4q9r5s2')
                     ->with('success', 'تم تسجيل المصروف بنجاح');
             }
 
-            return redirect()->route('expenses.index')
+            return redirect()->route('l7m2n6o1.index')
                 ->with('success', 'تم تسجيل المصروف بنجاح');
 
         } catch (\Exception $e) {
@@ -175,9 +175,11 @@ class ExpenseController extends Controller
     /**
      * Display the specified expense.
      */
-    public function show(Expense $expense)
+    public function show(Expense $l7m2n6o1)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $expense = $l7m2n6o1; // Alias for clarity
+        
         // Check if branch user is trying to access another branch's expense
         $user = auth()->user();
         if ($user->isBranch() && $expense->branch_id != $user->branch_id) {
@@ -192,9 +194,10 @@ class ExpenseController extends Controller
     /**
      * Remove the specified expense.
      */
-    public function destroy(Expense $expense)
+    public function destroy(Expense $l7m2n6o1)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $expense = $l7m2n6o1; // Alias for clarity
         $user = auth()->user();
         // Block all deletes for branch accounts
         if ($user->isBranch()) {
@@ -203,7 +206,7 @@ class ExpenseController extends Controller
         try {
             $expense->delete();
 
-            return redirect()->route('expenses.index')
+            return redirect()->route('l7m2n6o1.index')
                 ->with('success', 'تم حذف المصروف بنجاح');
 
         } catch (\Exception $e) {
@@ -216,7 +219,7 @@ class ExpenseController extends Controller
      */
     public function dailyExpenses(Request $request)
     {
-        $this->enforceDeviceToken($request);
+
         $user = auth()->user();
 
         // Only branch users can access this page

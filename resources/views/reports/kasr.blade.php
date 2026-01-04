@@ -152,7 +152,7 @@
         <div class="col-12">
             <div class="page-title-box">
                 <div class="page-title-right no-print">
-                    <a href="{{ route('reports.all') }}" class="btn btn-secondary">
+                    <a href="{{ route('t3u8v1w4.b1c5d8e3') }}" class="btn btn-secondary">
                         <i class="mdi mdi-arrow-left me-1"></i> عودة
                     </a>
                     <button class="btn btn-success" onclick="window.print()">
@@ -167,7 +167,7 @@
     <!-- Input Form -->
     <div class="card mb-3 kasr-filters-form">
         <div class="card-body">
-            <form method="POST" action="{{ route('reports.kasr') }}" id="kasrForm">
+            <form method="POST" action="{{ route('t3u8v1w4.t6u2v8w5') }}" id="kasrForm">
                 @csrf
                                 <!-- Removed customInterestPopup and shake styles -->
                                 <!-- Removed customInterestPopup HTML -->

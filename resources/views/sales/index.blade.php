@@ -1,8 +1,5 @@
-@extends('layouts.vertical')
-
-@section('title')
-    المبيعات
-@endsection
+@extends('layouts.vertical', ['title' => 'قائمة المبيعات'])
+@section('title') قائمة المبيعات @endsection
 
 @section('css')
 <style>
@@ -42,7 +39,7 @@
                                 <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة اليومية
                             </a>
                         @else
-                            <a href="{{ route('sales.index') }}" class="btn btn-outline-primary">
+                            <a href="{{ route('t6u1v5w8.index') }}" class="btn btn-outline-primary">
                                 <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة
                             </a>
                         @endif
@@ -53,7 +50,7 @@
                             <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة اليومية
                         </a>
                     @else
-                        <a href="{{ route('sales.index') }}" class="btn btn-outline-primary">
+                        <a href="{{ route('t6u1v5w8.index') }}" class="btn btn-outline-primary">
                             <i class="mdi mdi-arrow-left"></i> رجوع إلى القائمة
                         </a>
                     @endif
@@ -66,7 +63,7 @@
                         إضافة مبيعة جديدة
                     </a>
                 @else
-                    <a href="{{ route('sales.create') }}" class="btn btn-light">
+                    <a href="{{ route('t6u1v5w8.create') }}" class="btn btn-light">
                         <i class="ri-add-line me-1"></i>
                         إضافة مبيعة جديدة
                     </a>
@@ -166,15 +163,15 @@
                                     </td>
                                     <td class="text-muted">{{ $sale->created_at->format('Y-m-d') }}</td>
                                     <td class="text-center sales-table-actions">
-                                        <a href="{{ route('sales.show', $sale) }}" class="btn btn-icon btn-sm bg-info-subtle" data-bs-toggle="tooltip" data-bs-original-title="عرض">
+                                        <a href="{{ route('t6u1v5w8.show', $sale) }}" class="btn btn-icon btn-sm bg-info-subtle" data-bs-toggle="tooltip" data-bs-original-title="عرض">
                                             <i class="mdi mdi-eye-outline text-info fs-16"></i>
                                         </a>
-                                        <a href="{{ route('sales.edit', $sale) }}" class="btn btn-icon btn-sm bg-warning-subtle" data-bs-toggle="tooltip" data-bs-original-title="تعديل">
+                                        <a href="{{ route('t6u1v5w8.edit', $sale) }}" class="btn btn-icon btn-sm bg-warning-subtle" data-bs-toggle="tooltip" data-bs-original-title="تعديل">
                                             <i class="mdi mdi-pencil-outline text-warning fs-16"></i>
                                         </a>
                                         @if(!auth()->user()->isBranch())
                                             <button type="button" class="btn btn-icon btn-sm bg-danger-subtle btn-delete-sale" 
-                                                    data-url="{{ route('sales.destroy', $sale) }}" 
+                                                    data-url="{{ route('t6u1v5w8.destroy', $sale) }}" 
                                                     data-invoice="{{ $sale->invoice_number }}"
                                                     data-bs-toggle="tooltip" data-bs-original-title="حذف">
                                                 <i class="mdi mdi-delete-outline text-danger fs-16"></i>
@@ -182,7 +179,7 @@
                                         @endif
                                         @if(!$sale->is_returned)
                                             @if(!auth()->user()->isBranch())
-                                                <button type="button" class="btn btn-icon btn-sm bg-secondary-subtle ms-1 btn-return-sale" data-sale-id="{{ $sale->id }}" data-url="{{ route('sales.return', $sale) }}" data-bs-toggle="tooltip" data-bs-original-title="تعيين كمرتجع">
+                                                <button type="button" class="btn btn-icon btn-sm bg-secondary-subtle ms-1 btn-return-sale" data-sale-id="{{ $sale->id }}" data-url="{{ route('t6u1v5w8.x2y7z3a9', $sale) }}" data-bs-toggle="tooltip" data-bs-original-title="تعيين كمرتجع">
                                                     <i class="mdi mdi-backup-restore text-secondary fs-16"></i>
                                                 </button>
                                             @endif
@@ -224,7 +221,7 @@
                         <h5 class="text-muted mt-3">لا توجد مبيعات</h5>
                         <p class="text-muted">قم بإضافة مبيعة جديدة للبدء</p>
                         @if(!request()->filled('invoice_number'))
-                        <a href="{{ route('sales.create') }}" class="btn btn-primary">
+                        <a href="{{ route('t6u1v5w8.create') }}" class="btn btn-primary">
                             <i class="mdi mdi-plus-circle-outline me-1"></i>
                             إضافة مبيعة
                         </a>

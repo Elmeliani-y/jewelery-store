@@ -4,14 +4,14 @@
 <div class="container-fluid">
     <div class="page-header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background:linear-gradient(135deg,#198754,#20c997);padding:1.25rem 1rem;border-radius:14px;color:#fff;">
         <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('employees.index') }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
+            <a href="{{ route('f3g8h1i4.index') }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
             <h5 class="mb-0"><iconify-icon icon="solar:user-bold-duotone" class="fs-4 me-1"></iconify-icon> الموظف: {{ $employee->name }}</h5>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('employees.edit',$employee) }}" class="btn btn-primary btn-sm"><iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon> تعديل</a>
-            <form action="{{ route('employees.toggle-status',$employee) }}" method="POST">@csrf <button class="btn btn-{{ $employee->is_active? 'warning':'success' }} btn-sm" type="submit"><iconify-icon icon="solar:{{ $employee->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>{{ $employee->is_active? 'تعطيل':'تفعيل' }}</button></form>
+            <a href="{{ route('f3g8h1i4.edit',$employee) }}" class="btn btn-primary btn-sm"><iconify-icon icon="solar:pen-bold" class="me-1"></iconify-icon> تعديل</a>
+            <form action="{{ route('f3g8h1i4.j9k5l2m7',$employee) }}" method="POST">@csrf <button class="btn btn-{{ $employee->is_active? 'warning':'success' }} btn-sm" type="submit"><iconify-icon icon="solar:{{ $employee->is_active? 'eye-closed':'eye' }}-bold" class="me-1"></iconify-icon>{{ $employee->is_active? 'تعطيل':'تفعيل' }}</button></form>
             @if(!$employee->sales()->exists())
-            <form action="{{ route('employees.destroy',$employee) }}" method="POST" class="delete-form">@csrf @method('DELETE') <button class="btn btn-danger btn-sm" type="submit"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon></button></form>
+            <form action="{{ route('f3g8h1i4.destroy',$employee) }}" method="POST" class="delete-form">@csrf @method('DELETE') <button class="btn btn-danger btn-sm" type="submit"><iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon></button></form>
             @endif
         </div>
     </div>

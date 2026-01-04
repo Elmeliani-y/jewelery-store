@@ -13,12 +13,12 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="m-0"><iconify-icon icon="solar:chart-square-bold-duotone" class="fs-4 me-1"></iconify-icon> واجهة التقارير</h4>
-        <a href="{{ route('dashboard') }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
+        <a href="{{ route('c5d9f2h7') }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
     </div>
 
     <div class="card filters-card mb-4">
         <div class="card-body">
-            <form id="reports-filter" class="row g-3" method="GET" action="{{ route('reports.index') }}">
+            <form id="reports-filter" class="row g-3" method="GET" action="{{ route('t3u8v1w4.b1c5d8e3') }}">
                 <div class="col-md-3">
                     <label class="form-label">الفرع</label>
                     <select name="branch_id" class="form-select">
@@ -74,7 +74,7 @@
                 </div>
                 <div class="col-md-3 d-flex align-items-end filter-actions gap-2">
                     <button class="btn btn-primary w-100" type="submit"><iconify-icon icon="solar:search-bold" class="me-1"></iconify-icon> تطبيق الفلاتر</button>
-                    <a class="btn btn-light" href="{{ route('reports.index') }}">تفريغ</a>
+                    <a class="btn btn-light" href="{{ route('t3u8v1w4.b1c5d8e3') }}">تفريغ</a>
                 </div>
             </form>
         </div>
@@ -90,10 +90,10 @@
                     </div>
                     <p class="text-muted small mt-2">ملخص مبيعات ومصروفات وصافي ربح</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.comprehensive', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.comprehensive', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.comprehensive', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.comprehensive', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
+                        <a class="btn btn-light btn-sm" href="{{ route('t3u8v1w4.j6k1l5m9', request()->query()) }}">عرض</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('t3u8v1w4.j6k1l5m9', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ route('t3u8v1w4.j6k1l5m9', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('t3u8v1w4.j6k1l5m9', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
                     </div>
                 </div>
@@ -109,10 +109,10 @@
                     </div>
                     <p class="text-muted small mt-2">تفصيل المبيعات حسب فرع / موظف / صنف / عيار / تاريخ</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.detailed', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.detailed', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.detailed', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.detailed', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
+                        <a class="btn btn-light btn-sm" href="{{ route('t3u8v1w4.n3o7p2q8', request()->query()) }}">عرض</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('t3u8v1w4.n3o7p2q8', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ route('t3u8v1w4.n3o7p2q8', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('t3u8v1w4.n3o7p2q8', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
                     </div>
                 </div>
@@ -128,10 +128,10 @@
                     </div>
                     <p class="text-muted small mt-2">مبيعات حسب العيار (يشمل 24)</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.calibers', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.calibers', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.calibers', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.calibers', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
+                        <a class="btn btn-light btn-sm" href="{{ route('t3u8v1w4.r5s9t4u1', request()->query()) }}"عرض</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('t3u8v1w4.r5s9t4u1', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ route('t3u8v1w4.r5s9t4u1', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('t3u8v1w4.r5s9t4u1', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
                     </div>
                 </div>
@@ -147,10 +147,10 @@
                     </div>
                     <p class="text-muted small mt-2">مبيعات حسب نوع الصنف</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.categories', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.categories', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.categories', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.categories', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
+                        <a class="btn btn-light btn-sm" href="{{ route('t3u8v1w4.v8w3x7y2', request()->query()) }}"عرض</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('t3u8v1w4.v8w3x7y2', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ route('t3u8v1w4.v8w3x7y2', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('t3u8v1w4.v8w3x7y2', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
                     </div>
                 </div>
@@ -166,10 +166,10 @@
                     </div>
                     <p class="text-muted small mt-2">إحصائيات مبيعات ورواتب حسب الموظف</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.employees', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.employees', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.employees', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.employees', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
+                        <a class="btn btn-light btn-sm" href="{{ route('t3u8v1w4.z1a6b9c4', request()->query()) }}"عرض</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('t3u8v1w4.z1a6b9c4', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ route('t3u8v1w4.z1a6b9c4', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('t3u8v1w4.z1a6b9c4', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
                     </div>
                 </div>
@@ -185,10 +185,10 @@
                     </div>
                     <p class="text-muted small mt-2">صافي بعد خصم المصروفات والرواتب</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-light btn-sm" href="{{ route('reports.net-profit', request()->query()) }}">عرض</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('reports.net-profit', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
-                        <a class="btn btn-outline-success btn-sm" href="{{ route('reports.net-profit', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
-                        <a class="btn btn-outline-dark btn-sm" href="{{ route('reports.net-profit', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
+                        <a class="btn btn-light btn-sm" href="{{ route('t3u8v1w4.d5e2f8g3', request()->query()) }}"عرض</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ route('t3u8v1w4.d5e2f8g3', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a>
+                        <a class="btn btn-outline-success btn-sm" href="{{ route('t3u8v1w4.d5e2f8g3', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a>
+                        <a class="btn btn-outline-dark btn-sm" href="{{ route('t3u8v1w4.d5e2f8g3', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a>
                         <button class="btn btn-outline-primary btn-sm" onclick="window.print()">طباعة</button>
                     </div>
                 </div>
@@ -204,7 +204,7 @@
                     </div>
                     <p class="text-muted small mt-2">مقارنة بالرسوم البيانية بين الفروع والموظفين والفئات</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-warning btn-sm text-white" href="{{ route('reports.comparative', request()->query()) }}">
+                        <a class="btn btn-warning btn-sm text-white" href="{{ route('t3u8v1w4.l3m8n2o6', request()->query()) }}">
                             <i class="mdi mdi-chart-line me-1"></i> عرض
                         </a>
                     </div>
@@ -221,7 +221,7 @@
                     </div>
                     <p class="text-muted small mt-2">تقرير مفصل للعيارات والأجور والرواتب حسب الفرع</p>
                     <div class="d-flex gap-2">
-                        <a class="btn btn-info btn-sm text-white" href="{{ route('reports.kasr') }}">
+                        <a class="btn btn-info btn-sm text-white" href="{{ route('t3u8v1w4.t6u2v8w5') }}">
                             <i class="mdi mdi-chart-box me-1"></i> عرض
                         </a>
                     </div>

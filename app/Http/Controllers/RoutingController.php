@@ -31,7 +31,7 @@ class RoutingController extends BaseController
                 // Accountants go to /
                 return view('welcome'); // or any default accountant view, or just return redirect('/') if you want loop
             }
-            return redirect()->route('dashboard');
+            return redirect()->route('c5d9f2h7');
         }
         $hasDevice = $request->cookie('device_token');
         $hasAdminSecret = $request->session()->get('admin_secret_used');

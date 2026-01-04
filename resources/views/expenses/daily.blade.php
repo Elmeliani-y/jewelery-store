@@ -61,7 +61,7 @@
                     </h4>
                 </div>
                 <div class="text-end">
-                    <a href="{{ route('expenses.create') }}" class="btn btn-danger">
+                    <a href="{{ route('l7m2n6o1.create') }}" class="btn btn-danger">
                         <iconify-icon icon="solar:add-circle-bold"></iconify-icon>
                         تسجيل مصروف جديد
                     </a>
@@ -81,7 +81,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">إجمالي المصروفات</h6>
-                            <h4 class="mb-0">{{ number_format($totalAmount, 2) }} <small>ريال</small></h4>
+                            <h4 class="mb-0">{{ number_format($totalExpenses, 2) }} <small>ريال</small></h4>
                         </div>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="GET" action="{{ route('branch.daily-expenses') }}" class="row g-3 align-items-end arabic-text">
+                    <form method="GET" action="{{ route('r8s3t7u1.p4q9r5s2') }}" class="row g-3 align-items-end arabic-text">
                         <div class="col-md-6">
                             <label for="expense_type_id" class="form-label">تصفية حسب نوع المصروف</label>
                             <select name="expense_type_id" id="expense_type_id" class="form-select">
@@ -174,11 +174,11 @@
                                             <td>
                                                 <div class="d-flex gap-1">
                                                     @if(!auth()->user() || !auth()->user()->isBranch())
-                                                        <a href="{{ route('expenses.edit', $expense) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
+                                                        <a href="{{ route('l7m2n6o1.edit', $expense) }}" class="btn btn-sm btn-primary edit-btn" title="تعديل">
                                                             <iconify-icon icon="solar:pen-bold"></iconify-icon>
                                                         </a>
                                                     @endif
-                                                    <a href="{{ route('expenses.show', $expense) }}" class="btn btn-sm btn-info edit-btn" title="عرض">
+                                                    <a href="{{ route('l7m2n6o1.show', $expense) }}" class="btn btn-sm btn-info edit-btn" title="عرض">
                                                         <iconify-icon icon="solar:eye-bold"></iconify-icon>
                                                     </a>
                                                 </div>

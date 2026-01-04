@@ -3,11 +3,11 @@
 @section('content')
 <div class="container-fluid">
     <div class="page-header mb-4 d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#198754,#20c997);padding:1.25rem 1rem;border-radius:14px;color:#fff;">
-        <a href="{{ route('employees.show',$employee) }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
+        <a href="{{ route('f3g8h1i4.show',$employee) }}" class="btn btn-light btn-sm"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
         <h5 class="mb-0"><iconify-icon icon="solar:pen-bold-duotone" class="fs-4 me-1"></iconify-icon> تعديل الموظف: {{ $employee->name }}</h5>
     </div>
 
-    <form action="{{ route('employees.update',$employee) }}" method="POST">@csrf @method('PUT')
+    <form action="{{ route('f3g8h1i4.update',$employee) }}" method="POST">@csrf @method('PUT')
         <div class="row">
             <div class="col-lg-8">
                 <div class="card form-card mb-4"><div class="card-body">
@@ -54,7 +54,7 @@
                 </div></div>
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-success btn-lg"><iconify-icon icon="solar:diskette-bold" class="me-1"></iconify-icon> حفظ التعديلات</button>
-                    <a href="{{ route('employees.show',$employee) }}" class="btn btn-light btn-lg"><iconify-icon icon="solar:close-circle-bold" class="me-1"></iconify-icon> إلغاء</a>
+                    <a href="{{ route('f3g8h1i4.show',$employee) }}" class="btn btn-light btn-lg"><iconify-icon icon="solar:close-circle-bold" class="me-1"></iconify-icon> إلغاء</a>
                 </div>
             </div>
         </div>

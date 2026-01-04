@@ -55,7 +55,7 @@
         <div class="col-12">
             <div class="page-title-box">
                 <div class="page-title-right no-print">
-                    <a href="{{ route('reports.all') }}" class="btn btn-secondary">
+                    <a href="{{ route('t3u8v1w4.b1c5d8e3') }}" class="btn btn-secondary">
                         <i class="mdi mdi-arrow-left me-1"></i> عودة للتقارير
                     </a>
                     <button class="btn btn-info" onclick="exportToCSV()">
@@ -74,7 +74,7 @@
     </div>
 
     <!-- Filters -->
-    <form method="GET" action="{{ route('reports.comparative') }}" class="card mb-4 no-print">
+    <form method="GET" action="{{ route('t3u8v1w4.l3m8n2o6') }}" class="card mb-4 no-print">
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">

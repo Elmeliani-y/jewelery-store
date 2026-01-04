@@ -17,7 +17,7 @@
             <button class="btn btn-sm btn-secondary ms-2" onclick="navigator.clipboard.writeText(document.getElementById('device-link').href)">نسخ الرابط</button>
         </div>
     @endif
-    <form method="POST" action="{{ route('settings.devices.generateUserLink') }}" class="mb-3">
+    <form method="POST" action="{{ route('q3r8s1t6.u4v9w2x7.y5z1a8b3') }}" class="mb-3">
         @csrf
         <div class="input-group">
             <input type="text" name="name" class="form-control" placeholder="اسم الجهاز" required>
@@ -58,7 +58,7 @@
                                     هل أنت متأكد أنك تريد حذف هذا الجهاز؟ لا يمكن التراجع عن هذا الإجراء.
                                 </div>
                                 <div class="modal-footer">
-                                    <form method="POST" action="{{ route('settings.devices.delete', $device->id) }}">
+                                    <form method="POST" action="{{ route('h4i8j3k7.l2m6n9o4.delete', $device->id) }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>

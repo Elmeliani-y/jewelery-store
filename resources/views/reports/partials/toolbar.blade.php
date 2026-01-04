@@ -9,7 +9,7 @@
     @endif
   </div>
   <div class="d-flex align-items-center">
-    <a href="{{ $backUrl ?? route('reports.index') }}" class="btn btn-light btn-sm" title="الرجوع"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
+    <a href="{{ $backUrl ?? route('t3u8v1w4.b1c5d8e3') }}" class="btn btn-light btn-sm" title="الرجوع"><iconify-icon icon="solar:arrow-right-bold"></iconify-icon></a>
     <div class="btn-group ms-2">
       <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
         <iconify-icon icon="solar:export-bold" class="me-1"></iconify-icon> تصدير

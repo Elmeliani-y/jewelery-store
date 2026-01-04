@@ -1,0 +1,278 @@
+<?php $__env->startSection('css'); ?>
+    <?php echo $__env->make('components.form-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">إعدادات النظام</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="<?php echo e(route('c5d9f2h7')); ?>">الرئيسية</a></li>
+                        <li class="breadcrumb-item active">إعدادات النظام</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php if(session('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?php echo e(session('success')); ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+    <?php if($errors->any()): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            حدثت أخطاء في الإدخال. يرجى المراجعة.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <form action="<?php echo e(route('h4i8j3k7.update')); ?>" method="POST" class="arabic-text" enctype="multipart/form-data">
+        <?php echo csrf_field(); ?>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="form-section">
+                    <h5 class="section-header">
+                        <iconify-icon icon="solar:settings-bold-duotone"></iconify-icon>
+                        معلومات المتجر
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="company_name">اسم المتجر <span class="text-danger">*</span></label>
+                            <input type="text" id="company_name" name="company_name" class="form-control <?php $__errorArgs = ['company_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('company_name', $settings['company_name'] ?? '')); ?>" required>
+                            <?php $__errorArgs = ['company_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="currency_symbol">رمز العملة <span class="text-danger">*</span></label>
+                            <input type="text" id="currency_symbol" name="currency_symbol" class="form-control <?php $__errorArgs = ['currency_symbol'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('currency_symbol', $settings['currency_symbol'] ?? 'ريال')); ?>" required>
+                            <?php $__errorArgs = ['currency_symbol'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label" for="address">العنوان</label>
+                            <input type="text" id="address" name="address" class="form-control <?php $__errorArgs = ['address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('address', $settings['address'] ?? '')); ?>" placeholder="مثال: شارع الملك، الرياض">
+                            <?php $__errorArgs = ['address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label" for="phones">أرقام الهواتف</label>
+                            <input type="text" id="phones" name="phones" class="form-control <?php $__errorArgs = ['phones'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('phones', $settings['phones'] ?? '')); ?>" placeholder="مثال: 0500000000, 0110000000">
+                            <?php $__errorArgs = ['phones'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="tax_number">الرقم الضريبي</label>
+                            <input type="text" id="tax_number" name="tax_number" class="form-control <?php $__errorArgs = ['tax_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('tax_number', $settings['tax_number'] ?? '')); ?>">
+                            <?php $__errorArgs = ['tax_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="commercial_register">السجل التجاري</label>
+                            <input type="text" id="commercial_register" name="commercial_register" class="form-control <?php $__errorArgs = ['commercial_register'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('commercial_register', $settings['commercial_register'] ?? '')); ?>">
+                            <?php $__errorArgs = ['commercial_register'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label" for="logo">اللوجو (شعار المتجر)</label>
+                            <input type="file" id="logo" name="logo" accept="image/*" class="form-control <?php $__errorArgs = ['logo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
+                            <?php $__errorArgs = ['logo'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            <div class="mt-2 d-flex align-items-center gap-3">
+                                <?php if(!empty($settings['logo_path']) && file_exists(public_path($settings['logo_path']))): ?>
+                                    <img src="<?php echo e(asset($settings['logo_path'])); ?>" alt="شعار المتجر" style="height:48px; border-radius:8px; border:1px solid var(--ct-border-color)">
+                                <?php endif; ?>
+                                <img id="logoPreview" src="#" alt="معاينة الشعار" style="height:48px; border-radius:8px; border:1px solid var(--ct-border-color); display:none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h5 class="section-header">
+                        <iconify-icon icon="solar:shield-warning-bold-duotone"></iconify-icon>
+                        السلوك والواجهات
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label" for="min_invoice_gram_avg">الحد الأدنى لمتوسط الجرام للفاتورة <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="min_invoice_gram_avg" name="min_invoice_gram_avg" class="form-control <?php $__errorArgs = ['min_invoice_gram_avg'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" value="<?php echo e(old('min_invoice_gram_avg', $settings['min_invoice_gram_avg'] ?? config('sales.min_invoice_gram_avg'))); ?>" required>
+                            <small class="text-muted">سيتم تنبيه الموظف إذا كان متوسط الجرام أقل من هذا الرقم عند حفظ الفاتورة.</small>
+                            <?php $__errorArgs = ['min_invoice_gram_avg'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enable_delete_modal" name="enable_delete_modal" value="1" <?php echo e(old('enable_delete_modal', ($settings['enable_delete_modal'] ?? true) ? '1' : '') ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="enable_delete_modal">استخدام نافذة تأكيد مخصصة عند الحذف</label>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="show_tax_in_totals" name="show_tax_in_totals" value="1" <?php echo e(old('show_tax_in_totals', ($settings['show_tax_in_totals'] ?? true) ? '1' : '') ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="show_tax_in_totals">عرض الضريبة ضمن الإجماليات</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="form-section">
+                    <h5 class="section-header">
+                        <iconify-icon icon="solar:settings-bold-duotone"></iconify-icon>
+                        الإجراءات
+                    </h5>
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <iconify-icon icon="solar:diskette-bold"></iconify-icon>
+                            حفظ الإعدادات
+                        </button>
+                        <a href="<?php echo e(route('c5d9f2h7')); ?>" class="btn btn-light btn-lg">
+                            <iconify-icon icon="solar:arrow-right-bold"></iconify-icon>
+                            إلغاء
+                        </a>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <iconify-icon icon="solar:info-circle-bold" class="fs-5 me-2"></iconify-icon>
+                    <strong>ملاحظة:</strong> يتم حفظ الإعدادات في ملف آمن داخل النظام.
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('script'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logoInput = document.getElementById('logo');
+    const preview = document.getElementById('logoPreview');
+    if (logoInput) {
+        logoInput.addEventListener('change', function() {
+            const file = this.files?.[0];
+            if (!file) { preview.style.display = 'none'; return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+});
+</script>
+</div>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.vertical', ['title' => 'إعدادات النظام'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Dusty_Laravel_v1.0.0\Dusty\resources\views/settings/index.blade.php ENDPATH**/ ?>

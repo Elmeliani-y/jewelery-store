@@ -10,7 +10,7 @@
             </div>
         </div>
     </div>
-    <form method="GET" action="{{ route('reports.accounts') }}" class="mb-4">
+    <form method="GET" action="{{ route('t3u8v1w4.a3b7c1d5') }}" class="mb-4">
         <div class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label for="branch_id" class="form-label">الفرع</label>

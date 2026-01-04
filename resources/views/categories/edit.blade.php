@@ -34,7 +34,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ route('categories.update', $category) }}" method="POST">
+                    <form action="{{ route('v5w9x4y1.update', $category) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -71,7 +71,7 @@
                                 <iconify-icon icon="solar:check-circle-bold-duotone" class="me-1"></iconify-icon>
                                 حفظ التغييرات
                             </button>
-                            <a href="{{ route('categories.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('v5w9x4y1.index') }}" class="btn btn-secondary">
                                 <iconify-icon icon="solar:close-circle-bold-duotone" class="me-1"></iconify-icon>
                                 إلغاء
                             </a>

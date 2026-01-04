@@ -18,7 +18,7 @@ class RestrictBranchFromDashboard
         $user = $request->user();
 
         if ($user && method_exists($user, 'isBranch') && $user->isBranch()) {
-            return redirect()->route('sales.create')
+            return redirect()->route('t6u1v5w8.create')
                 ->with('warning', 'تم تحويلك إلى صفحة تسجيل المبيعة. حساب الفرع لا يمكنه فتح لوحة التحكم.');
         }
 

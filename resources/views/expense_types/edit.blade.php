@@ -15,7 +15,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ route('expense-types.update', $expenseType) }}" method="POST">
+                    <form action="{{ route('z8a3b6c2.update', $expenseType) }}" method="POST">
                         @csrf
                         @method('PUT')
 

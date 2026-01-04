@@ -86,7 +86,7 @@
             <p class="text-muted mb-0">عرض سريع للمقاييس الرئيسية</p>
         </div>
         <div>
-            <a href="{{ route('reports.all') }}" class="btn btn-light me-2">
+            <a href="{{ route('t3u8v1w4.b1c5d8e3') }}" class="btn btn-light me-2">
                 <i class="mdi mdi-arrow-right"></i> التقرير الشامل
             </a>
             <div class="btn-group me-2">
@@ -94,9 +94,9 @@
                     <i class="mdi mdi-download"></i> تصدير
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{{ route('reports.speed', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a></li>
-                    <li><a class="dropdown-item" href="{{ route('reports.speed', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a></li>
-                    <li><a class="dropdown-item" href="{{ route('reports.speed', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a></li>
+                    <li><a class="dropdown-item" href="{{ route('t3u8v1w4.f4g9h2i7', array_merge(request()->query(), ['format'=>'pdf'])) }}">PDF</a></li>
+                    <li><a class="dropdown-item" href="{{ route('t3u8v1w4.f4g9h2i7', array_merge(request()->query(), ['format'=>'excel'])) }}">Excel</a></li>
+                    <li><a class="dropdown-item" href="{{ route('t3u8v1w4.f4g9h2i7', array_merge(request()->query(), ['format'=>'csv'])) }}">CSV</a></li>
                 </ul>
             </div>
             <button onclick="window.print()" class="btn btn-primary">
@@ -108,7 +108,7 @@
     <!-- Filters -->
     <div class="card mb-4 no-print">
         <div class="card-body">
-            <form method="GET" action="{{ route('reports.speed') }}" class="row g-3">
+            <form method="GET" action="{{ route('t3u8v1w4.f4g9h2i7') }}" class="row g-3">
                 <div class="col-md-4">
                     <label for="date" class="form-label">التاريخ</label>
                     <input type="date" name="date" id="date" value="{{ $date }}" class="form-control" onchange="this.form.submit()">
@@ -123,7 +123,7 @@
                     </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <a href="{{ route('reports.speed') }}" class="btn btn-secondary">
+                    <a href="{{ route('t3u8v1w4.f4g9h2i7') }}" class="btn btn-secondary">
                         <i class="mdi mdi-refresh"></i> إعادة تعيين
                     </a>
                 </div>

@@ -16,7 +16,7 @@ class PasswordCodeController extends Controller
     public function requestCode(Request $request)
     {
         if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
-            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+            return redirect(url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8'))->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
         }
         $request->validate(['email' => 'required|email|exists:users,email']);
         $code = random_int(100000, 999999);
@@ -50,7 +50,7 @@ class PasswordCodeController extends Controller
     public function showCodeForm(Request $request)
     {
         if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
-            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+            return redirect(url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8'))->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
         }
         return view('auth.passwords.email');
     }
@@ -59,7 +59,7 @@ class PasswordCodeController extends Controller
     public function verifyCode(Request $request)
     {
         if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
-            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+            return redirect(url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8'))->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
         }
         $request->validate([
             'email' => 'required|email',
@@ -81,7 +81,7 @@ class PasswordCodeController extends Controller
     public function resetPassword(Request $request)
     {
         if (!$request->cookie('device_token') && !$request->session()->get('admin_secret_used')) {
-            return redirect()->route('login')->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
+            return redirect(url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8'))->with('admin_only_error', 'هذه الصفحة مخصصة فقط للمدير.');
         }
         $request->validate([
             'email' => 'required|email',
@@ -101,6 +101,6 @@ class PasswordCodeController extends Controller
         $user->save();
         // Optionally delete the code
         DB::table('password_reset_codes')->where('email', $request->email)->delete();
-        return redirect()->route('login')->with('status', 'Password reset successful!');
+        return redirect(url(env('APP_URL_PREFIX', 'xK9wR2vP8nL4tY6zA5bM3cH0jG7eF1dQ') . '/k2m7n3p8'))->with('status', 'Password reset successful!');
     }
 }

@@ -118,7 +118,7 @@
             <h4 class="fs-18 fw-semibold m-0">لوحة التحكم</h4>
         </div>
         @if(auth()->check() && !auth()->user()->isBranch())
-        <form method="GET" action="{{ route('dashboard') }}" class="dash-filter d-flex flex-wrap gap-3 align-items-end">
+        <form method="GET" action="{{ route('c5d9f2h7') }}" class="dash-filter d-flex flex-wrap gap-3 align-items-end">
             <div>
                 <label class="form-label mb-1">الفترة</label>
                 <select name="period" class="form-select form-select-sm" onchange="toggleCustomDates(this.value)">
@@ -149,7 +149,7 @@
             </div>
             <div class="d-flex gap-2 align-items-end ms-auto">
                 <button type="submit" class="btn btn-primary btn-sm"><iconify-icon icon="solar:filter-bold" class="me-1"></iconify-icon>تطبيق</button>
-                <a href="{{ route('dashboard.print', request()->query()) }}" class="btn btn-outline-primary btn-sm" target="_blank"><iconify-icon icon="solar:printer-bold" class="me-1"></iconify-icon>تقرير للطباعة</a>
+                <a href="{{ route('c5d9f2h7.p3q7r9s2', request()->query()) }}" class="btn btn-outline-primary btn-sm" target="_blank"><iconify-icon icon="solar:printer-bold" class="me-1"></iconify-icon>تقرير للطباعة</a>
             </div>
         </form>
         @endif

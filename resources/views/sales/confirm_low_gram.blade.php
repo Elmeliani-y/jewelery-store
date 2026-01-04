@@ -7,9 +7,9 @@
             <div class="alert alert-warning text-center p-4">
                 <h4 class="mb-3"><iconify-icon icon="solar:warning-triangle-bold" class="text-warning fs-2 me-2"></iconify-icon>تنبيه: متوسط الجرام أقل من الحد الأدنى</h4>
                 <p class="fs-5">متوسط الجرام في هذه الفاتورة هو <strong>{{ number_format($gramAvg, 2) }}</strong> جرام<br>
-                الحد الأدنى المسموح به هو <strong>{{ number_format($minGramAvg, 2) }}</strong> جرام (قابل للتعديل من <a href="{{ route('settings.index') }}" class="text-primary text-decoration-underline">إعدادات النظام</a>).</p>
+                الحد الأدنى المسموح به هو <strong>{{ number_format($minGramAvg, 2) }}</strong> جرام (قابل للتعديل من <a href="{{ route('h4i8j3k7') }}" class="text-primary text-decoration-underline">إعدادات النظام</a>).</p>
                 <p class="mb-4">هل ترغب في الاستمرار بحفظ الفاتورة بهذا المتوسط المنخفض؟</p>
-                <form method="POST" action="{{ route('sales.store') }}">
+                <form method="POST" action="{{ route('t6u1v5w8.store') }}">
                     @csrf
                     @foreach($validated as $key => $value)
                         @if(is_array($value))

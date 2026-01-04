@@ -1,5 +1,4 @@
-@extends('layouts.vertical')
-
+@extends('layouts.vertical', ['title' => 'تفاصيل المبيعة'])
 @section('title') تفاصيل المبيعة @endsection
 
 @section('css')
@@ -24,6 +23,13 @@
 @endsection
 
 @section('content')
+@php
+    // Decode products JSON string to array for use throughout the view
+    $productsArray = is_string($sale->products) ? json_decode($sale->products, true) : $sale->products;
+    if (!is_array($productsArray)) {
+        $productsArray = [];
+    }
+@endphp
 <div class="container-fluid">
     <div class="sale-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
         <div class="d-flex flex-column gap-1">
@@ -33,8 +39,8 @@
         <div class="sale-meta d-flex flex-wrap gap-2">
             <span class="badge bg-primary-subtle text-primary"><i class="mdi mdi-storefront-outline me-1"></i> {{ $sale->branch->name }}</span>
             <span class="badge bg-info-subtle text-info"><i class="mdi mdi-account-outline me-1"></i> {{ $sale->employee->name }}</span>
-            @if($sale->products && count($sale->products) > 0)
-            <span class="badge bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i> {{ count($sale->products) }} منتج</span>
+            @if(count($productsArray) > 0)
+            <span class="badge bg-success-subtle text-success"><i class="mdi mdi-package-variant-closed me-1"></i> {{ count($productsArray) }} منتج</span>
             @endif
             @if($sale->is_returned)
             <span class="badge bg-danger"><i class="mdi mdi-backup-restore me-1"></i> مرتجع</span>
@@ -73,10 +79,10 @@
                 </div>
             </div>
 
-            @if($sale->products && count($sale->products) > 0)
+            @if(count($productsArray) > 0)
             <div class="card mb-3">
                 <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
-                    <h6 class="mb-0"><i class="mdi mdi-package-variant-closed me-1"></i> المنتجات ({{ count($sale->products) }})</h6>
+                    <h6 class="mb-0"><i class="mdi mdi-package-variant-closed me-1"></i> المنتجات ({{ count($productsArray) }})</h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -93,15 +99,15 @@
                                 </tr>
                             </thead>
                             <tbody class="fs-13">
-                                @foreach($sale->products as $index => $product)
+                                @foreach($productsArray as $index => $product)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $product['category_name'] ?? '' }}</td>
                                     <td>{{ $product['caliber_name'] ?? '' }}</td>
-                                    <td>{{ number_format($product['weight'], 2) }}</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($product['amount'], 2) }}</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($product['tax_amount'], 0, ',', '.') }}</td>
-                                    <td class="text-mono" dir="ltr">{{ number_format($product['net_amount'], 0, ',', '.') }}</td>
+                                    <td>{{ number_format($product['weight'] ?? 0, 2) }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['amount'] ?? 0, 2) }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['tax_amount'] ?? 0, 0, ',', '.') }}</td>
+                                    <td class="text-mono" dir="ltr">{{ number_format($product['net_amount'] ?? 0, 0, ',', '.') }}</td>
                                 </tr>
                                 @endforeach
                                 <tr class="table-secondary fw-semibold">
@@ -265,9 +271,9 @@
                 </div>
                 <div class="card-body d-flex flex-wrap gap-2">
                     @if(!auth()->user()->isBranch())
-                        <a href="{{ route('sales.edit', $sale) }}" class="btn btn-warning btn-sm"><i class="mdi mdi-pencil-outline me-1"></i> تعديل</a>
+                        <a href="{{ route('t6u1v5w8.edit', $sale) }}" class="btn btn-warning btn-sm"><i class="mdi mdi-pencil-outline me-1"></i> تعديل</a>
                         <button type="button" class="btn btn-danger btn-sm btn-delete-sale" 
-                            data-url="{{ route('sales.destroy', $sale) }}"
+                            data-url="{{ route('t6u1v5w8.destroy', $sale) }}"
                             data-invoice="{{ $sale->invoice_number }}">
                             <i class="mdi mdi-delete-outline me-1"></i> حذف
                         </button>
@@ -275,7 +281,7 @@
                     @if(auth()->user()->isBranch())
                         <a href="{{ url('/branch/daily-sales') }}" class="btn btn-secondary btn-sm"><i class="mdi mdi-arrow-left me-1"></i> رجوع للقائمة اليومية</a>
                     @else
-                        <a href="{{ route('sales.index') }}" class="btn btn-secondary btn-sm"><i class="mdi mdi-arrow-left me-1"></i> رجوع للقائمة</a>
+                        <a href="{{ route('t6u1v5w8.index') }}" class="btn btn-secondary btn-sm"><i class="mdi mdi-arrow-left me-1"></i> رجوع للقائمة</a>
                     @endif
                 </div>
             </div>

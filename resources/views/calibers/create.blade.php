@@ -1,6 +1,6 @@
 @extends('layouts.vertical', ['title' => ' إضافة عيار'])
 
-@section('title')
+@section('title') إضافة عيار جديد @endsection
     @lang('translation.add-caliber')
 @endsection
 
@@ -83,7 +83,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="d-flex align-items-center">
-            <a href="{{ route('calibers.index') }}" class="btn btn-light btn-sm me-3">
+            <a href="{{ route('n6o1p4q9.index') }}" class="btn btn-light btn-sm me-3">
                 <iconify-icon icon="solar:arrow-right-bold"></iconify-icon>
             </a>
             <div>
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <form action="{{ route('calibers.store') }}" method="POST">
+    <form action="{{ route('n6o1p4q9.store') }}" method="POST">
         @csrf
         
         <div class="row">
@@ -200,7 +200,7 @@
                         <iconify-icon icon="solar:check-circle-bold" class="me-2"></iconify-icon>
                         حفظ العيار
                     </button>
-                    <a href="{{ route('calibers.index') }}" class="btn btn-light btn-lg">
+                    <a href="{{ route('n6o1p4q9.index') }}" class="btn btn-light btn-lg">
                         <iconify-icon icon="solar:close-circle-bold" class="me-2"></iconify-icon>
                         إلغاء
                     </a>

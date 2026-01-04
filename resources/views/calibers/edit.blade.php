@@ -88,7 +88,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="d-flex align-items-center">
-            <a href="{{ route('calibers.index') }}" class="btn btn-light btn-sm me-3">
+            <a href="{{ route('n6o1p4q9.index') }}" class="btn btn-light btn-sm me-3">
                 <iconify-icon icon="solar:arrow-right-bold"></iconify-icon>
             </a>
             <div>
@@ -107,7 +107,7 @@
         </div>
     @endif
 
-    <form action="{{ route('calibers.update', $caliber) }}" method="POST">
+    <form action="{{ route('n6o1p4q9.update', $caliber) }}" method="POST">
         @csrf
         @method('PUT')
         
@@ -213,7 +213,7 @@
                         <iconify-icon icon="solar:check-circle-bold" class="me-2"></iconify-icon>
                         حفظ التعديلات
                     </button>
-                    <a href="{{ route('calibers.index') }}" class="btn btn-light btn-lg">
+                    <a href="{{ route('n6o1p4q9.index') }}" class="btn btn-light btn-lg">
                         <iconify-icon icon="solar:close-circle-bold" class="me-2"></iconify-icon>
                         إلغاء
                     </a>

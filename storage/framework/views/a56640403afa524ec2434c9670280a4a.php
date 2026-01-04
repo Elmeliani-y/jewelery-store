@@ -1,0 +1,1047 @@
+<?php $__env->startSection('css'); ?>
+    <?php echo $__env->make('components.form-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+
+<div class="container-fluid">
+    <!-- Page Title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
+                <div class="flex-grow-1">
+                    <h4 class="fs-18 fw-semibold m-0 arabic-text">تسجيل مبيعة جديدة</h4>
+                </div>
+                <div class="text-end">
+                    <ol class="breadcrumb m-0 py-0 arabic-text">
+                        <li class="breadcrumb-item"><a href="<?php echo e(route('c5d9f2h7')); ?>" class="text-primary">الرئيسية</a></li>
+                        <?php if (! (auth()->user()->isBranch())): ?>
+                        <li class="breadcrumb-item"><a href="<?php echo e(route('t6u1v5w8.index')); ?>" class="text-primary">المبيعات</a></li>
+                        <?php endif; ?>
+                        <li class="breadcrumb-item active">تسجيل مبيعة جديدة</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Form -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title arabic-text">
+                        <iconify-icon icon="solar:add-circle-bold-duotone" class="me-2"></iconify-icon>
+                        بيانات المبيعة
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="sale-create-form" action="<?php echo e(route('t6u1v5w8.store')); ?>" method="POST" class="arabic-text" novalidate>
+                        <?php echo csrf_field(); ?>
+                        
+                        <!-- Branch and Employee Section -->
+                        <div class="form-section">
+                            <h5 class="section-header">
+                                <iconify-icon icon="solar:buildings-bold-duotone"></iconify-icon>
+                                معلومات الفرع والموظف
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="branch_id" class="form-label">الفرع <span class="text-danger">*</span></label>
+                                    <select class="form-select <?php $__errorArgs = ['branch_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                            id="branch_id" name="branch_id" required 
+                                            <?php echo e(isset($selectedBranchId) ? 'disabled' : ''); ?>>
+                                        <option value="" disabled selected hidden>اختر الفرع</option>
+                                        <?php $__currentLoopData = $branches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $branch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($branch->id); ?>" 
+                                                <?php echo e((old('branch_id', $selectedBranchId ?? null) == $branch->id) ? 'selected' : ''); ?>>
+                                                <?php echo e($branch->name); ?>
+
+                                            </option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </select>
+                                    <?php if(isset($selectedBranchId)): ?>
+                                        <input type="hidden" name="branch_id" value="<?php echo e($selectedBranchId); ?>">
+                                        <small class="text-muted">أنت مسجل كحساب لهذا الفرع</small>
+                                    <?php endif; ?>
+                                    <?php $__errorArgs = ['branch_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="employee_id" class="form-label">الموظف <span class="text-danger">*</span></label>
+                                    <select class="form-select <?php $__errorArgs = ['employee_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                            id="employee_id" name="employee_id" required>
+                                        <option value="">اختر الموظف</option>
+                                        <?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($employee->id); ?>" data-is-snap="<?php echo e($employee->is_snap ? 1 : 0); ?>" <?php echo e(old('employee_id') == $employee->id ? 'selected' : ''); ?>>
+                                                <?php echo e($employee->name); ?>
+
+                                            </option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </select>
+                                    <?php $__errorArgs = ['employee_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products Section -->
+                        <div class="form-section">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="section-header mb-0">
+                                    <iconify-icon icon="solar:gem-bold-duotone"></iconify-icon>
+                                    المنتجات
+                                    <!-- <span class="badge bg-warning text-dark ms-2">الحد الأدنى لسعر الجرام: <?php echo e((float)($settings['min_invoice_gram_avg'] ?? config('sales.min_invoice_gram_avg', 2.0))); ?> ريال</span> -->
+                                </h5>
+                                <button type="button" class="btn btn-success" id="add-product">
+                                    <iconify-icon icon="solar:add-square-bold-duotone" class="me-1"></iconify-icon>
+                                    إضافة منتج
+                                </button>
+                            </div>
+                            <div id="products-container">
+                                <!-- Product Item Template will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden Product Template -->
+                        <template id="product-item-template">
+                            <div class="product-item mb-4 p-3 border rounded-3 position-relative" style="border: 2px dashed var(--ct-border-color);">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0 fw-bold">
+                                        <iconify-icon icon="solar:box-bold-duotone" class="text-primary"></iconify-icon>
+                                        منتج <span class="product-number"></span>
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-danger remove-product">
+                                        <iconify-icon icon="solar:trash-bin-trash-bold"></iconify-icon>
+                                    </button>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">الصنف <span class="text-danger">*</span></label>
+                                        <select class="form-select product-category" name="products[INDEX][category_id]" required>
+                                            <option value="" disabled selected hidden>اختر الصنف</option>
+                                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($category->id); ?>" data-default-caliber="<?php echo e($category->default_caliber_id ?? ''); ?>"><?php echo e($category->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">العيار <span class="text-danger">*</span></label>
+                                        <select class="form-select product-caliber" name="products[INDEX][caliber_id]" required>
+                                            <option value="">اختر العيار</option>
+                                            <?php $__currentLoopData = $calibers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $caliber): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($caliber->id); ?>" data-tax-rate="<?php echo e($caliber->tax_rate); ?>">
+                                                    <?php echo e($caliber->name); ?> (<?php echo e($caliber->tax_rate); ?>%)
+                                                </option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">الوزن (جرام) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.001" class="form-control product-weight" 
+                                               name="products[INDEX][weight]" placeholder="0.000" inputmode="decimal" required>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">المبلغ (ريال) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" class="form-control product-amount" 
+                                               name="products[INDEX][amount]" placeholder="0.00" inputmode="decimal" required>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">سعر الجرام</label>
+                                        <input type="text" class="form-control product-gram-price" name="products[INDEX][gram_price]" placeholder="0.00" disabled>
+                                    </div>
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">عدد القطع <span class="text-danger">*</span></label>
+                                        <input type="number" min="1" step="1" class="form-control product-quantity" name="products[INDEX][quantity]" value="1" inputmode="numeric" required>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <div class="d-flex gap-3 flex-wrap">
+                                            <small class="text-muted">
+                                                <strong>الضريبة:</strong> 
+                                                <span class="product-tax">0.00</span> ريال
+                                            </small>
+                                            <small class="text-success">
+                                                <strong>الصافي:</strong> 
+                                                <span class="product-net">0.00</span> ريال
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Payment Section -->
+                        <div class="form-section">
+                            <h5 class="section-header">
+                                <iconify-icon icon="solar:wallet-money-bold-duotone"></iconify-icon>
+                                طريقة الدفع
+                            </h5>
+                            
+                            <div class="mb-4">
+                                <label class="form-label mb-3">اختر طريقة الدفع <span class="text-danger">*</span></label>
+                                <div class="row g-3" id="payment-method-options">
+                                    <div class="col-md-3 col-sm-6">
+                                        <label for="payment_cash" class="payment-card" id="cash-card">
+                                            <input class="form-check-input d-none" type="radio" name="payment_method" 
+                                                   id="payment_cash" value="cash" <?php echo e(old('payment_method') == 'cash' ? 'checked' : ''); ?>>
+                                            <iconify-icon icon="solar:money-bag-bold-duotone" class="payment-icon text-success"></iconify-icon>
+                                            <div class="payment-content">
+                                                <div class="payment-title">نقدي</div>
+                                                <div class="payment-desc">دفع كاش</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <label for="payment_network" class="payment-card" id="network-card">
+                                            <input class="form-check-input d-none" type="radio" name="payment_method" 
+                                                   id="payment_network" value="network" <?php echo e(old('payment_method') == 'network' ? 'checked' : ''); ?>>
+                                            <iconify-icon icon="solar:card-bold-duotone" class="payment-icon text-info"></iconify-icon>
+                                            <div class="payment-content">
+                                                <div class="payment-title">شبكة</div>
+                                                <div class="payment-desc">فيزا أو ماستركارد</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <label for="payment_mixed" class="payment-card" id="mixed-card">
+                                            <input class="form-check-input d-none" type="radio" name="payment_method" 
+                                                   id="payment_mixed" value="mixed" <?php echo e(old('payment_method') == 'mixed' ? 'checked' : ''); ?>>
+                                            <iconify-icon icon="solar:wallet-2-bold-duotone" class="payment-icon text-warning"></iconify-icon>
+                                            <div class="payment-content">
+                                                <div class="payment-title">مشترك</div>
+                                                <div class="payment-desc">نقدي + شبكة</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6" id="transfer-method-wrapper" style="display:none;">
+                                        <label for="payment_transfer" class="payment-card" id="transfer-card">
+                                            <input class="form-check-input d-none" type="radio" name="payment_method" 
+                                                   id="payment_transfer" value="transfer" <?php echo e(old('payment_method') == 'transfer' ? 'checked' : ''); ?>>
+                                            <iconify-icon icon="solar:bank-bold-duotone" class="payment-icon text-primary"></iconify-icon>
+                                            <div class="payment-content">
+                                                <div class="payment-title">تحويل</div>
+                                                <div class="payment-desc">دفع عبر تحويل (Snap)</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <?php $__errorArgs = ['payment_method'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="text-danger mt-2"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <!-- Payment Details -->
+                            <div id="payment_details">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3" id="cash_amount_field" style="display: none;">
+                                        <label for="cash_amount" class="form-label">المبلغ النقدي</label>
+                                        <input type="number" step="0.01" class="form-control <?php $__errorArgs = ['cash_amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                               id="cash_amount" name="cash_amount" value="<?php echo e(old('cash_amount')); ?>" 
+                                               placeholder="0.00" inputmode="decimal">
+                                        <?php $__errorArgs = ['cash_amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3" id="network_amount_field" style="display: none;">
+                                        <label for="network_amount" class="form-label">مبلغ الشبكة</label>
+                                        <input type="number" step="0.01" class="form-control <?php $__errorArgs = ['network_amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                               id="network_amount" name="network_amount" value="<?php echo e(old('network_amount')); ?>" 
+                                               placeholder="0.00" inputmode="decimal">
+                                        <?php $__errorArgs = ['network_amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3" id="transfer_amount_field" style="display: none;">
+                                        <label for="transfer_amount" class="form-label">مبلغ التحويل</label>
+                                        <input type="number" step="0.01" min="0" class="form-control <?php $__errorArgs = ['transfer_amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="transfer_amount" id="transfer_amount" placeholder="أدخل مبلغ التحويل" value="<?php echo e(old('transfer_amount')); ?>">
+                                        <?php $__errorArgs = ['transfer_amount'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                            <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tax Calculation Display -->
+                        <div class="form-section">
+                            <h5 class="section-header">
+                                <iconify-icon icon="solar:calculator-bold-duotone"></iconify-icon>
+                                الإجمالي الكلي
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="calc-card info">
+                                        <iconify-icon icon="solar:box-bold-duotone" class="calc-icon text-primary"></iconify-icon>
+                                        <div class="calc-label text-primary">الوزن الكلي</div>
+                                        <h3 class="calc-value text-primary" id="total_weight_display">0.000 جم</h3>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="calc-card warning">
+                                        <iconify-icon icon="solar:wallet-bold-duotone" class="calc-icon text-warning"></iconify-icon>
+                                        <div class="calc-label text-warning">الإجمالي</div>
+                                        <h3 class="calc-value text-warning" id="total_amount_display">0.00 ريال</h3>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="calc-card info">
+                                        <iconify-icon icon="solar:bill-list-bold-duotone" class="calc-icon text-info"></iconify-icon>
+                                        <div class="calc-label text-info">الضريبة</div>
+                                        <h3 class="calc-value text-info" id="tax_amount_display">0.00 ريال</h3>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="calc-card success">
+                                        <iconify-icon icon="solar:wallet-money-bold-duotone" class="calc-icon text-success"></iconify-icon>
+                                        <div class="calc-label text-success">الصافي</div>
+                                        <h3 class="calc-value text-success" id="net_amount_display">0.00 ريال</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden input to store total amount for payment -->
+                        <input type="hidden" id="final_total_amount" name="total_amount" value="0">
+                        <input type="hidden" id="final_total_weight" name="weight" value="0">
+
+                        <!-- Customer Status Section -->
+                        <div class="form-section">
+                            <h5 class="section-header">
+                                <iconify-icon icon="solar:user-check-bold-duotone"></iconify-icon>
+                                حالة الفاتورة
+                            </h5>
+                            <div class="mb-3">
+                                <div class="form-check form-switch form-switch-lg">
+                                    <input class="form-check-input" type="checkbox" id="customer_received" 
+                                           name="customer_received" value="1" 
+                                           <?php echo e(old('customer_received') ? 'checked' : ''); ?>>
+                                    <label class="form-check-label" for="customer_received">
+                                        <strong>هل استلم العميل الفاتورة؟</strong>
+                                        <br>
+                                        <small class="text-muted">فعّل هذا الخيار إذا كان العميل قد استلم فاتورته</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="form-section">
+                            <h5 class="section-header">
+                                <iconify-icon icon="solar:document-text-bold-duotone"></iconify-icon>
+                                ملاحظات
+                            </h5>
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">ملاحظات إضافية</label>
+                                <textarea class="form-control <?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                          id="notes" name="notes" rows="3" 
+                                          placeholder="أي ملاحظات إضافية حول هذه المبيعة"><?php echo e(old('notes')); ?></textarea>
+                                <?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex flex-column flex-sm-row justify-content-end gap-3">
+                                    <a href="<?php echo e(route('t6u1v5w8.index')); ?>" class="btn btn-secondary btn-lg">
+                                        <iconify-icon icon="solar:arrow-right-bold"></iconify-icon>
+                                        إلغاء
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <iconify-icon icon="solar:diskette-bold"></iconify-icon>
+                                        حفظ المبيعة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Error Alert (dynamic for AJAX) -->
+                    <div class="alert alert-danger d-none mt-3" id="saleErrorAlert" role="alert"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('script'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+        // Helper: update required attributes for all product rows
+        function updateProductRowRequired() {
+            document.querySelectorAll('.product-item').forEach(function(item) {
+                const category = item.querySelector('.product-category');
+                const caliber = item.querySelector('.product-caliber');
+                const weightInput = item.querySelector('.product-weight');
+                const amountInput = item.querySelector('.product-amount');
+                const categoryVal = category?.value;
+                const caliberVal = caliber?.value;
+                const weight = parseFloat(weightInput?.value || 0);
+                const amount = parseFloat(amountInput?.value || 0);
+                if (categoryVal && caliberVal && weight && amount) {
+                    category?.setAttribute('required', 'required');
+                    caliber?.setAttribute('required', 'required');
+                    weightInput?.setAttribute('required', 'required');
+                    amountInput?.setAttribute('required', 'required');
+                } else {
+                    category?.removeAttribute('required');
+                    caliber?.removeAttribute('required');
+                    weightInput?.removeAttribute('required');
+                    amountInput?.removeAttribute('required');
+                }
+            });
+        }
+
+        // Listen for changes in product fields to update required attributes
+        document.getElementById('products-container').addEventListener('input', function(e) {
+            if (e.target.classList.contains('product-category') ||
+                e.target.classList.contains('product-caliber') ||
+                e.target.classList.contains('product-weight') ||
+                e.target.classList.contains('product-amount')) {
+                updateProductRowRequired();
+            }
+        });
+
+        // Also update required attributes after adding/removing products
+        // (Assumes addProduct and remove-product logic exists elsewhere in the script)
+        setTimeout(updateProductRowRequired, 100); // Initial call after DOM ready
+    // Minimum price per gram from settings (passed from backend)
+    const minGramPrice = <?php echo e(isset($settings['min_invoice_gram_avg']) ? (float)$settings['min_invoice_gram_avg'] : config('sales.min_invoice_gram_avg', 2.0)); ?>;
+    let lowGramConfirmed = false;
+    // AJAX submit for sales create to show modal instead of redirect
+    const form = document.getElementById('sale-create-form');
+
+    // Prevent Enter key from submitting form in input fields
+    form.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    const errorAlert = document.getElementById('saleErrorAlert');
+
+    function clearErrors() {
+        errorAlert.classList.add('d-none');
+        errorAlert.textContent = '';
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+    }
+
+    function showFieldErrors(errors) {
+        clearErrors();
+        let hasFieldErrors = false;
+        Object.keys(errors || {}).forEach(name => {
+            const field = form.querySelector(`[name="${name}"]`);
+            if (field) {
+                field.classList.add('is-invalid');
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = Array.isArray(errors[name]) ? errors[name][0] : errors[name];
+                field.parentElement.appendChild(feedback);
+                hasFieldErrors = true;
+            }
+        });
+        if (!hasFieldErrors && errors) {
+            errorAlert.textContent = 'حدثت أخطاء أثناء الإرسال.';
+            errorAlert.classList.remove('d-none');
+        }
+    }
+
+    form.addEventListener('submit', async function(e) {
+        // Always update required attributes before validation
+        updateProductRowRequired();
+        e.preventDefault();
+        clearErrors();
+
+
+        // Check each product for low gram price, and disable empty rows
+        let lowGramProducts = [];
+        let validProductCount = 0;
+        document.querySelectorAll('.product-item').forEach(function(item, idx) {
+            const category = item.querySelector('.product-category');
+            const caliber = item.querySelector('.product-caliber');
+            const weightInput = item.querySelector('.product-weight');
+            const amountInput = item.querySelector('.product-amount');
+            const categoryVal = category?.value;
+            const caliberVal = caliber?.value;
+            const weight = parseFloat(weightInput?.value || 0);
+            const amount = parseFloat(amountInput?.value || 0);
+            // Only treat as filled if all required fields are present
+            if (categoryVal && caliberVal && weight && amount) {
+                validProductCount++;
+                // Set required attribute for filled row
+                category?.setAttribute('required', 'required');
+                caliber?.setAttribute('required', 'required');
+                weightInput?.setAttribute('required', 'required');
+                amountInput?.setAttribute('required', 'required');
+                if (weight > 0) {
+                    // Calculate base price from total for validation
+                    const caliberElem = caliber?.querySelector('option:checked');
+                    const taxRate = parseFloat(caliberElem?.getAttribute('data-tax-rate') || 0);
+                    const baseAmount = amount / (1 + taxRate / 100);
+                    const gramPrice = baseAmount / weight;
+                    if (gramPrice < minGramPrice) {
+                        lowGramProducts.push({idx: idx+1, gramPrice: gramPrice.toFixed(2)});
+                    }
+                }
+            } else {
+                // Remove required attribute for empty row
+                category?.removeAttribute('required');
+                caliber?.removeAttribute('required');
+                weightInput?.removeAttribute('required');
+                amountInput?.removeAttribute('required');
+                // Disable all inputs in this empty product row so it is not submitted
+                item.querySelectorAll('input, select, textarea').forEach(function(input) {
+                    input.disabled = true;
+                });
+            }
+        });
+        // If no valid products, show error and prevent submit
+        if (validProductCount === 0) {
+            errorAlert.textContent = 'يجب إدخال بيانات منتج واحد على الأقل.';
+            errorAlert.classList.remove('d-none');
+            return;
+        }
+
+        if (lowGramProducts.length > 0 && !lowGramConfirmed) {
+            let msg = 'هناك منتج أو أكثر سعر الجرام فيه أقل من الحد الأدنى (' + minGramPrice.toFixed(2) + '):<br>';
+            lowGramProducts.forEach(p => {
+                msg += 'منتج رقم ' + p.idx + ': سعر الجرام = ' + parseFloat(p.gramPrice).toFixed(2) + '<br>';
+            });
+            document.getElementById('lowGramWarningMsg').innerHTML = msg;
+            const modal = new bootstrap.Modal(document.getElementById('lowGramWarningModal'));
+            modal.show();
+            return;
+        }
+
+        // If confirmed or no low gram, proceed with submit
+        const url = form.getAttribute('action');
+        const csrfToken = form.querySelector('input[name="_token"]').value;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            if (response.status === 422) {
+                const data = await response.json();
+                showFieldErrors(data.errors || {});
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data && data.success) {
+                // Reset form and products immediately after success
+                const form = document.getElementById('sale-create-form');
+                if (form) {
+                    form.reset();
+                    const productsContainer = document.getElementById('products-container');
+                    productsContainer.innerHTML = '';
+                    if (typeof window.productIndex !== 'undefined') window.productIndex = 0;
+                    if (typeof window.addProduct === 'function') {
+                        window.addProduct();
+                    } else if (typeof addProduct === 'function') {
+                        addProduct();
+                    }
+                }
+                // Populate modal details and show
+                const modalEl = document.getElementById('saleSuccessModal');
+                const invoiceEl = document.getElementById('saleSuccessInvoice');
+                if (invoiceEl && data.data?.invoice_number) {
+                    invoiceEl.textContent = data.data.invoice_number;
+                }
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            } else {
+                errorAlert.textContent = (data && data.message) ? data.message : 'حدث خطأ غير متوقع.';
+                errorAlert.classList.remove('d-none');
+            }
+        } catch (err) {
+            errorAlert.textContent = 'تعذر الاتصال بالخادم. حاول مرة أخرى.';
+            errorAlert.classList.remove('d-none');
+        }
+    });
+
+    // Low gram modal confirm/cancel
+    window.confirmLowGram = function() {
+        lowGramConfirmed = true;
+        const modal = bootstrap.Modal.getInstance(document.getElementById('lowGramWarningModal'));
+        modal.hide();
+        form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
+    };
+    window.cancelLowGram = function() {
+        lowGramConfirmed = false;
+    };
+
+    let productIndex = 0;
+    
+    // Add first product on page load
+    addProduct();
+
+    // Get employees by branch
+    $('#branch_id').change(function() {
+        const branchId = $(this).val();
+        const employeeSelect = $('#employee_id');
+        employeeSelect.html('<option value="">جاري التحميل...</option>');
+        if (branchId) {
+            $.get('<?php echo e(route("f9g2h6i3.j7k1l4m8")); ?>', { branch_id: branchId })
+                .done(function(data) {
+                    employeeSelect.html('<option value="">اختر الموظف</option>');
+                    data.forEach(function(employee) {
+                        // Add data-is-snap attribute for JS logic
+                        employeeSelect.append(`<option value="${employee.id}" data-is-snap="${employee.is_snap ? 1 : 0}">${employee.name}</option>`);
+                    });
+                })
+                .fail(function() {
+                    employeeSelect.html('<option value="">خطأ في التحميل</option>');
+                });
+        } else {
+            employeeSelect.html('<option value="">اختر الموظف</option>');
+        }
+    });
+
+    // Show/hide transfer payment method based on selected employee
+    function updateTransferPaymentVisibility() {
+        const selectedOption = $('#employee_id option:selected');
+        const isSnap = selectedOption.data('is-snap') == 1;
+        if (isSnap) {
+            $('#transfer-method-wrapper').show();
+        } else {
+            // If transfer was selected, unselect it
+            if ($('input[name="payment_method"]:checked').val() === 'transfer') {
+                $('input[name="payment_method"][value="cash"]').prop('checked', true).trigger('change');
+            }
+            $('#transfer-method-wrapper').hide();
+        }
+    }
+    // On employee change
+    $('#employee_id').on('change', updateTransferPaymentVisibility);
+    // On page load, run it in case of old value
+    updateTransferPaymentVisibility();
+    // Force trigger change event to ensure JS logic runs for pre-selected employee
+    $('#employee_id').trigger('change');
+    
+    // Auto-load employees if branch is pre-selected
+    <?php if(isset($selectedBranchId) && !$employees->count()): ?>
+        $('#branch_id').trigger('change');
+    <?php endif; ?>
+    
+    // Add Product
+    function addProduct() {
+        const template = document.getElementById('product-item-template');
+        const clone = template.content.cloneNode(true);
+        
+        // Replace INDEX with actual index
+        clone.querySelectorAll('[name*="INDEX"]').forEach(function(el) {
+            el.name = el.name.replace('INDEX', productIndex);
+        });
+        
+        // Set product number
+        clone.querySelector('.product-number').textContent = productIndex + 1;
+        
+        // Add to container
+        document.getElementById('products-container').appendChild(clone);
+        
+        // Attach event listeners to the new product
+        attachProductEvents(productIndex);
+        
+        productIndex++;
+        
+        // Recalculate totals
+        calculateTotals();
+    }
+    
+    // Add product button
+    $('#add-product').click(function() {
+        addProduct();
+    });
+    
+    // Attach events to product
+    function attachProductEvents(index) {
+        const container = $('#products-container');
+        const productItem = container.find('.product-item').eq(index);
+        
+        // Remove product
+        productItem.find('.remove-product').click(function() {
+            if ($('.product-item').length > 1) {
+                productItem.remove();
+                updateProductNumbers();
+                calculateTotals();
+            } else {
+                alert('يجب أن يكون هناك منتج واحد على الأقل');
+            }
+        });
+        
+        // Auto-select caliber based on category default
+        productItem.find('.product-category').on('change', function() {
+            const selectedOption = $(this).find(':selected');
+            let defaultCaliberId = selectedOption.attr('data-default-caliber');
+            const caliberSelect = productItem.find('.product-caliber');
+            // Debug: log available options and defaultCaliberId
+            console.log('DefaultCaliberId:', defaultCaliberId, 'Options:', caliberSelect.find('option').map(function(){return $(this).val();}).get());
+            if (defaultCaliberId && defaultCaliberId !== '' && defaultCaliberId !== '0') {
+                caliberSelect.val(defaultCaliberId.toString()).trigger('change');
+            } else {
+                caliberSelect.val('');
+            }
+        });
+        
+        // Calculate on input
+        productItem.find('.product-caliber, .product-amount, .product-weight').on('change input', function() {
+            calculateProductTax(productItem);
+            calculateTotals();
+            calculateGramPrice(productItem);
+        });
+        productItem.find('.product-quantity').on('change input', function() {
+            calculateTotals();
+        });
+    }
+    
+    // Calculate tax for individual product
+    function calculateProductTax(productItem) {
+        const totalPrice = parseFloat(productItem.find('.product-amount').val()) || 0;
+        const caliberSelect = productItem.find('.product-caliber');
+        const taxRate = parseFloat(caliberSelect.find(':selected').data('tax-rate')) || 0;
+        
+        // Calculate base price from total: basePrice = totalPrice / (1 + taxRate/100)
+        const baseAmount = totalPrice / (1 + taxRate / 100);
+        const tax = totalPrice - baseAmount;
+        
+        productItem.find('.product-tax').text(tax.toFixed(2));
+        productItem.find('.product-net').text(baseAmount.toFixed(2));
+    }
+
+    // Calculate price per gram for individual product
+    function calculateGramPrice(productItem) {
+        const totalPrice = parseFloat(productItem.find('.product-amount').val()) || 0;
+        const weight = parseFloat(productItem.find('.product-weight').val()) || 0;
+        const caliberSelect = productItem.find('.product-caliber');
+        const taxRate = parseFloat(caliberSelect.find(':selected').data('tax-rate')) || 0;
+        
+        // Calculate base price from total, then price per gram = basePrice / weight
+        const baseAmount = totalPrice / (1 + taxRate / 100);
+        let gramPrice = 0;
+        if (weight > 0) {
+            gramPrice = baseAmount / weight;
+        }
+        productItem.find('.product-gram-price').val(gramPrice.toFixed(2));
+    }
+    
+    // Calculate totals for all products
+    function calculateTotals() {
+        let totalWeight = 0;
+        let totalAmount = 0;
+        let totalTax = 0;
+        let totalNet = 0;
+        
+        $('.product-item').each(function() {
+            const weight = parseFloat($(this).find('.product-weight').val()) || 0;
+            const amount = parseFloat($(this).find('.product-amount').val()) || 0;
+            const tax = parseFloat($(this).find('.product-tax').text()) || 0;
+            const net = parseFloat($(this).find('.product-net').text()) || 0;
+            
+            totalWeight += weight;
+            totalAmount += amount;
+            totalTax += tax;
+            totalNet += net;
+        });
+        
+        $('#total_weight_display').text(totalWeight.toFixed(3) + ' جم');
+        $('#total_amount_display').text(totalAmount.toFixed(2) + ' ريال');
+        $('#tax_amount_display').text(totalTax.toFixed(2) + ' ريال');
+        $('#net_amount_display').text(totalNet.toFixed(2) + ' ريال');
+        
+        // Store in hidden inputs
+        $('#final_total_amount').val(totalAmount.toFixed(2));
+        $('#final_total_weight').val(totalWeight.toFixed(3));
+        
+        // Update payment fields
+        updatePaymentAmounts(totalAmount);
+    }
+    
+    // Update product numbers after removal
+    function updateProductNumbers() {
+        $('.product-item').each(function(index) {
+            $(this).find('.product-number').text(index + 1);
+        });
+    }
+    
+    // Update payment amounts based on total
+    function updatePaymentAmounts(total) {
+        const paymentMethod = $('input[name="payment_method"]:checked').val();
+        
+        if (paymentMethod === 'cash') {
+            $('#cash_amount').val(total.toFixed(2));
+            $('#network_amount').val('0');
+        } else if (paymentMethod === 'network') {
+            $('#network_amount').val(total.toFixed(2));
+            $('#cash_amount').val('0');
+        } else if (paymentMethod === 'mixed') {
+            // For mixed, keep current values or clear
+            if (!$('#cash_amount').val() && !$('#network_amount').val()) {
+                $('#cash_amount, #network_amount').val('');
+            }
+        }
+    }
+    
+    // Handle payment method changes with card styling
+    $('input[name="payment_method"]').change(function() {
+        const method = $(this).val();
+        const total = parseFloat($('#final_total_amount').val()) || 0;
+
+        // Update card styling
+        $('.payment-card').removeClass('active');
+        $(this).closest('.payment-card').addClass('active');
+
+        // Hide all payment fields first
+        $('#cash_amount_field, #network_amount_field, #transfer_amount_field').hide().removeClass('fade-in');
+
+        // Show relevant fields based on payment method with animation
+        if (method === 'cash') {
+            $('#cash_amount_field').show().addClass('fade-in');
+            $('#cash_amount').val(total.toFixed(2));
+            $('#network_amount').val('');
+        } else if (method === 'network') {
+            $('#network_amount_field').show().addClass('fade-in');
+            $('#network_amount').val(total.toFixed(2));
+            $('#cash_amount').val('');
+        } else if (method === 'mixed') {
+            $('#cash_amount_field, #network_amount_field').show().addClass('fade-in');
+            $('#cash_amount, #network_amount').val('');
+        } else if (method === 'transfer') {
+            $('#transfer_amount_field').show().addClass('fade-in');
+            $('#transfer_amount').val(total.toFixed(2));
+        }
+    });
+    
+    // Initialize active card on page load
+    const checkedPayment = $('input[name="payment_method"]:checked');
+    if (checkedPayment.length) {
+        checkedPayment.closest('.payment-card').addClass('active');
+    }
+    
+    // Auto-calculate mixed payment amounts
+    $('#cash_amount').on('input', function() {
+        const paymentMethod = $('input[name="payment_method"]:checked').val();
+        
+        if (paymentMethod === 'mixed') {
+            const cashAmount = parseFloat($(this).val()) || 0;
+            const totalAmount = parseFloat($('#final_total_amount').val()) || 0;
+            const networkAmount = totalAmount - cashAmount;
+            
+            if (networkAmount >= 0) {
+                $('#network_amount').val(networkAmount.toFixed(2));
+                $(this).removeClass('is-invalid');
+                $('#network_amount').removeClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $('#network_amount').siblings('.invalid-feedback').remove();
+            } else {
+                $(this).addClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $(this).after('<div class="invalid-feedback">المبلغ النقدي أكبر من الإجمالي</div>');
+            }
+        }
+    });
+    
+    $('#network_amount').on('input', function() {
+        const paymentMethod = $('input[name="payment_method"]:checked').val();
+        
+        if (paymentMethod === 'mixed') {
+            const networkAmount = parseFloat($(this).val()) || 0;
+            const totalAmount = parseFloat($('#final_total_amount').val()) || 0;
+            const cashAmount = totalAmount - networkAmount;
+            
+            if (cashAmount >= 0) {
+                $('#cash_amount').val(cashAmount.toFixed(2));
+                $(this).removeClass('is-invalid');
+                $('#cash_amount').removeClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $('#cash_amount').siblings('.invalid-feedback').remove();
+            } else {
+                $(this).addClass('is-invalid');
+                $(this).siblings('.invalid-feedback').remove();
+                $(this).after('<div class="invalid-feedback">مبلغ الشبكة أكبر من الإجمالي</div>');
+            }
+        }
+    });
+    
+    // Trigger payment method change if there's an old value
+    <?php if(old('payment_method')): ?>
+        $('input[name="payment_method"][value="<?php echo e(old('payment_method')); ?>"]').trigger('change');
+    <?php endif; ?>
+});
+// ...existing code...
+</script>
+<!-- Low Gram Warning Modal -->
+<div class="modal fade" id="lowGramWarningModal" tabindex="-1" aria-labelledby="lowGramWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="lowGramWarningModalLabel">
+                    <iconify-icon icon="solar:warning-bold" class="text-warning fs-4 me-2"></iconify-icon>
+                    تنبيه سعر الجرام منخفض
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="lowGramWarningMsg" class="mb-2"></div>
+                هل تريد الاستمرار في حفظ الفاتورة بهذه الأسعار؟
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelLowGram()">تعديل البيانات</button>
+                <button type="button" class="btn btn-warning" onclick="confirmLowGram()">موافق (حفظ رغم التحذير)</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Success Modal -->
+<div class="modal fade" id="saleSuccessModal" tabindex="-1" aria-labelledby="saleSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="saleSuccessModalLabel">
+                    <iconify-icon icon="solar:check-circle-bold" class="text-success fs-4 me-2"></iconify-icon>
+                    تم حفظ المبيعة بنجاح
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                رقم الفاتورة: <strong id="saleSuccessInvoice">—</strong><br>
+                يمكنك إضافة مبيعة أخرى أو إغلاق النافذة.
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="addAnotherSaleBtn">إضافة مبيعة أخرى</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('addAnotherSaleBtn')?.addEventListener('click', function() {
+            const form = document.getElementById('sale-create-form');
+            if (form) {
+                form.reset();
+                // Clear dynamic products and add a fresh one
+                const productsContainer = document.getElementById('products-container');
+                productsContainer.innerHTML = '';
+                if (typeof window.productIndex !== 'undefined') window.productIndex = 0;
+                if (typeof window.addProduct === 'function') {
+                    window.addProduct();
+                } else if (typeof addProduct === 'function') {
+                    addProduct();
+                }
+            }
+        });
+
+
+    </script>
+</div>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.vertical', ['title' => 'تسجيل مبيعة جديدة'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Dusty_Laravel_v1.0.0\Dusty\resources\views/sales/create.blade.php ENDPATH**/ ?>

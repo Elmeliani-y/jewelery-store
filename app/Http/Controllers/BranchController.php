@@ -67,7 +67,7 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $this->validateDeviceOrAbort();
-        $this->enforceDeviceToken($request);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:branches,name',
             'address' => 'nullable|string|max:500',
@@ -97,7 +97,7 @@ class BranchController extends Controller
                     'number' => null, // or set as needed
                 ]);
 
-            return redirect()->route('branches.index')
+            return redirect()->route('x9y4z1a6.index')
                 ->with('success', 'تم إضافة الفرع بنجاح');
 
         } catch (\Exception $e) {
@@ -109,9 +109,10 @@ class BranchController extends Controller
     /**
      * Display the specified branch.
      */
-    public function show(Branch $branch)
+    public function show(Branch $x9y4z1a6)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $branch = $x9y4z1a6; // Alias for clarity
         $branch->loadCount(['employees', 'sales', 'expenses']);
 
         return view('branches.show', compact('branch'));
@@ -120,18 +121,20 @@ class BranchController extends Controller
     /**
      * Show the form for editing the specified branch.
      */
-    public function edit(Branch $branch)
+    public function edit(Branch $x9y4z1a6)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $branch = $x9y4z1a6; // Alias for clarity
         return view('branches.edit', compact('branch'));
     }
 
     /**
      * Update the specified branch.
      */
-    public function update(Request $request, Branch $branch)
+    public function update(Request $request, Branch $x9y4z1a6)
     {
-        $this->enforceDeviceToken($request);
+        $branch = $x9y4z1a6; // Alias for clarity
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:branches,name,'.$branch->id,
             'address' => 'nullable|string|max:500',
@@ -142,7 +145,7 @@ class BranchController extends Controller
         try {
             $branch->update($validated);
 
-            return redirect()->route('branches.show', $branch)
+            return redirect()->route('x9y4z1a6.show', $branch)
                 ->with('success', 'تم تحديث الفرع بنجاح');
 
         } catch (\Exception $e) {
@@ -154,9 +157,10 @@ class BranchController extends Controller
     /**
      * Remove the specified branch.
      */
-    public function destroy(Branch $branch)
+    public function destroy(Branch $x9y4z1a6)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
+        $branch = $x9y4z1a6; // Alias for clarity
         try {
             // Check if branch has employees or sales
             if ($branch->employees()->exists() || $branch->sales()->exists()) {
@@ -165,7 +169,7 @@ class BranchController extends Controller
 
             $branch->delete();
 
-            return redirect()->route('branches.index')
+            return redirect()->route('x9y4z1a6.index')
                 ->with('success', 'تم حذف الفرع بنجاح');
 
         } catch (\Exception $e) {
@@ -178,7 +182,7 @@ class BranchController extends Controller
      */
     public function toggleStatus(Branch $branch)
     {
-        $this->enforceDeviceToken(request());
+        $this->enforceDeviceOrAdminOr404(request());
         try {
             $branch->update(['is_active' => ! $branch->is_active]);
 

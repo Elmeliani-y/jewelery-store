@@ -276,11 +276,11 @@ class SaleController extends Controller
 
             // Redirect branch users to daily sales, others to sale details
             if ($user->isBranch()) {
-                return redirect()->route('branch.daily-sales')
+                return redirect()->route('r8s3t7u1.v4w9x2y5')
                     ->with('success', 'تم تسجيل المبيعة بنجاح');
             }
 
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('t6u1v5w8.show', $sale)
                 ->with('success', 'تم تسجيل المبيعة بنجاح');
 
         } catch (\Exception $e) {
@@ -300,9 +300,11 @@ class SaleController extends Controller
     /**
      * Display the specified sale.
      */
-    public function show(Sale $sale)
+    public function show(Sale $t6u1v5w8)
     {
         $this->enforceDeviceOrAdminOr404(request());
+        $sale = $t6u1v5w8; // Alias for clarity
+        
         // Check if branch user is trying to access another branch's sale
         $user = auth()->user();
         if ($user->isBranch() && $sale->branch_id != $user->branch_id) {
@@ -317,9 +319,11 @@ class SaleController extends Controller
     /**
      * Show the form for editing the specified sale.
      */
-    public function edit(Sale $sale)
+    public function edit(Sale $t6u1v5w8)
     {
         $this->enforceDeviceOrAdminOr404(request());
+        $sale = $t6u1v5w8; // Alias for clarity
+        
         // Block branch users from editing sales
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -327,7 +331,7 @@ class SaleController extends Controller
         }
 
         if ($sale->is_returned) {
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('t6u1v5w8.show', $sale)
                 ->with('error', 'لا يمكن تعديل فاتورة مسترجعة');
         }
 
@@ -342,9 +346,11 @@ class SaleController extends Controller
     /**
      * Update the specified sale.
      */
-    public function update(Request $request, Sale $sale)
+    public function update(Request $request, Sale $t6u1v5w8)
     {
         $this->enforceDeviceOrAdminOr404($request);
+        $sale = $t6u1v5w8; // Alias for clarity
+        
         // Block branch users from updating sales
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -352,7 +358,7 @@ class SaleController extends Controller
         }
 
         if ($sale->is_returned) {
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('t6u1v5w8.show', $sale)
                 ->with('error', 'لا يمكن تعديل فاتورة مسترجعة');
         }
 
@@ -473,7 +479,7 @@ class SaleController extends Controller
 
             DB::commit();
 
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('t6u1v5w8.show', $sale)
                 ->with('success', 'تم تحديث المبيعة بنجاح');
 
         } catch (\Exception $e) {
@@ -491,14 +497,14 @@ class SaleController extends Controller
     {
         $this->enforceDeviceOrAdminOr404(request());
         if ($sale->is_returned) {
-            return redirect()->route('sales.index')
+            return redirect()->route('t6u1v5w8.index')
                 ->with('error', 'هذه الفاتورة مسترجعة بالفعل');
         }
 
         try {
             $sale->returnSale();
 
-            return redirect()->route('sales.index')
+            return redirect()->route('t6u1v5w8.index')
                 ->with('success', 'تم استرجاع الفاتورة بنجاح');
 
         } catch (\Exception $e) {
@@ -513,7 +519,7 @@ class SaleController extends Controller
     {
         $this->enforceDeviceOrAdminOr404(request());
         if (! $sale->is_returned) {
-            return redirect()->route('sales.show', $sale)
+            return redirect()->route('t6u1v5w8.show', $sale)
                 ->with('error', 'هذه الفاتورة ليست مرتجعاً');
         }
         $sale->update([
@@ -521,7 +527,7 @@ class SaleController extends Controller
             'returned_at' => null,
         ]);
 
-        return redirect()->route('sales.index')->with('success', 'تمت إعادة الفاتورة إلى قائمة المبيعات بنجاح');
+        return redirect()->route('t6u1v5w8.index')->with('success', 'تمت إعادة الفاتورة إلى قائمة المبيعات بنجاح');
     }
 
     /**
@@ -556,9 +562,11 @@ class SaleController extends Controller
     /**
      * Remove the specified sale.
      */
-    public function destroy(Sale $sale)
+    public function destroy(Sale $t6u1v5w8)
     {
         $this->enforceDeviceOrAdminOr404(request());
+        $sale = $t6u1v5w8; // Alias for clarity
+        
         // Block all branch users from deleting sales
         $user = auth()->user();
         if ($user->isBranch()) {
@@ -568,7 +576,7 @@ class SaleController extends Controller
         try {
             $sale->delete();
 
-            return redirect()->route('sales.index')
+            return redirect()->route('t6u1v5w8.index')
                 ->with('success', 'تم حذف المبيعة بنجاح');
 
         } catch (\Exception $e) {
@@ -660,7 +668,7 @@ class SaleController extends Controller
      */
     public function returns(Request $request)
     {
-        $this->enforceDeviceToken($request);
+
         $query = Sale::with(['branch', 'employee', 'caliber'])
             ->where('is_returned', true)
             ->orderBy('returned_at', 'desc');

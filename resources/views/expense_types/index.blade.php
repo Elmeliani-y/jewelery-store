@@ -31,7 +31,7 @@
             <p class="mb-0 opacity-75">إدارة تصنيفات المصروفات</p>
         </div>
         <div>
-            <a href="{{ route('expense-types.create') }}" class="btn btn-light">
+            <a href="{{ route('z8a3b6c2.create') }}" class="btn btn-light">
                 <iconify-icon icon="solar:add-circle-bold" class="me-1"></iconify-icon> إضافة نوع جديد
             </a>
         </div>
@@ -56,10 +56,10 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        <a href="{{ route('expense-types.edit', $type) }}" class="btn btn-sm btn-primary flex-fill">
+                        <a href="{{ route('z8a3b6c2.edit', $type) }}" class="btn btn-sm btn-primary flex-fill">
                             <iconify-icon icon="solar:pen-bold"></iconify-icon> تعديل
                         </a>
-                        <form action="{{ route('expense-types.destroy', $type) }}" method="POST" class="flex-fill" onsubmit="return confirm('هل أنت متأكد من حذف هذا النوع؟')">
+                        <form action="{{ route('z8a3b6c2.destroy', $type) }}" method="POST" class="flex-fill" onsubmit="return confirm('هل أنت متأكد من حذف هذا النوع؟')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger w-100">

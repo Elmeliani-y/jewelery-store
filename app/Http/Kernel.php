@@ -13,7 +13,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\SecurityHeaders::class, // Add security headers
-        \App\Http\Middleware\BlockIpAfterFailedAttempts::class, // Block IPs after failed attempts
+        // \App\Http\Middleware\BlockIpAfterFailedAttempts::class, // Disabled - too aggressive
     ];
 
     protected $middlewareGroups = [
@@ -24,6 +24,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\CheckBlockedIp::class, // Check blocked IPs on all web routes
         ],
         'api' => [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
